@@ -1,0 +1,11 @@
+{
+  "name": "enginelens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A bilingual interactive visual guide to engine induction systems.",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "check": "node --check dist/app.js && node --check server.mjs"
+  }
+}
