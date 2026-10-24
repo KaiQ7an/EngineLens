@@ -1,13 +1,16 @@
-import { wrap, strokeIndex, VALVES, SPARK, valvesOverlap } from '../sim/kinematics.js';
-import { C, text, MONO, circle, stroke, pipe, flow, arrow, dot, part, figLabel } from './kit.js';
-import { drawCylinder, GAS_KIND } from './engine.js';
+import { wrap, strokeIndex, strokeProgress, valveLift, sparkGlow, valvesOverlap } from '../sim/kinematics.js';
+import { C, text, para, MONO, rect, stroke, pipe, flow, arrow, dot, part, alpha, figLabel, STROKE_TONES } from './kit.js';
+import { drawCylinder, crownY, GAS_KIND } from './engine.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
 const CX = 430, CY = 665, S = 1.42;
+// On a narrow screen the panel moves out of the figure, so the engine moves to the middle.
+const COMPACT_SHIFT = 70;
 // Pipes meet the head where its ports open (local x = ±118); the bore matches the port.
 const INTAKE = [[118, 30], [118, 250], [CX - 118 * S, 250]];
 const EXHAUST = [[CX + 118 * S, 250], [690, 250], [690, 30]];
+const shift = (pts, dx) => pts.map(([x, y]) => [x + dx, y]);
 
 const SPOTS = {
   cams: { dx: -86, dy: -4, r: 30 },
@@ -22,62 +25,92 @@ const SPOTS = {
 
 export const STROKE_NAMES = [['进气', 'Intake'], ['压缩', 'Compression'], ['做功', 'Power'], ['排气', 'Exhaust']];
 
-// The cycle as a dial: one full turn of the dial is 720° of crank rotation.
-export function cycleDial(c, theta, x, y, r) {
-  const a = wrap(theta), cur = strokeIndex(a);
-  const ang = d => -Math.PI / 2 + d / 720 * Math.PI * 2;
-  circle(c, x, y, r, null, C.faint, 1);
-  for (let k = 0; k < 4; k++) {
-    c.beginPath(); c.arc(x, y, r, ang(k * 180) + 0.04, ang(k * 180 + 180) - 0.04);
-    c.strokeStyle = k === cur ? (k === 2 ? C.burn : C.ink) : C.faint; c.lineWidth = k === cur ? 5 : 2; c.lineCap = 'butt'; c.stroke();
-    const mid = ang(k * 180 + 90), lx = x + Math.cos(mid) * (r + 14), ly = y + Math.sin(mid) * (r + 14);
-    text(c, L(...STROKE_NAMES[k]), lx, ly + (Math.sin(mid) > 0 ? 16 : -4),
-      { size: 15, weight: k === cur ? 700 : 500, color: k === cur ? C.ink : C.ink2, align: Math.cos(mid) > 0 ? 'left' : 'right' });
-  }
-  for (const [kind, dash] of [['intake', null], ['exhaust', [4, 4]]]) {
-    const { centre, duration } = VALVES[kind];
-    c.beginPath(); c.arc(x, y, r - 16, ang(centre - duration / 2), ang(centre + duration / 2));
-    c.strokeStyle = C.ink2; c.lineWidth = 1.5; c.lineCap = 'round'; if (dash) c.setLineDash(dash); c.stroke(); c.setLineDash([]);
-  }
-  const sp = ang(SPARK);
-  circle(c, x + Math.cos(sp) * (r - 16), y + Math.sin(sp) * (r - 16), 4, C.burn);
-  for (const d of [0, 180, 360, 540]) { const q = ang(d); stroke(c, [[x + Math.cos(q) * (r - 6), y + Math.sin(q) * (r - 6)], [x + Math.cos(q) * (r + 6), y + Math.sin(q) * (r + 6)]], C.ink2, 1); }
-  const p = ang(a);
-  stroke(c, [[x, y], [x + Math.cos(p) * (r - 4), y + Math.sin(p) * (r - 4)]], C.accent, 2);
-  circle(c, x + Math.cos(p) * r, y + Math.sin(p) * r, 6, C.accent);
-  circle(c, x, y, 3, C.accent);
-  text(c, Math.round(a) + '°', x, y + r + 66, { size: 22, weight: 500, color: C.ink, align: 'center', font: MONO });
-  text(c, L('曲轴角', 'Crank angle'), x, y + r + 88, { size: 13, color: C.ink2, align: 'center' });
+// What the piston is doing: resting at a dead centre, or which way it is going.
+export function pistonState(theta) {
+  const a = wrap(theta, 360);
+  if (a < 6 || a > 354) return { at: 'tdc', text: L('在上止点（最高）', 'At TDC (top)') };
+  if (Math.abs(a - 180) < 6) return { at: 'bdc', text: L('在下止点（最低）', 'At BDC') };
+  return a < 180 ? { text: L('↓ 往下走', '↓ moving down') } : { text: L('↑ 往上走', '↑ moving up') };
 }
 
-// Key to the dots, drawn on the figure itself.
-export function gasKey(c, x, y) {
-  const rows = [['air', ['新鲜空气', 'Fresh air']], ['squeezed', ['被压缩的混合气', 'Squeezed charge']], ['burning', ['正在燃烧', 'Burning']], ['exhaust', ['废气', 'Exhaust']]];
-  rows.forEach(([kind, name], i) => {
-    dot(c, x + 6, y + i * 28, 5, kind);
-    text(c, L(...name), x + 22, y + i * 28 + 5, { size: 14, color: C.ink2 });
-  });
+// What each moving part is doing at crank angle θ. The panel in the figure shows it,
+// and so does the text readout that replaces the panel on narrow screens.
+export function readout(theta) {
+  const a = wrap(theta), ps = pistonState(a), spark = sparkGlow(a) > 0;
+  const valve = (kind, label) => {
+    const lift = valveLift(a, kind);
+    return { id: kind, label, lift, value: lift > 0.01 ? L('开', 'open') : L('关', 'shut') };
+  };
+  const overlap = valvesOverlap(a);
+  return [
+    { id: 'piston', label: L('活塞', 'Piston'), value: ps.text, hot: !!ps.at },
+    valve('intake', L('进气门', 'Intake valve')), valve('exhaust', L('排气门', 'Exhaust valve')),
+    { id: 'spark', label: L('火花塞', 'Spark plug'), value: spark ? L('点火！', 'Spark!') : '—', hot: spark },
+    { id: 'overlap', label: L('气门重叠', 'Valve overlap'), value: overlap ? L('两个气门都开着', 'both valves open') : '—', hot: overlap }
+  ];
+}
+
+// The panel beside the cylinder. Everything in it is read off the same crank angle as
+// the drawing: the four strokes with the current one lit, then each part's state.
+function panel(c, a, x0, x1) {
+  const cur = strokeIndex(a), prog = strokeProgress(a);
+  text(c, L('一个循环 · 曲轴转两圈', 'ONE CYCLE = 2 TURNS'), x0, 112, { size: 12, color: C.ink2, font: MONO, spacing: 0.6 });
+  for (let k = 0; k < 4; k++) {
+    const y = 150 + k * 44, on = k === cur, tone = C[STROKE_TONES[k]];
+    dot(c, x0 + 7, y - 6, 6, GAS_KIND[k]);
+    text(c, L(...STROKE_NAMES[k]), x0 + 24, y, { size: on ? 17 : 15, weight: on ? 800 : 500, color: on ? tone : C.ink2 });
+    rect(c, x0 + 24, y + 9, x1 - x0 - 24, 4, 2, alpha(C.ink, 0.14));
+    if (on) rect(c, x0 + 24, y + 9, Math.max(4, (x1 - x0 - 24) * prog), 4, 2, tone);
+  }
+  text(c, L('曲轴角', 'Crank angle'), x0, 348, { size: 13.5, color: C.ink2 });
+  text(c, Math.round(a) + '°', x1, 350, { size: 24, weight: 500, font: MONO, align: 'right' });
+  const [piston, intake, exhaust, spark, overlap] = readout(a);
+  const row = (y, { label, value, hot }, hotColor = C.accent) => {
+    text(c, label, x0, y, { size: 13.5, color: C.ink2 });
+    text(c, value, x1, y, { size: 15, weight: 700, color: hot ? hotColor : value === '—' ? C.ink2 : C.ink, align: 'right' });
+  };
+  row(388, piston);
+  for (const [v, y, tone] of [[intake, 424, C.intake], [exhaust, 458, C.exhaust]]) {
+    const w = 54, bx = x1 - w - 34;
+    row(y, v);
+    rect(c, bx, y - 9, w, 8, 4, alpha(C.ink, 0.14));
+    if (v.lift > 0.01) rect(c, bx, y - 9, Math.max(8, w * v.lift), 8, 4, tone);
+  }
+  row(492, spark, C.burn);
+  if (overlap.hot) para(c, L('两个气门都开着：气门重叠', 'Both valves open: valve overlap'), x0, 532, x1 - x0, { size: 13.5, weight: 700, color: C.accent });
+}
+
+// The two dead centres, marked on the bore like dimension lines on a drawing.
+function deadCentres(c, a, cx) {
+  const yT = CY + crownY(0) * S, yB = CY + crownY(180) * S, x = cx - 96 * S - 10, ps = pistonState(a);
+  for (const [y, at, zh, en] of [[yT, 'tdc', '上止点', 'TDC'], [yB, 'bdc', '下止点', 'BDC']]) {
+    const on = ps.at === at;
+    stroke(c, [[x - 34, y], [x, y]], on ? C.accent : C.ink2, on ? 2 : 1, on ? null : [3, 3]);
+    text(c, L(zh, en), x - 40, y + 5, { size: 13, weight: on ? 800 : 500, color: on ? C.accent : C.ink2, align: 'right' });
+  }
+  stroke(c, [[x - 17, yT + 4], [x - 17, yB - 4]], C.ink2, 1);
+  arrow(c, x - 17, yT + 2, -Math.PI / 2, C.ink2, 5); arrow(c, x - 17, yB - 2, Math.PI / 2, C.ink2, 5);
+  text(c, L('行程', 'Stroke'), x - 24, (yT + yB) / 2 + 5, { size: 12.5, color: C.ink2, align: 'right' });
 }
 
 export function drawFourStroke(c, st) {
-  const { theta, time, parts, speed = 24, blur = 0 } = st;
-  const a = wrap(theta);
+  const { theta, time, parts, speed = 24 } = st;
+  const a = wrap(theta), dx = st.compact ? COMPACT_SHIFT : 0, intake = shift(INTAKE, dx), exhaust = shift(EXHAUST, dx);
   part(c, 'intake-port', () => {
-    pipe(c, INTAKE, 38);
-    flow(c, INTAKE, 'air', time, { rate: st.flow.intake, strength: Math.min(1, st.flow.intake * 3), lanes: 2, spread: 12 });
+    pipe(c, intake, 38);
+    flow(c, intake, 'air', time, { rate: st.flow.intake, strength: Math.min(1, st.flow.intake * 3), lanes: 2, spread: 12 });
   });
-  arrow(c, 118, 70, Math.PI / 2, C.ink, 8);
-  text(c, L('新鲜空气', 'Fresh air'), 150, 52, { size: 14, color: C.ink2, weight: 500 });
+  arrow(c, 118 + dx, 70, Math.PI / 2, C.ink, 8);
+  text(c, L('新鲜空气', 'Fresh air'), 150 + dx, 52, { size: 14, color: C.ink2, weight: 500 });
   part(c, 'exhaust-port', () => {
-    pipe(c, EXHAUST, 38);
-    flow(c, EXHAUST, 'exhaust', time, { rate: st.flow.exhaust, strength: Math.min(1, st.flow.exhaust * 3), lanes: 2, spread: 12 });
+    pipe(c, exhaust, 38);
+    flow(c, exhaust, 'exhaust', time, { rate: st.flow.exhaust, strength: Math.min(1, st.flow.exhaust * 3), lanes: 2, spread: 12 });
   });
-  arrow(c, 690, 66, -Math.PI / 2, C.ink, 8);
-  text(c, L('废气', 'Exhaust'), 722, 52, { size: 14, color: C.ink2, weight: 500 });
-  const anchors = drawCylinder(c, a, { x: CX, y: CY, s: S, air: 26, time, cams: true, blur });
-  cycleDial(c, a, 836, 236, 66);
-  if (valvesOverlap(a)) text(c, L('两个气门同时开着：气门重叠', 'Both valves open: valve overlap'), 836, 400, { size: 13, color: C.accent, align: 'center', weight: 600 });
-  gasKey(c, 790, 470);
+  arrow(c, 690 + dx, 66, -Math.PI / 2, C.ink, 8);
+  text(c, L('废气', 'Exhaust'), 722 + dx, 52, { size: 14, color: C.ink2, weight: 500 });
+  const anchors = drawCylinder(c, a, { x: CX + dx, y: CY, s: S, air: 26, time, cams: true });
+  deadCentres(c, a, CX + dx);
+  if (!st.compact) panel(c, a, 752, 978);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
   return { anchors, gas: GAS_KIND[strokeIndex(a)], speed };

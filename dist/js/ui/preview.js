@@ -13,7 +13,7 @@ export function drawPreview(canvas, entry, theta, time, boost = 1) {
   const a = wrap(theta);
   setTextBoost(boost);
   view.draw(c, {
-    theta, time, parts: {}, rpm: 3000, speed: 30, blur: 0, tip: -1, t: 2.5, alt: 'sea', balance: false, boxer: 'flat6', preview: true,
+    theta, time, parts: {}, rpm: 3000, speed: 30, compact: canvas.clientWidth < 560, tip: -1, t: 2.5, alt: 'sea', balance: false, boxer: 'flat6', preview: true,
     flow: { intake: valveLift(a, 'intake') * 1.2, exhaust: valveLift(a, 'exhaust') * 1.2 }, step: entry.steps[0]
   }, entry);
   setTextBoost(1);

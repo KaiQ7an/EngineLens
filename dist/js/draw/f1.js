@@ -1,6 +1,6 @@
 import { ENGINES } from '../sim/firing.js';
 import { ERAS, electricShare, LAP, zoneAt, speedAt, FLOW } from '../sim/f1.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel, para } from './kit.js';
 import { frontSection } from './layouts.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -72,10 +72,10 @@ function lapTrace(c, lap) {
   stroke(c, [[x0, y0 + 8], [x1, y0 + 8]], C.ink2, 1);
   const z = zoneAt(lap), car = [sx(lap % 1), sy(speedAt(lap))];
   circle(c, car[0], car[1], 7, C.accent, C.ink, 1.4);
-  text(c, L('一圈的车速（示意）· 黄色区域是刹车区', 'Speed over a lap (model) · yellow: braking zones'), x0, y1 - 20, { size: 13, color: C.ink2 });
+  para(c, L('一圈的车速（示意）· 黄色区域是刹车区', 'Speed over a lap (model) · yellow: braking zones'), x0, y1 - 20, x1 - x0, { size: 13, color: C.ink2, anchor: 'bottom' });
   const names = { deploy: ['放电：电机帮着推', 'Deploying: the motor pushes'], top: ['接近极速：电机出力减小', 'Near top speed: the motor eases off'], brake: ['刹车：电机发电充电', 'Braking: the motor harvests'], corner: ['过弯', 'Cornering'] };
-  text(c, L(...names[z.zone]), x0, y0 + 36, { size: 16, weight: 800, color: z.zone === 'brake' ? C.accent : C.ink });
-  text(c, Math.round(speedAt(lap)) + ' km/h', x1, y0 + 36, { size: 16, font: MONO, weight: 600, align: 'right' });
+  text(c, L(...names[z.zone]), x0, y0 + 38, { size: 16, weight: 800, color: z.zone === 'brake' ? C.accent : C.ink });
+  text(c, Math.round(speedAt(lap)) + ' km/h', x0, y0 + 66, { size: 16, font: MONO, weight: 600 });
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 }
 
@@ -85,14 +85,14 @@ export function drawF1(c, st) {
   const anchors = {};
   // Fuel in, on the left.
   part(c, 'fuel', () => {
-    rect(c, 26, 646, 92, 56, 10, C.paper, C.ink, 1.6);
-    text(c, L('可持续燃料', 'Sustainable fuel'), 72, 680, { size: 13, weight: 700, align: 'center' });
-    const pts = [[118, 674], [200, 674], [200, 636]];
+    rect(c, 18, 646, 128, 56, 10, C.paper, C.ink, 1.6);
+    para(c, L('可持续燃料', 'Sustainable fuel'), 82, 680, 116, { size: 13, weight: 700, align: 'center', anchor: 'middle', leading: 1.15 });
+    const pts = [[146, 674], [200, 674], [200, 636]];
     stroke(c, pts, alpha(C.ink2, 0.8), 5);
     const run = flow < 0 ? 0 : 1, len = pathLength(pts);
     for (let d = (time * 60) % 22; d < len && run; d += 22) { const [x, y] = pointAt(pts, d); circle(c, x, y, 3.6, C.burn); }
   });
-  anchors.fuel = [72, 646];
+  anchors.fuel = [82, 646];
   part(c, 'ice', () => {
     frontSection(c, ENGINES.v6f1, theta, time, V);
     text(c, L('1.6 升 · 90° V6', '1.6 L · 90° V6'), V.x, V.y + 92, { size: 14, weight: 700, align: 'center' });

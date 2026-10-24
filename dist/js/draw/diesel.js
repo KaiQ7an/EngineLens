@@ -43,9 +43,9 @@ function thermometer(c, a) {
     stroke(c, [[x + 11, y(v)], [x + 26, y(v)]], color, 1.5, [3, 3]);
     text(c, L(zh, en), x + 32, y(v) + 4, { size: 12.5, color, weight: 600 });
   };
-  mark(compressionTemp(360, DIESEL_CR), '柴油机压缩到这里', 'Diesel squeezes to here', C.accent);
+  mark(compressionTemp(360, DIESEL_CR), '柴油机压缩到这里', 'Diesel gets here', C.accent);
   mark(compressionTemp(360, PETROL_CR), '汽油机只到这里', 'Petrol stops here', C.ink2);
-  mark(AUTOIGNITION_C, '柴油自燃 ≈ 210°', 'Diesel self-lights ≈ 210°', C.ink2);
+  mark(AUTOIGNITION_C, '柴油自燃 ≈ 210°', 'Self-ignites ≈ 210°', C.ink2);
   const shown = hot ? L('燃烧中 >1500°', 'Burning >1500°') : Math.round(temp) + '°C';
   text(c, L('缸内空气温度', 'Air in the cylinder'), x, top - 26, { size: 13, color: C.ink2, align: 'center' });
   text(c, shown, x, bottom + 70, { size: 18, font: MONO, weight: 600, color: col === C.ink2 ? C.ink : col, align: 'center' });
@@ -53,7 +53,7 @@ function thermometer(c, a) {
 }
 
 export function drawDiesel(c, st) {
-  const { theta, time, parts, speed = 20, blur = 0 } = st;
+  const { theta, time, parts, speed = 20 } = st;
   const a = wrap(theta);
   part(c, 'intake-port', () => {
     pipe(c, INTAKE, 38);
@@ -67,7 +67,7 @@ export function drawDiesel(c, st) {
   });
   arrow(c, 670, 66, -Math.PI / 2, C.ink, 8);
   text(c, L('废气', 'Exhaust'), 700, 52, { size: 14, color: C.ink2, weight: 500 });
-  const anchors = drawCylinder(c, a, { x: CX, y: CY, s: S, air: 26, time, cams: true, blur, diesel: true });
+  const anchors = drawCylinder(c, a, { x: CX, y: CY, s: S, air: 26, time, cams: true, diesel: true });
   part(c, 'thermo', () => { anchors.thermo = thermometer(c, a); });
   anchors['exhaust-port'] = [670, 160];
   const k = strokeIndex(a), fuel = injection(a) > 0;

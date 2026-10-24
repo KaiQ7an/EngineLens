@@ -1,6 +1,6 @@
 import { steadyBoost, tipIn, airCharge, wastegateOpen } from '../sim/induction.js';
 import { wrap } from '../sim/kinematics.js';
-import { C, MONO, part, text, rect, circle, stroke, path, pipe, flow, arrow, fillCut, fillPart, clamp, alpha, figLabel } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, path, pipe, flow, arrow, fillCut, fillPart, clamp, alpha, figLabel, measure } from './kit.js';
 import { drawCylinder } from './engine.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -16,13 +16,17 @@ const bar = v => (v > 0.005 ? '+' : '') + v.toFixed(2) + ' bar';
 
 // A dashed blueprint annotation block with key / value rows.
 export function note(c, x, y, w, title, rows) {
-  const h = 40 + rows.length * 30;
+  // A value too long to share its row with the label drops onto a line of its own.
+  const fits = rows.map(r => measure(c, r[0], 14) + measure(c, r[1], 17, 500, MONO) + 20 <= w - 32);
+  const h = 40 + fits.reduce((s, f) => s + (f ? 30 : 54), 0);
   c.save(); c.setLineDash([5, 5]); rect(c, x, y, w, h, 6, alpha(C.paper, 0.85), C.ink2, 1); c.restore();
   text(c, title, x + 16, y + 26, { size: 12, color: C.ink2, font: MONO, spacing: 1.2 });
+  let yy = y + 56;
   rows.forEach((r, i) => {
-    const yy = y + 56 + i * 30;
     text(c, r[0], x + 16, yy, { size: 14, color: C.ink2 });
+    if (!fits[i]) yy += 24;
     text(c, r[1], x + w - 16, yy, { size: 17, color: r[2] ? C.accent : C.ink, font: MONO, weight: 500, align: 'right' });
+    yy += 30;
   });
   return [x + w / 2, y + h / 2];
 }

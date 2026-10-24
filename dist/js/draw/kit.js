@@ -4,10 +4,14 @@ export const W = 1000, H = 760;
 
 // Blueprint drawing: white linework and section hatching on blueprint blue, with a
 // yellow accent. Figures stay blueprint in both page themes; only the depth changes.
+// Each stroke of the cycle keeps one colour everywhere it appears: intake cyan,
+// compression lilac, burning orange, exhaust grey (style.css repeats them as --tone-*).
+const TONES = { intake: '#7fdcff', squeeze: '#c9a8ff', burn: '#ff9f2e', exhaust: '#c4bcb2' };
 const PALETTES = {
-  light: { paper: '#1f4f8c', paper2: '#2a5c9c', ink: '#f4f8ff', ink2: '#b3cbec', faint: '#4673ad', accent: '#ffd23f', burn: '#ff9f2e', grid: '#ffffff12', hatch: '#c9dbf5' },
-  dark: { paper: '#10294b', paper2: '#16325a', ink: '#eaf2ff', ink2: '#93b3de', faint: '#2d5487', accent: '#ffd23f', burn: '#ff9f2e', grid: '#ffffff0d', hatch: '#9fbde6' }
+  light: { paper: '#1f4f8c', paper2: '#2a5c9c', ink: '#f4f8ff', ink2: '#b3cbec', faint: '#4673ad', accent: '#ffd23f', grid: '#ffffff12', hatch: '#c9dbf5', ...TONES },
+  dark: { paper: '#10294b', paper2: '#16325a', ink: '#eaf2ff', ink2: '#93b3de', faint: '#2d5487', accent: '#ffd23f', grid: '#ffffff0d', hatch: '#9fbde6', ...TONES }
 };
+export const STROKE_TONES = ['intake', 'squeeze', 'burn', 'exhaust'];
 export const C = { ...PALETTES.light };
 const LINE = 1.4;
 let hatchCache = null;
@@ -58,7 +62,7 @@ export function withFocus(c, draw) {
   pass = 'all';
   const out = draw();
   if (!focus) return out;
-  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = alpha(C.paper, 0.58); c.fillRect(0, 0, c.canvas.width, c.canvas.height); c.restore();
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = alpha(C.paper, 0.45); c.fillRect(0, 0, c.canvas.width, c.canvas.height); c.restore();
   pass = 'focus';
   try { return draw(); } finally { pass = 'all'; }
 }
@@ -70,6 +74,7 @@ export const clearHits = () => { hits.length = 0; };
 
 // ── Page ────────────────────────────────────────────────────────────
 export function stage(c, w, h) {
+  placed.length = 0;
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.fillStyle = C.paper; c.fillRect(0, 0, w, h);
   c.strokeStyle = C.grid; c.lineWidth = 1; c.beginPath();
@@ -105,14 +110,57 @@ export function fitCanvas(canvas, maxRatio = 2) {
 }
 
 // ── Primitives ──────────────────────────────────────────────────────
-export function text(c, str, x, y, { size = 16, color = C.ink, align = 'left', weight = 500, font = SANS, spacing = 0, base = 'alphabetic' } = {}) {
+// Every label gets a thin halo of the background colour, so it stays readable where it
+// crosses linework. Pass `halo: false` for text sitting on a filled shape.
+export const textLog = { on: false, items: [] }; // layout checks collect label boxes here
+// Boxes of everything written on the current figure, in logical units, so callouts
+// can find a place that does not cover other text. stage() starts a new list.
+export const placed = [];
+export const measure = (c, str, size, weight = 500, font = SANS) => { c.font = `${weight} ${boosted(size)}px ${font}`; return c.measureText(str).width; };
+export const boostedSize = size => boosted(size);
+export function text(c, str, x, y, { size = 16, color = C.ink, align = 'left', weight = 500, font = SANS, spacing = 0, base = 'alphabetic', halo = true } = {}) {
   size = boosted(size);
   c.font = `${weight} ${size}px ${font}`; c.fillStyle = color; c.textAlign = align; c.textBaseline = base;
   if ('letterSpacing' in c) c.letterSpacing = spacing + 'px';
+  if (halo) {
+    c.save(); c.strokeStyle = alpha(C.paper, 0.92); c.lineWidth = Math.max(3, size * 0.3); c.lineJoin = 'round';
+    c.strokeText(str, x, y); c.restore();
+  }
   c.fillText(str, x, y);
   const w = c.measureText(str).width;
   if ('letterSpacing' in c) c.letterSpacing = '0px';
+  const x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  const top = base === 'middle' ? y - size / 2 : y - size * 0.82, m = c.getTransform();
+  const pts = [[x0, top], [x0 + w, top], [x0, top + size], [x0 + w, top + size]].map(([px, py]) => [m.a * px + m.c * py + m.e, m.b * px + m.d * py + m.f]);
+  const k = c.canvas.width / W;
+  const box = { str, x0: Math.min(...pts.map(p => p[0])) / k, x1: Math.max(...pts.map(p => p[0])) / k, y0: Math.min(...pts.map(p => p[1])) / k, y1: Math.max(...pts.map(p => p[1])) / k };
+  placed.push(box);
+  if (textLog.on) textLog.items.push(box);
   return w;
+}
+
+// Text wrapped to fit `maxW`: breaks at spaces, or between characters in Chinese.
+// `y` is the first line's baseline, or with `anchor` the middle or the last line's.
+// Returns the height used, so the next line can follow it.
+export function para(c, str, x, y, maxW, opts = {}) {
+  const size = boosted(opts.size ?? 16), lh = size * (opts.leading ?? 1.35);
+  c.font = `${opts.weight ?? 500} ${size}px ${opts.font ?? SANS}`;
+  const lines = [];
+  let cur = '';
+  for (const w of str.match(/[\u2e80-\u9fff\uff00-\uffef]|[^\s\u2e80-\u9fff\uff00-\uffef]+\s*|\s+/g) ?? []) {
+    if (cur.trim() && c.measureText((cur + w).trimEnd()).width > maxW) { lines.push(cur.trimEnd()); cur = w.trimStart(); } else cur += w;
+  }
+  if (cur.trim()) lines.push(cur.trimEnd());
+  const shift = opts.anchor === 'bottom' ? (lines.length - 1) * lh : opts.anchor === 'middle' ? (lines.length - 1) * lh / 2 : 0;
+  lines.forEach((l, i) => text(c, l, x, y - shift + i * lh, opts));
+  return lines.length * lh;
+}
+
+// Nudge stacked labels (objects with a `y`) apart until they are at least `gap` apart.
+export function spread(labels, gap) {
+  const sorted = [...labels].sort((p, q) => p.y - q.y);
+  for (let i = 1; i < sorted.length; i++) sorted[i].y = Math.max(sorted[i].y, sorted[i - 1].y + gap);
+  return labels;
 }
 
 export function path(c, pts) { c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); }
@@ -153,13 +201,13 @@ export function pointAt(pts, d) {
   return [...pts[pts.length - 1], 0];
 }
 
-// Gas is drawn as dots, told apart by shape and tone rather than many colours:
-// fresh air is a hollow ring, burning charge a solid orange dot, exhaust a pale dot.
+// Gas is drawn as dots in its stroke's colour, and told apart by shape as well:
+// fresh and squeezed air are rings, burning charge and exhaust are solid dots.
 export const GAS = {
-  air: { fill: null, line: () => C.ink2 },
-  squeezed: { fill: null, line: () => C.ink },
+  air: { fill: null, line: () => C.intake },
+  squeezed: { fill: null, line: () => C.squeeze },
   burning: { fill: () => C.burn, line: null },
-  exhaust: { fill: () => C.ink2, line: null }
+  exhaust: { fill: () => C.exhaust, line: null }
 };
 export function dot(c, x, y, r, kind) {
   const g = GAS[kind];
@@ -202,9 +250,10 @@ export function arrow(c, x, y, ang, color = C.ink, size = 10) {
 }
 
 // Numbered callout marker, as in a technical illustration.
+export const markerR = () => Math.max(11, boosted(12.5) * 0.72);
 export function marker(c, n, x, y, on) {
-  circle(c, x, y, 11, on ? C.accent : C.paper, on ? C.accent : C.ink, 1.4);
-  text(c, String(n), x, y + 0.5, { size: 12.5, weight: 700, color: on ? C.paper : C.ink, align: 'center', base: 'middle', font: MONO });
+  circle(c, x, y, markerR(), on ? C.accent : C.paper, on ? C.accent : C.ink, 1.4);
+  text(c, String(n), x, y + 0.5, { size: 12.5, weight: 700, color: on ? C.paper : C.ink, align: 'center', base: 'middle', font: MONO, halo: false });
 }
 
 // The figure number in the bottom-left corner, as in a printed plate. Thumbnails omit it.

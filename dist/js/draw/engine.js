@@ -21,7 +21,7 @@ export const gasKind = (theta, diesel = false) => {
 
 // A diesel piston rides higher at the top, leaving far less room: a higher compression ratio.
 const crownHeight = diesel => CROWN + (diesel ? 9 : 0);
-const crownY = (theta, diesel) => -pinHeight(theta, R, L) - crownHeight(diesel);
+export const crownY = (theta, diesel) => -pinHeight(theta, R, L) - crownHeight(diesel);
 
 // Dots of air inside the cylinder: their number is the air charge, so a turbo
 // visibly packs in more. They stream in through the intake valve, crowd together as
@@ -128,11 +128,10 @@ function head(c, theta, time, { cams, flowRate, density, intakeKind, diesel }) {
   });
 }
 
-function bottomEnd(c, theta, ghost = 1, diesel = false) {
+function bottomEnd(c, theta, diesel = false) {
   const a = theta * Math.PI / 180;
   const pin = [R * Math.sin(a), -R * Math.cos(a)];
   const wrist = [0, -pinHeight(theta, R, L)];
-  c.save(); c.globalAlpha *= ghost;
   part(c, 'crank', () => {
     c.save(); c.rotate(a);
     c.beginPath(); c.arc(0, 0, 60, Math.PI * 0.16, Math.PI * 0.84); c.lineTo(-17, 6); c.lineTo(17, 6); c.closePath(); // counterweight
@@ -157,12 +156,11 @@ function bottomEnd(c, theta, ghost = 1, diesel = false) {
     for (let k = 0; k < 3; k++) stroke(c, [[-BORE + 2, top + 12 + k * 6], [BORE - 2, top + 12 + k * 6]], C.ink, 1.1);
     circle(c, 0, wrist[1], 11, C.paper, C.ink, 1.4);
   });
-  c.restore();
 }
 
 // Draw a cylinder. Returns anchor points (stage coordinates) for labels and hit tests.
 export function drawCylinder(c, theta, o = {}) {
-  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, blur = 0, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true, diesel = false } = o;
+  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true, diesel = false } = o;
   c.save(); c.translate(x, y); c.scale(s, s);
   const a = wrap(theta), crown = crownY(theta, diesel);
   part(c, 'cylinder', () => {
@@ -182,8 +180,7 @@ export function drawCylinder(c, theta, o = {}) {
     }
     gas(c, a, air, time, diesel);
   });
-  for (let k = 3; k >= 1 && blur > 0; k--) bottomEnd(c, theta - k * 9, 0.16 * blur, diesel);
-  bottomEnd(c, theta, 1, diesel);
+  bottomEnd(c, theta, diesel);
   head(c, a, time, { cams, flowRate, density, intakeKind, diesel });
   c.restore();
   const at = (lx, ly) => [x + lx * s, y + ly * s];

@@ -1,6 +1,6 @@
 import { wrap, pistonDrop, sparkGlow } from '../sim/kinematics.js';
 import { ENGINES, localAngle, fireAngles, bankIntervals, throwAngle, inlineForces, cylinders, push, pushing, smoothness } from '../sim/firing.js';
-import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path, figLabel } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path, figLabel, measure, clamp, para, W } from './kit.js';
 import { drawCylinder, gasKind, R, L as ROD } from './engine.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
@@ -44,9 +44,12 @@ function pushGraph(c, theta, engine, { x0, x1, y0, y1 }) {
   const now = [sx(a), sy(push(a, engine))];
   stroke(c, [[now[0], y0], now], C.accent, 1.5);
   circle(c, now[0], now[1], 5, C.accent);
-  text(c, L('推曲轴的力（示意）', 'Push on the crank (model)'), x0, y1 - 12, { size: 13, color: C.ink2 });
-  const n = pushing(a, engine);
-  text(c, L(`同时在推：${n} 个缸`, `Pushing now: ${n} cylinder${n === 1 ? '' : 's'}`), x1, y1 - 12, { size: 14, weight: 700, color: n ? C.accent : C.ink2, align: 'right' });
+  const n = pushing(a, engine), title = L('推曲轴的力（示意）', 'Push on the crank (model)');
+  const count = L(`同时在推：${n} 个缸`, `Pushing now: ${n} cylinder${n === 1 ? '' : 's'}`);
+  // Title and count share a line when there is room for both, otherwise the title goes above.
+  const wide = measure(c, title, 13) + measure(c, L('同时在推：2 个缸', 'Pushing now: 2 cylinders'), 14, 700) + 24 > x1 - x0;
+  text(c, title, x0, y1 - (wide ? 36 : 12), { size: 13, color: C.ink2 });
+  text(c, count, x1, y1 - 12, { size: 14, weight: 700, color: n ? C.accent : C.ink2, align: 'right' });
   text(c, L('最弱时 ≈ 最强时的 ', 'Weakest ≈ ') + Math.round(smoothness(engine, 4) * 100) + L('%', '% of strongest'), x1, y0 + 20, { size: 12.5, color: C.ink2, align: 'right' });
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 }
@@ -65,8 +68,8 @@ function shakeMeter(c, theta, engine, balanced, [x, y]) {
 
 // ── Inline engines ──────────────────────────────────────────────────
 const INLINE = {
-  inline4: { y: 650, s: 0.7, order: '1 – 3 – 4 – 2', balance: true },
-  inline6: { y: 668, s: 0.58, order: '1 – 5 – 3 – 6 – 2 – 4', balance: false }
+  inline4: { y: 650, s: 0.7, order: '1-3-4-2', balance: true },
+  inline6: { y: 668, s: 0.58, order: '1-5-3-6-2-4', balance: false }
 };
 const BAL = [[292, 734], [698, 734]];
 
@@ -114,7 +117,8 @@ function drawInline(c, st, key) {
   if (!st.preview) callouts(c, anchors, inlineSpots(n), parts);
   figLabel(c, st.figure);
 }
-const inlineSpots = n => ({
+const spotCache = {};
+const inlineSpots = n => (spotCache[n] ??= {
   ...Object.fromEntries(Array.from({ length: n }, (_, i) => ['cyl' + (i + 1), { dx: -58, dy: -30, r: 0 }])),
   crank: { dx: 0, dy: 64, r: 0 }, timeline: { dx: -40, dy: -32, r: 0 }, push: { dx: -60, dy: 40, r: 0 },
   shake: { dx: 40, dy: -56, r: 0 }, balance: { dx: 0, dy: -36, r: 0 }
@@ -134,7 +138,7 @@ export const inline4View = {
 export const inline6View = { draw: (c, st) => drawInline(c, st, 'inline6') };
 
 // ── Bank grid: every cylinder as a small cell, one row per bank ─────
-const rowName = b => (b === 'L' || b === 'R' ? bankName(b) : L(b + ' 排', 'Row ' + b));
+const rowName = b => (b === 'L' ? L('左排', 'Left') : b === 'R' ? L('右排', 'Right') : L(b + ' 排', 'Row ' + b));
 function bankGrid(c, e, a, x0, y0, gap = 52, rowGap = 92, cellH = 76) {
   const per = e.firing.length / e.banks.length;
   e.banks.forEach((bank, row) => {
@@ -167,7 +171,10 @@ export function frontSection(c, e, a, time, { x, y, s }) {
     c.restore();
     const ang = sign * half * Math.PI / 180, far = 360 * s + 26;
     out[bank] = [x + Math.cos(ang) * hx - Math.sin(ang) * hy, y + Math.sin(ang) * hx + Math.cos(ang) * hy];
-    text(c, bankName(bank), x + Math.sin(ang) * far, y - Math.cos(ang) * far, { size: 14, weight: 700, align: 'center' });
+    // A boxer's banks lie flat, so their names go above the cylinders instead of past their ends.
+    const flat = e.vAngle >= 180, name = bankName(bank), w = measure(c, name, 14, 700);
+    const lx = x + Math.sin(ang) * (flat ? far - 110 * s : far), ly = flat ? y - 150 * s : y - Math.cos(ang) * far;
+    text(c, name, clamp(lx, w / 2 + 8, W - w / 2 - 8), ly, { size: 14, weight: 700, align: 'center' });
   }
   circle(c, x, y, 104 * s, null, C.ink, 1.4);
   // The V angle between the two cylinder axes, marked out in the gap between the banks.
@@ -279,7 +286,7 @@ function wFront(c, e, a, time, { x, y, s }) {
     const q = sign * 45 * Math.PI / 180, far = 360 * s + 34;
     text(c, L(zh, en), x + Math.sin(q) * far, y - Math.cos(q) * far, { size: 14, weight: 700, align: 'center' });
   }
-  text(c, L('每个 VR8 里两排只差 15°', 'Two rows 15° apart in each VR8'), x, y + 92, { size: 13, color: C.ink2, align: 'center' });
+  text(c, L('每个 VR8 里两排只差 15°', 'Two rows 15° apart in each VR8'), x, y + 78, { size: 13, color: C.ink2, align: 'center' });
   return [x, y - 120];
 }
 
@@ -303,7 +310,7 @@ function drawW16(c, st) {
   part(c, 'turbos', () => { anchors.turbos = turbos(c, time); });
   part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 640, 54, 56, 72, 56); });
   part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 560, x1: 970, y: 410 }, ''); });
-  text(c, L('16 个缸，每 45° 点一次火（示例顺序）', 'Sixteen cylinders, one firing every 45° (example order)'), 560, 448, { size: 13, color: C.ink2 });
+  para(c, L('16 个缸，每 45° 点一次火（示例顺序）', 'Sixteen cylinders, one firing every 45° (example order)'), 560, 448, 410, { size: 13, color: C.ink2 });
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 560, x1: 970, y0: 640, y1: 540 }); });
   if (!st.preview) callouts(c, anchors, W16_SPOTS, parts);
   figLabel(c, st.figure);
@@ -329,15 +336,20 @@ function endView(c, e, a, x, y) {
     text(c, side === 'L' ? L('左排', 'Left') : L('右排', 'Right'), x + Math.cos(q) * 124, y + Math.sin(q) * 124, { size: 13, color: C.ink2, align: 'center' });
   }
   circle(c, x, y, r + 16, null, C.faint, 1);
+  // Throws that point the same way (1 and 4, 2 and 3 on a flat-plane crank) share a label.
+  const throws = new Map();
   for (let p = 1; p <= 4; p++) {
+    const t = Math.round(throwAngle(e, 'L' + p)) % 360;
+    throws.set(t, [...(throws.get(t) ?? []), p]);
+  }
+  for (const [t, ps] of throws) {
     // The left bank axis points up-left; a throw at 0° points along it at TDC. The crank
     // turns anticlockwise here, so each right-bank cylinder reaches TDC 90° earlier.
-    const ang = (-135 - (throwAngle(e, 'L' + p) + a)) * Math.PI / 180;
-    const off = (p - 2.5) * 3;
-    const px = x + Math.cos(ang) * r + off, py = y + Math.sin(ang) * r + off;
-    stroke(c, [[x + off, y + off], [px, py]], C.ink, 7);
-    circle(c, px, py, 11, C.paper, C.ink, 1.4);
-    text(c, String(p), px, py + 4.5, { size: 12, font: MONO, weight: 600, align: 'center' });
+    const ang = (-135 - (t + a)) * Math.PI / 180;
+    const px = x + Math.cos(ang) * r, py = y + Math.sin(ang) * r, label = ps.join('·');
+    stroke(c, [[x, y], [px, py]], C.ink, ps.length > 1 ? 10 : 7);
+    rect(c, px - 7 - 6 * ps.length, py - 11, 14 + 12 * ps.length, 22, 11, C.paper, C.ink, 1.4);
+    text(c, label, px, py + 4.5, { size: 12, font: MONO, weight: 600, align: 'center', halo: false });
   }
   circle(c, x, y, 12, C.paper, C.ink, 1.4);
   return [x, y];

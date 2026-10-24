@@ -64,7 +64,7 @@ export function homePage() {
         if (document.hidden) return;
         time += dt;
         if (!reduced) theta += 32 * 6 * dt;
-        if (heroVisible) { fitCanvas(hero); drawPreview(hero, featured, theta, time, 700 / hero.clientWidth); }
+        if (heroVisible) { fitCanvas(hero); drawPreview(hero, featured, theta, time, 1000 / hero.clientWidth); }
         cards.frame(dt);
       },
       stop() { cards.stop(); if (io) io.disconnect(); }

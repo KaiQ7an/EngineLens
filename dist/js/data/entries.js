@@ -38,11 +38,25 @@ export const ENTRIES = [
       'Intake, compression, power, exhaust: two turns of the crank, one push from the cylinder. Road cars and F1 cars alike run on this cycle.'],
     analogy: ['像起跑前那一口气：先深吸，憋住，猛地发力，再呼出去。图里每个小点代表一团空气，数一数，就知道吸进了多少。',
       'Like the breath before a sprint start: in, hold, explode, out. Each dot in the animation is a parcel of air, so you can count what goes in.'],
+    // The guide stops at each dead centre, where one stroke ends and the next begins.
+    scrub: 'strokes', playback: 'slow', hold: 2.6,
     steps: [
-      { at: 90, until: 180, title: ['进气', 'Intake'], text: ['活塞往下走，缸里空出位置。进气门打开，新鲜空气（随后混入燃油）涌进来。', 'The piston drops and the intake valve opens. Fresh air rushes in to fill the space, and fuel joins it.'], focus: ['intake-valve', 'piston', 'intake-port'] },
-      { at: 270, until: 350, title: ['压缩', 'Compression'], text: ['两个气门都关上，活塞往上顶，把空气挤进原来大约十分之一的空间。挤得越紧，等会儿推得越狠。', 'Both valves shut and the piston rises, squeezing the charge into about a tenth of the space. The tighter the squeeze, the harder the push to come.'], focus: ['chamber', 'piston'] },
-      { at: 380, until: 540, title: ['做功', 'Power'], text: ['火花塞点火，混合气瞬间燃烧膨胀，把活塞狠狠推下去。四步里只有这一步在出力。', 'The spark plug fires. The burning mixture expands and slams the piston down. Only this one stroke makes power.'], focus: ['spark', 'chamber', 'piston'] },
-      { at: 630, until: 720, title: ['排气', 'Exhaust'], text: ['排气门打开，活塞再往上走，把烧完的热废气推出去，给下一口新鲜空气腾地方。', 'The exhaust valve opens and the rising piston pushes the hot burnt gas out, clearing room for the next breath.'], focus: ['exhaust-valve', 'exhaust-port', 'piston'] }
+      { at: 0, until: 180, tone: 'intake', title: ['进气', 'Intake'],
+        text: ['活塞从[[tdc|上止点]]往下走，进气门打开，新鲜空气（混着燃油）被吸进缸里。', 'The piston moves down from [[tdc|top dead centre]] with the intake valve open, drawing in fresh air (and fuel).'],
+        why: ['活塞让出空间，缸里的压力比外面低，空气就自己涌进来，像拉开针筒一样。', 'As the piston makes room, the pressure inside drops below the air outside, so air rushes in, like pulling back a syringe.'],
+        focus: ['intake-valve', 'piston', 'intake-port'] },
+      { at: 180, until: 360, tone: 'squeeze', title: ['压缩', 'Compression'],
+        text: ['两个气门都关上，活塞从[[bdc|下止点]]往上顶，把混合气挤进大约十分之一的空间。快到顶时，火花塞点火。', 'Both valves close and the piston rises from [[bdc|bottom dead centre]], squeezing the charge into about a tenth of the space. Just before the top, the spark plug fires.'],
+        why: ['挤得越紧（[[compression-ratio|压缩比]]越高），燃烧时压力升得越高，推活塞就越狠。提前一点点火，是因为火焰要一点时间才能烧旺。', 'The tighter the squeeze (the higher the [[compression-ratio|compression ratio]]), the higher the pressure when it burns. The spark comes a little early because the flame takes a moment to build.'],
+        focus: ['chamber', 'piston', 'spark'] },
+      { at: 360, until: 540, tone: 'burn', title: ['做功', 'Power'],
+        text: ['混合气猛烈燃烧、膨胀，把活塞从上止点一路推到下止点，曲轴被推着转起来。', 'The burning charge expands and drives the piston all the way from top to bottom, turning the crank.'],
+        why: ['四个冲程里只有这一下在出力。其余三步靠飞轮的惯性、以及其他缸的做功带过去。', 'This is the only stroke of the four that makes power. The flywheel and the other cylinders carry the engine through the rest.'],
+        focus: ['chamber', 'piston', 'crank'] },
+      { at: 540, until: 720, tone: 'exhaust', title: ['排气', 'Exhaust'],
+        text: ['排气门打开，活塞往上走，把烧完的废气推出缸外。', 'The exhaust valve opens and the rising piston pushes the burnt gas out.'],
+        why: ['不清空废气，下一口新鲜空气就进不来。快到顶时进气门提前打开（[[valve-overlap|气门重叠]]），气流顺势把剩下的废气带走。', 'Unless the cylinder is cleared, the next breath has no room. Near the top the intake valve opens early ([[valve-overlap|valve overlap]]) and the moving gas sweeps out what is left.'],
+        focus: ['exhaust-valve', 'exhaust-port', 'piston'] }
     ],
     parts: {
       'intake-valve': { name: ['进气门', 'Intake valve'], text: ['空气的入口。只在吸气时打开，由上方的凸轮轴准时推开。', 'The way in for air. It opens only for intake, pushed open on time by the camshaft above.'] },
@@ -52,7 +66,7 @@ export const ENTRIES = [
       piston: { name: ['活塞', 'Piston'], text: ['在缸里上下跑的"拳头"。燃烧的力量就推在它的顶上。', 'The fist that runs up and down the cylinder. Combustion pushes on its crown.'] },
       rod: { name: ['连杆', 'Connecting rod'], text: ['连接活塞和曲轴，把"往下推"传给曲轴。', 'Links the piston to the crank and passes the push down to it.'] },
       crank: { name: ['曲轴', 'Crankshaft'], text: ['把上下运动变成旋转：就像踩自行车，腿上下用力，脚踏却在转圈。', 'Turns up-and-down into rotation, like pedalling a bike: your legs push down, the pedals go round.'] },
-      chamber: { name: ['燃烧室', 'Combustion chamber'], text: ['活塞顶和缸盖之间的空间。颜色代表气体正在经历什么：蓝是新鲜空气，紫是被压缩，黄是燃烧，橙是热废气。', 'The space above the piston. Its colour tells you what the gas is doing: blue fresh, violet squeezed, yellow burning, orange exhaust.'] }
+      chamber: { name: ['燃烧室', 'Combustion chamber'], text: ['活塞顶和缸盖之间的空间。小点的颜色就是气体此刻的状态：青色圈是新鲜空气，紫色圈是被压缩，橙色是正在燃烧，灰色是废气。', 'The space above the piston. The dots show what the gas is doing: cyan rings are fresh air, lilac rings squeezed charge, orange burning, grey exhaust.'] }
     },
     pros: [
       ['效率高、省油，每一步都有专门的时间去做好。', 'Efficient: each job gets its own stroke.'],
@@ -300,7 +314,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'inline-4', group: 'layout', view: 'inline4', kind: 'crank', speed: 18,
+    id: 'inline-4', group: 'layout', view: 'inline4', kind: 'crank', scrub: 'angle', speed: 18,
     eyebrow: 'INLINE-FOUR',
     name: ['直列四缸', 'Inline-four'],
     tagline: ['四个缸排一排', 'Four in a row'],
@@ -348,7 +362,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'inline-6', group: 'layout', view: 'inline6', kind: 'crank', speed: 16,
+    id: 'inline-6', group: 'layout', view: 'inline6', kind: 'crank', scrub: 'angle', speed: 16,
     eyebrow: 'INLINE-SIX',
     name: ['直列六缸', 'Inline-six'],
     tagline: ['天生平顺', 'Born smooth'],
@@ -398,7 +412,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'v6', group: 'layout', view: 'v6', kind: 'crank', speed: 16,
+    id: 'v6', group: 'layout', view: 'v6', kind: 'crank', scrub: 'angle', speed: 16,
     eyebrow: 'V6',
     name: ['V6', 'V6'],
     tagline: ['把六个缸折成 V 字', 'Six cylinders folded into a V'],
@@ -441,7 +455,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'v8', group: 'layout', view: 'v8', kind: 'crank', speed: 14,
+    id: 'v8', group: 'layout', view: 'v8', kind: 'crank', scrub: 'angle', speed: 14,
     eyebrow: 'CROSS-PLANE VS FLAT-PLANE V8',
     name: ['V8', 'V8'],
     tagline: ['同样八个缸，两种声音', 'Eight cylinders, two voices'],
@@ -486,7 +500,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'v12', group: 'layout', view: 'v12', kind: 'crank', speed: 12,
+    id: 'v12', group: 'layout', view: 'v12', kind: 'crank', scrub: 'angle', redline: 9000, speed: 12,
     eyebrow: 'V12',
     name: ['V12', 'V12'],
     tagline: ['两台直六，背靠背', 'Two inline-sixes back to back'],
@@ -529,7 +543,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'w16', group: 'layout', view: 'w16', kind: 'crank', speed: 12,
+    id: 'w16', group: 'layout', view: 'w16', kind: 'crank', scrub: 'angle', speed: 12,
     eyebrow: 'W16',
     name: ['W16', 'W16'],
     tagline: ['两台窄角 V8，拼成一个 W', 'Two narrow V8s folded into a W'],
@@ -573,7 +587,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'boxer', group: 'layout', view: 'boxer', kind: 'crank', speed: 16,
+    id: 'boxer', group: 'layout', view: 'boxer', kind: 'crank', scrub: 'angle', speed: 16,
     eyebrow: 'BOXER',
     name: ['水平对置', 'Boxer'],
     tagline: ['活塞面对面出拳', 'Pistons trading punches'],
@@ -617,7 +631,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'diesel', group: 'special', view: 'diesel', kind: 'crank', speed: 18,
+    id: 'diesel', group: 'special', view: 'diesel', kind: 'crank', scrub: 'strokes', redline: 4500, speed: 18,
     eyebrow: 'DIESEL',
     name: ['柴油机', 'Diesel'],
     tagline: ['没有火花塞，压得够狠就自己着', 'No spark plug: squeeze hard enough and it lights itself'],

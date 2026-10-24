@@ -1,5 +1,5 @@
 import { phaseCurrents, field, rotorAngle, COIL_AXES } from '../sim/motor.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, poly, fillCut, fillPart, alpha, pointAt, pathLength, figLabel } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, poly, fillCut, fillPart, alpha, pointAt, pathLength, figLabel, para } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -61,7 +61,9 @@ function waves(c, e) {
     const pts = [];
     for (let a = 0; a <= TAU + 1e-9; a += TAU / 90) pts.push([sx(a), y - amp * Math.cos(a - COIL_AXES[k])]);
     stroke(c, pts, STYLE[k].color(), 2, STYLE[k].dash);
-    text(c, p, x1 + 10, y - amp * Math.cos(TAU - COIL_AXES[k]) + 5, { size: 13, font: MONO, weight: 600, color: STYLE[k].color() });
+    // Each phase is named under its own trough, where it alone is lowest.
+    const trough = (COIL_AXES[k] + Math.PI) % TAU;
+    text(c, p, sx(trough), y + amp + 30, { size: 13, font: MONO, weight: 700, color: STYLE[k].color(), align: 'center' });
   });
   stroke(c, [[sx(ph), y - amp - 12], [sx(ph), y + amp + 12]], C.accent, 2);
   phaseCurrents(e).forEach((v, k) => circle(c, sx(ph), y - amp * v, 4.5, STYLE[k].color()));
@@ -81,7 +83,7 @@ function chain(c, mode, time) {
     text(c, L(...names[id]), x, y + 6, { size: 16, weight: 700, align: 'center' });
     out[id] = [x, y - 30];
   }
-  const label = mode === 'regen' ? L('回收：车轮带着电机发电 → 电池', 'Regen: the wheels turn the motor → battery') : L('驱动：电池 → 电控 → 电机', 'Drive: battery → inverter → motor');
+  const label = mode === 'regen' ? L('回收：车轮带着电机发电 → 电池', 'Regen: wheels → motor → battery') : L('驱动：电池 → 电控 → 电机', 'Drive: battery → inverter → motor');
   text(c, label, CHAIN[0][1] - 40, CHAIN[0][2] + 66, { size: 14, weight: 600, color: mode === 'regen' ? C.accent : C.ink });
   return out;
 }
@@ -102,7 +104,7 @@ export function drawMotor(c, st) {
   partAny(c, ['battery', 'inverter'], () => Object.assign(anchors, chain(c, mode, time)));
   anchors.battery ??= [CHAIN[0][1], CHAIN[0][2] - 30];
   anchors.inverter ??= [CHAIN[1][1], CHAIN[1][2] - 30];
-  text(c, L('看：线圈不动，磁场在转，转子跟着它跑', 'Watch: the coils stay put, the field turns, the rotor follows'), 640, 400, { size: 14, color: C.ink2 });
+  para(c, L('看：线圈不动，磁场在转，转子跟着它跑', 'Watch: the coils stay put, the field turns, the rotor follows'), 640, 386, 330, { size: 14, color: C.ink2 });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
 }

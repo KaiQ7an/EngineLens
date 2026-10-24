@@ -1,25 +1,33 @@
 import { ENTRIES, GROUPS, entryById } from '../data/entries.js';
 import { bi, t, ui } from '../i18n.js';
-import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, clamp, fitCanvas, setTextBoost } from '../draw/kit.js';
+import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, fitCanvas, setTextBoost, STROKE_TONES } from '../draw/kit.js';
 import { VIEWS } from '../draw/views.js';
-import { wrap, valveLift } from '../sim/kinematics.js';
+import { STROKE_NAMES } from '../draw/fourstroke.js';
+import { wrap, valveLift, strokeIndex } from '../sim/kinematics.js';
 import { rich } from './terms.js';
 import { cardHTML, mountCards } from './cards.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const HOLD = 1.6;          // seconds the guide pauses on each step
+// On a phone the figure is too small for a panel of small text, so views that can
+// leave theirs out do, and the same readout is shown as text under the figure.
+const narrow = matchMedia('(max-width: 640px)');
+const HOLD = 1.6;          // seconds the guide pauses on each step, unless the entry says otherwise
 const STEP_TIME = 4.8;     // seconds per step for cause-and-effect narration
-const VISUAL_CAP = 150;    // fastest rpm drawn literally; beyond this the picture is slowed
-const PRESETS = [24, 800, 2500, 7000];
-const toSlider = rpm => Math.round(Math.log(rpm / 6) / Math.log(7000 / 6) * 100);
-const fromSlider = v => Math.round(6 * (7000 / 6) ** (v / 100));
+// Playback is how fast the drawing turns, as a multiple of the entry's base speed in
+// crank rpm. It is not the engine speed being described: the real thing at 3,000 rpm
+// is far too fast to see, so that is a separate setting with its own readout.
+const PLAYBACK = { slow: 0.5, mid: 1, fast: 2.5 };
+const BASE_SPEED = 16;
+const playRpm = (entry, st) => (entry.speed ?? BASE_SPEED) * PLAYBACK[st.play];
+// Readout numbers rounded the way you would say them: 380, 25, 6.7.
+const say = v => (v >= 100 ? Math.round(v / 10) * 10 : v >= 10 ? Math.round(v) : +v.toFixed(1)).toLocaleString('en');
 
 // Each engine's state survives language switches and revisits within a session.
 const states = new Map();
 function stateFor(entry) {
   if (!states.has(entry.id)) states.set(entry.id, {
-    theta: entry.start ?? 20, time: 0, playing: !reduced, guided: true, hold: 0, tween: null,
-    part: null, step: 0, stepClock: 0, speed: entry.speed ?? 24, rpm: 3000, tip: -1, alt: 'sea', balance: false, boxer: 'flat6'
+    theta: entry.start ?? entry.steps[0].at ?? 20, time: 0, playing: !reduced, guided: true, hold: 0, tween: null,
+    part: null, step: 0, stepClock: 0, play: entry.playback ?? 'mid', rpm: 3000, tip: -1, alt: 'sea', balance: false, boxer: 'flat6'
   });
   return states.get(entry.id);
 }
@@ -47,13 +55,34 @@ function controlsFor(entry, st) {
       <button type="button" data-alt="high" aria-pressed="${st.alt === 'high'}">${t('high')}</button>
     </div>
     <button class="btn btn-accent" id="floor" type="button">${t('floor')}</button>`;
+  const redline = entry.redline ?? 7000;
   return `
-    <div class="ctl-speed">
-      <label for="speed"><span>${t('speed')}</span><output id="speed-out">${st.speed.toLocaleString('en')}</output><small>rpm</small></label>
-      <input id="speed" type="range" min="0" max="100" value="${toSlider(st.speed)}">
-      <div class="presets">${PRESETS.map((p, i) => `<button type="button" data-preset="${p}">${bi(ui.presets[i])}</button>`).join('')}</div>
+    <div class="ctl-play">
+      <span class="ctl-label">${t('playback')}</span>
+      <div class="seg" role="group" aria-label="${t('playback')}">${Object.keys(PLAYBACK).map(k => `<button type="button" data-play="${k}" aria-pressed="${st.play === k}">${t(k)}</button>`).join('')}</div>
     </div>
+    ${entry.scrub ? `
+    <div class="ctl-speed">
+      <label for="rpm"><span>${t('engineRpm')}</span><output id="rpm-out">${st.rpm.toLocaleString('en')}</output><small>rpm</small></label>
+      <input id="rpm" type="range" min="800" max="${redline}" step="100" value="${st.rpm}">
+      <div class="presets">${[800, 2500, redline].map((p, i) => `<button type="button" data-rpm="${p}">${bi(ui.presets[i])}</button>`).join('')}</div>
+      <p class="ctl-read" id="rate" aria-live="polite"></p>
+    </div>` : ''}
     ${view.extraControls ? view.extraControls(st) : ''}`;
+}
+
+// The crank-angle scrubber under the figure: drag to turn the crank by hand. For a
+// single cylinder it is marked with the strokes and dead centres.
+function scrubber(entry, st) {
+  const strokes = entry.scrub === 'strokes';
+  return `
+  <div class="scrub">
+    <div class="scrub-head"><label for="angle">${t('crankAngle')}</label><output id="angle-out"></output><span class="scrub-hint">${t('scrubHint')}</span></div>
+    ${strokes ? `<div class="scrub-strokes">${STROKE_NAMES.map((nm, k) => `<span data-tone="${STROKE_TONES[k]}">${bi(nm)}</span>`).join('')}</div>` : ''}
+    <input id="angle" type="range" min="0" max="719" step="1" value="${Math.round(wrap(st.theta))}" data-mode="${entry.scrub}">
+    <div class="scrub-marks">${[0, 180, 360, 540, 720].map(d => `<span style="left:${d / 7.2}%">${strokes ? t(d % 360 ? 'bdc' : 'tdc') : d + '°'}</span>`).join('')}</div>
+    ${VIEWS[entry.view].readout ? '<dl class="scrub-read"></dl>' : ''}
+  </div>`;
 }
 
 // Other engines worth a look: the rest of this group first, then the neighbours.
@@ -75,7 +104,7 @@ export function entryPage(id) {
   const figure = `${GROUPS.indexOf(group) + 1}.${siblings.indexOf(entry) + 1}`;
 
   const html = `
-  <article class="entry" data-kind="${entry.kind}">
+  <article class="entry" data-kind="${entry.kind}"${entry.scrub ? ' data-scrub' : ''}>
     <div class="crumbs wrap">
       <a href="#/" class="back">← ${t('gallery')}</a>
       <nav class="siblings" aria-label="${bi(group.name)}">${siblings.map(s => `<a href="#/${s.id}" ${s === entry ? 'aria-current="page"' : ''}>${bi(s.name)}</a>`).join('')}</nav>
@@ -84,6 +113,7 @@ export function entryPage(id) {
       <div class="stage-col">
         <figure class="stage">
           <canvas id="stage" width="${W * 1.5}" height="${H * 1.5}" role="img" aria-label="${bi(entry.name)}"></canvas>
+          ${entry.scrub ? scrubber(entry, st) : ''}
           <figcaption class="caption">
             <div class="cap-body" aria-live="polite"><span class="cap-step"></span><span class="cap-text"></span></div>
             <div class="cap-nav">
@@ -183,10 +213,12 @@ export function entryPage(id) {
       shown = key;
       if (st.part) {
         const p = entry.parts[st.part];
-        cap.step.textContent = bi(p.name); cap.text.innerHTML = rich(bi(p.text)); cap.clear.hidden = false;
+        cap.step.textContent = bi(p.name); cap.step.dataset.tone = ''; cap.text.innerHTML = rich(bi(p.text)); cap.clear.hidden = false;
       } else {
         const s = entry.steps[i];
-        cap.step.textContent = bi(s.title); cap.text.innerHTML = rich(bi(s.text)); cap.clear.hidden = true;
+        cap.step.textContent = bi(s.title); cap.step.dataset.tone = s.tone ?? ''; cap.clear.hidden = true;
+        // First what is happening, then why it matters.
+        cap.text.innerHTML = rich(bi(s.text)) + (s.why ? `<span class="cap-why"><b>${t('why')}</b>${rich(bi(s.why))}</span>` : '');
       }
       cap.count.textContent = `${i + 1} / ${n}`;
     }
@@ -205,12 +237,12 @@ export function entryPage(id) {
         if (st.guided) { st.stepClock += dt; if (st.stepClock > STEP_TIME) goStep(st.step + 1, false); }
       }
       if (st.hold > 0) { st.hold -= dt; return; }
-      const vis = entry.kind === 'flow' ? 20 + st.rpm / 6500 * 40 : Math.min(st.speed, VISUAL_CAP);
+      const vis = entry.kind === 'flow' ? 20 + st.rpm / 6500 * 40 : playRpm(entry, st);
       const before = st.theta, after = before + vis * 6 * dt;
       if (st.guided && !timed(entry)) {
         for (const s of entry.steps) {
           const k = Math.ceil((before - s.at) / 720), mark = s.at + 720 * k;
-          if (mark > before && mark <= after) { st.theta = mark; st.hold = HOLD; return; }
+          if (mark > before && mark <= after) { st.theta = mark; st.hold = entry.hold ?? HOLD; return; }
         }
       }
       st.theta = after;
@@ -232,24 +264,54 @@ export function entryPage(id) {
       c.setTransform(canvas.width / W, 0, 0, canvas.height / H, 0, 0);
       clearHits();
       const a = wrap(st.theta);
-      const vis = Math.min(st.speed, VISUAL_CAP);
+      const vis = playRpm(entry, st);
       const frame = {
-        ...st, theta: st.theta, parts: entry.parts, figure,
-        blur: entry.kind === 'crank' ? clamp((st.speed - VISUAL_CAP) / 1500) : 0,
+        ...st, theta: st.theta, parts: entry.parts, figure, speed: vis, compact: narrow.matches,
         flow: { intake: valveLift(a, 'intake') * (0.5 + vis / 60), exhaust: valveLift(a, 'exhaust') * (0.5 + vis / 60) },
         step: s
       };
-      setTextBoost(700 / canvas.clientWidth);
+      setTextBoost(1000 / canvas.clientWidth);
       withFocus(c, () => view.draw(c, frame, entry));
       setTextBoost(1);
       setFocus(null);
       updateCaption();
+      updateScrub();
+    }
+
+    // Keep the scrubber on the crank angle while it plays.
+    const angle = $('#angle'), angleOut = $('#angle-out'), scrubStrokes = root.querySelectorAll('.scrub-strokes span'), read = $('.scrub-read');
+    let shownAngle = -1;
+    function updateScrub() {
+      if (!angle) return;
+      const d = Math.round(wrap(st.theta)) % 720;
+      if (d === shownAngle) return;
+      shownAngle = d;
+      if (+angle.value !== d) angle.value = d;
+      const k = strokeIndex(d), name = entry.scrub === 'strokes' ? ' · ' + bi(STROKE_NAMES[k]) : '';
+      angleOut.textContent = d + '°' + name;
+      angle.setAttribute('aria-valuetext', d + '°' + name);
+      scrubStrokes.forEach((el, i) => el.classList.toggle('on', i === k));
+      if (read) read.innerHTML = view.readout(d).map(r => `<div class="r-${r.id}${r.hot ? ' hot' : ''}"><dt>${r.label}</dt><dd>${r.value}</dd></div>`).join('');
+    }
+    // Turning the crank by hand pauses the animation; it carries on from there when played.
+    const turnTo = theta => { st.theta = theta; st.playing = false; st.tween = null; st.hold = 0; render(); };
+    if (angle) angle.addEventListener('input', () => turnTo(st.theta - wrap(st.theta) + +angle.value));
+
+    const rate = $('#rate');
+    function updateRate() {
+      if (!rate) return;
+      rate.textContent = t('rate', { fires: say(st.rpm / 120), ms: say(120000 / st.rpm), slow: say(st.rpm / playRpm(entry, st)) });
     }
 
     // ── Events ──
     $('#play').addEventListener('click', () => { st.playing = !st.playing; st.hold = 0; render(); });
     root.querySelectorAll('[data-guided]').forEach(b => b.addEventListener('click', () => { st.guided = b.dataset.guided === '1'; st.hold = 0; st.playing = true; render(); }));
-    $('#prev').addEventListener('click', () => goStep(currentStep() - 1, 'back'));
+    // Back goes to the start of the current step first, like a video player's back button.
+    const back = () => {
+      const i = currentStep(), at = entry.steps[i].at;
+      goStep(at !== undefined && wrap(st.theta) - at > 4 ? i : i - 1, 'back');
+    };
+    $('#prev').addEventListener('click', back);
     $('#next').addEventListener('click', () => goStep(currentStep() + 1));
     root.querySelectorAll('[data-part]').forEach(b => b.addEventListener('click', () => {
       setPart(b.dataset.part);
@@ -259,17 +321,35 @@ export function entryPage(id) {
     cap.clear.addEventListener('click', () => setPart(st.part));
     const toLogical = e => { const r = canvas.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H]; };
     const hitAt = ([x, y]) => hits.reduce((best, h) => { const d = Math.hypot(h.x - x, h.y - y); return d < h.rad && (!best || d < best.d) ? { id: h.id, d } : best; }, null);
-    canvas.addEventListener('click', e => { const h = hitAt(toLogical(e)); if (h) setPart(h.id); else if (st.part) setPart(st.part); });
-    canvas.addEventListener('mousemove', e => { canvas.style.cursor = hitAt(toLogical(e)) ? 'pointer' : 'default'; });
-    const speed = $('#speed');
-    if (speed) {
-      const out = $('#speed-out');
-      const set = rpm => { st.speed = rpm; out.textContent = rpm.toLocaleString('en'); speed.value = toSlider(rpm); };
-      speed.addEventListener('input', () => set(fromSlider(+speed.value)));
-      root.querySelectorAll('[data-preset]').forEach(b => b.addEventListener('click', () => { set(+b.dataset.preset); if (!st.playing) { st.playing = true; render(); } }));
-    }
+    // A tap picks a part; a sideways drag on the drawing turns the crank instead.
+    let drag = null, dragged = false;
+    canvas.addEventListener('pointerdown', e => { if (angle) drag = { x: e.clientX, theta: st.theta, id: e.pointerId, moving: false }; });
+    canvas.addEventListener('pointermove', e => {
+      if (!drag) { canvas.style.cursor = hitAt(toLogical(e)) ? 'pointer' : angle ? 'ew-resize' : 'default'; return; }
+      const dx = e.clientX - drag.x;
+      if (!drag.moving && Math.abs(dx) < 6) return;
+      if (!drag.moving) { drag.moving = true; canvas.setPointerCapture(drag.id); }
+      turnTo(drag.theta + dx / canvas.clientWidth * 720);
+    });
+    const endDrag = () => { dragged = !!drag?.moving; drag = null; };
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('click', e => {
+      if (dragged) { dragged = false; return; }
+      const h = hitAt(toLogical(e)); if (h) setPart(h.id); else if (st.part) setPart(st.part);
+    });
+    root.querySelectorAll('[data-play]').forEach(b => b.addEventListener('click', () => {
+      st.play = b.dataset.play;
+      root.querySelectorAll('[data-play]').forEach(x => x.setAttribute('aria-pressed', x === b));
+      updateRate();
+    }));
     const rpm = $('#rpm');
-    if (rpm) rpm.addEventListener('input', () => { st.rpm = +rpm.value; $('#rpm-out').textContent = st.rpm.toLocaleString('en'); });
+    if (rpm) {
+      const set = v => { st.rpm = v; rpm.value = v; $('#rpm-out').textContent = v.toLocaleString('en'); updateRate(); };
+      rpm.addEventListener('input', () => set(+rpm.value));
+      root.querySelectorAll('[data-rpm]').forEach(b => b.addEventListener('click', () => set(+b.dataset.rpm)));
+    }
+    updateRate();
     if (view.bind) view.bind(root, st, render);
 
     render();
@@ -279,7 +359,7 @@ export function entryPage(id) {
       key(e) {
         if (e.key === ' ') { st.playing = !st.playing; st.hold = 0; render(); return true; }
         if (e.key === 'ArrowRight') { goStep(currentStep() + 1); return true; }
-        if (e.key === 'ArrowLeft') { goStep(currentStep() - 1, 'back'); return true; }
+        if (e.key === 'ArrowLeft') { back(); return true; }
         return false;
       }
     };

@@ -1,5 +1,5 @@
 import { ROTOR, housing, apex, rotorCentre, rotorAngle, apexAlpha, faceStroke, faceProgress, flankPoint } from '../sim/rotary.js';
-import { C, part, text, rect, circle, stroke, path, pipe, flow, arrow, dot, hatch, fillPart, alpha, hash, lerp, figLabel } from './kit.js';
+import { C, part, text, rect, circle, stroke, path, pipe, flow, arrow, dot, hatch, fillPart, alpha, hash, lerp, figLabel, para } from './kit.js';
 import { note } from './induction.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
@@ -123,7 +123,7 @@ export function drawRotary(c, st) {
   ]);
   const rows = [['air', ['新鲜空气', 'Fresh air']], ['squeezed', ['被压缩', 'Squeezed']], ['burning', ['燃烧', 'Burning']], ['exhaust', ['废气', 'Exhaust']]];
   rows.forEach(([kind, name], i) => { dot(c, 716, 300 + i * 28, 5, kind); text(c, L(...name), 732, 305 + i * 28, { size: 14, color: C.ink2 }); });
-  text(c, L('每个腔转一圈，就走完四个冲程', 'Each chamber runs all four strokes per rotor turn'), 700, 452, { size: 13, color: C.ink2 });
+  para(c, L('每个腔转一圈，就走完四个冲程', 'Each chamber runs all four strokes per rotor turn'), 700, 452, 280, { size: 13, color: C.ink2 });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
 }

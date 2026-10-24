@@ -11,7 +11,7 @@ count: a turbo visibly packs more into the same cylinder.
 
 | Group | Engine | What you see |
 | --- | --- | --- |
-| The basics | Four-stroke | One cylinder, cams and valves on a 720° cycle dial |
+| The basics | Four-stroke | One cylinder with its cams, valves and spark, dead centres marked, and a live readout of every part |
 | How it breathes | Naturally aspirated | The atmosphere pushing air past the throttle |
 | | Turbocharged | Exhaust spinning the turbine, boost, intercooler, wastegate, lag |
 | | Supercharged | Belt-driven Roots blower and the power it takes |
@@ -32,8 +32,20 @@ count: a turbo visibly packs more into the same cylinder.
 | | Hydrogen fuel cell | Hydrogen split at the anode, protons through the membrane, electrons round the circuit, water out |
 | On track | F1 power unit | The 2026 rules: 90° V6 turbo, 350 kW MGU-K, no MGU-H; energy over a lap; 2014–2025 for comparison |
 
-On phones the figures enlarge their small labels so they stay legible, and every
-figure redraws only while it is on screen. Each engine page has an identity card, parts you can tap (numbered callouts on the
+The four-stroke page sets the pattern for the others. The narrated guide stops at each
+dead centre and explains what happens, then why. A crank-angle scrubber under the figure
+(or a sideways drag on the drawing) turns the engine by hand; it stays where you leave it
+and plays on from there. Playback speed is set apart from the engine speed being
+described, which has its own readout of firings per second and how much the drawing is
+slowed. Each stroke keeps one colour throughout: intake cyan, compression lilac,
+burning orange, exhaust grey.
+
+Labels are placed so they never cover each other: numbered callouts look for a free
+spot, and `dist/js/dev/layout.js` draws every figure at every step, in both languages
+and at desktop and phone text sizes, and lists any label that overlaps another or
+leaves the figure. On phones the figures enlarge their small labels, the four-stroke
+readout moves under the figure as text, and every figure redraws only while it is on
+screen. Each engine page has an identity card, parts you can tap (numbered callouts on the
 drawing), strengths and trade-offs, cars you may know (tagged by layout and
 induction), one common myth explained, and links to related engines. Dashed-underlined
 terms open a glossary.
@@ -46,6 +58,13 @@ Requires Node.js 20 or newer. There are no dependencies and no build step.
 npm run dev     # http://localhost:5173, reloads on changes in dist/
 npm test        # model and content tests
 npm run check   # syntax-check every module
+```
+
+To check figure labels, open the running site and run this in the browser console; an
+empty list means nothing overlaps:
+
+```js
+(await import('/js/dev/layout.js')).check()
 ```
 
 Use `PORT=5174 npm run dev` to choose another port. The site is static and can be
@@ -64,6 +83,7 @@ dist/
   js/draw/              canvas views, all drawn from a single crank angle
   js/data/              entry copy, cars and glossary as [中文, English] pairs
   js/ui/                gallery, engine page, glossary, term tooltips
+  js/dev/layout.js      label overlap check, run from the browser console
 tests/sim.test.js       node:test checks on the models
 tests/content.test.js   every entry has a view, both languages, and glossary links that resolve
 ```

@@ -1,6 +1,6 @@
 import { steadyBoost } from '../sim/induction.js';
 import { twinBoost, superchargerOn, spool, HANDOVER } from '../sim/twincharge.js';
-import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, fillCut, fillPart, clamp, figLabel } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, fillCut, fillPart, clamp, figLabel, spread, boostedSize } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -59,15 +59,17 @@ function spoolChart(c, t) {
   const { x0, x1, y0, y1, tMax } = SPOOL, sx = s => x0 + (x1 - x0) * s / tMax, sy = v => y0 - (y0 - y1) * v;
   stroke(c, [[x0, y1 - 10], [x0, y0], [x1, y0]], C.ink, 1.4);
   for (let s = 0; s <= tMax; s++) text(c, s + ' s', sx(s), y0 + 20, { size: 11.5, font: MONO, color: C.ink2, align: 'center' });
-  text(c, L('踩下油门后，增压多快到位', 'How fast boost arrives'), x0, y1 - 22, { size: 13, color: C.ink2 });
-  const end = t < 0 ? tMax : Math.min(t, tMax);
+  text(c, L('踩下油门后，增压多快到位', 'How fast boost arrives'), x0, y1 - 36, { size: 13, color: C.ink2 });
+  const end = t < 0 ? tMax : Math.min(t, tMax), labels = [];
   for (const [kind, color, dash, name] of [['electric', C.accent, null, L('电动增压', 'Electric')], ['turbo', C.ink2, [7, 5], L('普通涡轮', 'Turbo')]]) {
     const pts = [];
     for (let s = 0; s <= end + 1e-9; s += 0.03) pts.push([sx(s), sy(spool(kind, s))]);
     stroke(c, pts, color, kind === 'electric' ? 3.5 : 2, dash);
     const last = pts[pts.length - 1];
-    text(c, name, Math.min(last[0], x1) - 4, last[1] + (kind === 'electric' ? -10 : 18), { size: 13, color, align: 'right', weight: 600 });
+    labels.push({ name, color, last, y: last[1] + (kind === 'electric' ? -10 : 18) });
   }
+  spread(labels, boostedSize(13) + 5);
+  for (const { name, color, last, y } of labels) text(c, name, Math.min(last[0], x1) - 4, y, { size: 13, color, align: 'right', weight: 600 });
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 }
 
