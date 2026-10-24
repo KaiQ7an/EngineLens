@@ -52,6 +52,9 @@ drawing), strengths and trade-offs, cars you may know (tagged by layout and
 induction), one common myth explained, and links to related engines. Dashed-underlined
 terms open a glossary.
 
+Live at **https://kaiq7an.github.io/EngineLens/**. Every push to `main` runs the tests
+and publishes `dist/` to GitHub Pages (`.github/workflows/pages.yml`).
+
 ## Run locally
 
 Requires Node.js 20 or newer. There are no dependencies and no build step.
