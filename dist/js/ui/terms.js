@@ -1,10 +1,9 @@
 import { termById } from '../data/glossary.js';
 import { bi } from '../i18n.js';
 
-// Turn [[id|text]] markers in lesson copy into glossary buttons.
+// Turn [[id|text]] markers in entry copy into glossary buttons.
 export const rich = str => str.replace(/\[\[([\w-]+)\|([^\]]+)\]\]/g,
   (_, id, shown) => `<button type="button" class="term" data-term="${id}">${shown}</button>`);
-export const plain = str => str.replace(/\[\[[\w-]+\|([^\]]+)\]\]/g, '$1');
 
 // One shared popover for every term on the page: hover or focus to peek, click to pin.
 let tip, pinned = null;

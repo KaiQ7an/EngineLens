@@ -1,7 +1,7 @@
 import { lang, setLang, t } from './i18n.js';
-import { load, save, loadJSON, saveJSON } from './store.js';
-import { lessonById } from './data/lessons.js';
-import { lessonPage } from './ui/lesson.js';
+import { load, save } from './store.js';
+import { entryById } from './data/entries.js';
+import { entryPage } from './ui/entry.js';
 import { homePage } from './ui/home.js';
 import { glossaryPage } from './ui/glossary.js';
 import { installTerms } from './ui/terms.js';
@@ -27,10 +27,6 @@ document.getElementById('theme').addEventListener('click', () => {
 });
 systemDark.addEventListener('change', applyTheme);
 
-// ── Progress through the route ──
-export const visited = new Set(loadJSON('enginelens-visited', []));
-function markVisited(id) { visited.add(id); saveJSON('enginelens-visited', [...visited]); }
-
 function chrome() {
   root.lang = lang === 'zh' ? 'zh-CN' : 'en';
   document.querySelectorAll('[data-t]').forEach(el => { el.textContent = t(el.dataset.t); });
@@ -44,16 +40,18 @@ function route() {
   if (name === 'compare') name = 'throttle';
   let p;
   if (name === 'glossary') p = glossaryPage();
-  else if (lessonById(name)) { p = lessonPage(name); markVisited(name); }
-  else p = homePage(visited);
+  else if (entryById(name)) p = entryPage(name);
+  else p = homePage();
+  page?.stop?.();
   chrome();
   app.innerHTML = p.html;
   document.title = (p.title ? p.title + ' · ' : '') + 'EngineLens';
-  document.querySelectorAll('.top nav a').forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === '#/' + (name === 'route' ? 'route' : name || '')));
+  const section = name === 'glossary' ? 'glossary' : '';
+  document.querySelectorAll('.top nav a').forEach(a => a.toggleAttribute('aria-current', a.getAttribute('href') === '#/' + section));
   page = p.mount ? p.mount(app) : null;
-  if (name === 'route') document.getElementById('route')?.scrollIntoView();
+  if (name === 'atlas' || name === 'route') document.getElementById('atlas')?.scrollIntoView();
   else scrollTo(0, 0);
-  if (location.hash && name !== 'route') app.querySelector('h1')?.focus({ preventScroll: true });
+  if (entryById(name) || name === 'glossary') app.querySelector('h1')?.focus({ preventScroll: true });
 }
 
 document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => { setLang(b.dataset.lang); route(); }));

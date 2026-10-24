@@ -1,39 +1,33 @@
-// Lesson content. Copy is [中文, English]. Steps with `at` are moments in the crank
-// cycle (degrees); steps without it are a chain of cause and effect the guide walks
-// through on a timer. `focus` names the parts the step puts under the lens.
+// Gallery entries, one per engine or idea. Copy is [中文, English]. Steps with `at`
+// are moments in the crank cycle (degrees); steps without it are a chain of cause and
+// effect the narration walks through on a timer. `focus` names the parts it highlights.
 
-export const CHAPTERS = [
-  { n: 1, title: ['发动机怎么转', 'How an engine turns'], core: ['先看懂一个缸：它怎么吸气、出力、排气。', 'Start with one cylinder: how it breathes in, makes power and breathes out.'] },
-  { n: 2, title: ['空气怎么进', 'How the air gets in'], core: ['发动机有多大劲，看每次能烧多少油；油要配够空气才能烧。三种方式，都在回答"怎么塞进更多空气"。', 'Power depends on how much fuel each cycle can burn, and fuel needs air to burn. All three answer one question: how do you get more air in?'] },
-  { n: 3, title: ['气缸怎么排', 'How the cylinders line up'], core: ['一个缸不够用，就排一排、排成 V。怎么排，决定了它的体积、平顺和声音。', 'One cylinder is never enough. Line them up or fold them into a V: the layout sets size, smoothness and sound.'] },
-  { n: 4, title: ['特殊结构', 'Different designs'], core: ['柴油靠压燃，转子没有活塞。', 'Diesels light by compression; rotaries have no pistons.'] },
-  { n: 5, title: ['电动化', 'Going electric'], core: ['混动、增程、纯电、氢燃料：电在动力里占多大份量。', 'Hybrid, range extender, battery, hydrogen: how much of the work electricity does.'] },
-  { n: 6, title: ['F1 动力单元', 'The F1 power unit'], core: ['1.6 升 V6 涡轮加大功率电机，油电大约各占一半。', 'A 1.6-litre turbo V6 plus a powerful motor, splitting the work roughly half and half.'] }
+export const GROUPS = [
+  { id: 'basics', name: ['基本原理', 'The basics'] },
+  { id: 'induction', name: ['进气方式', 'How it breathes'] },
+  { id: 'layout', name: ['气缸布局', 'Cylinder layouts'] }
 ];
 
-// Lessons that are planned but not built yet, shown on the route as "coming soon".
-export const UPCOMING = [
-  { chapter: 2, title: ['双增压与电动增压', 'Twincharging & e-boost'] },
-  { chapter: 3, title: ['直列六缸', 'Inline-six'] }, { chapter: 3, title: ['V6', 'V6'] }, { chapter: 3, title: ['V12', 'V12'] },
-  { chapter: 3, title: ['W16 / V16', 'W16 / V16'] }, { chapter: 3, title: ['水平对置', 'Boxer'] },
-  { chapter: 4, title: ['柴油', 'Diesel'] }, { chapter: 4, title: ['转子', 'Rotary'] },
-  { chapter: 5, title: ['混合动力', 'Hybrid'] }, { chapter: 5, title: ['增程', 'Range extender'] },
-  { chapter: 5, title: ['纯电电机', 'Electric motor'] }, { chapter: 5, title: ['氢燃料电池', 'Fuel cell'] },
-  { chapter: 6, title: ['2026 F1 动力单元', '2026 F1 power unit'] }
+// Engines not in the gallery yet.
+export const COMING = [
+  ['W16 / V16', 'W16 / V16'], ['双增压与电动增压', 'Twincharging & e-boost'], ['柴油', 'Diesel'], ['转子', 'Rotary'],
+  ['混合动力', 'Hybrid'], ['增程', 'Range extender'], ['纯电电机', 'Electric motor'], ['氢燃料电池', 'Fuel cell'], ['2026 F1 动力单元', '2026 F1 power unit']
 ];
 
 const tags = {
-  inline: ['直列', 'Inline'], i3: ['直列三缸', 'Inline-3'], i4: ['直列四缸', 'Inline-4'], v6: ['V6', 'V6'], v8: ['V8', 'V8'], v8cross: ['V8 十字曲轴', 'Cross-plane V8'], v8flat: ['V8 平面曲轴', 'Flat-plane V8'],
+  inline: ['直列', 'Inline'], i3: ['直列三缸', 'Inline-3'], i4: ['直列四缸', 'Inline-4'], v6: ['V6', 'V6'], v8: ['V8', 'V8'], v8cross: ['V8 十字曲轴', 'Cross-plane V8'], v8flat: ['V8 平面曲轴', 'Flat-plane V8'], i6: ['直列六缸', 'Inline-6'], v12: ['V12', 'V12'], flat4: ['水平对置四缸', 'Flat-4'],
   flat6: ['水平对置六缸', 'Flat-6'],
   na: ['自然吸气', 'Naturally aspirated'], turbo: ['涡轮', 'Turbo'], twin: ['双涡轮', 'Twin-turbo'], sc: ['机械增压', 'Supercharged'],
-  turboHybrid: ['涡轮 + 电机', 'Turbo + motor']
+  turboHybrid: ['涡轮 + 电机', 'Turbo + motor'], twinHybrid: ['双涡轮 + 电机', 'Twin-turbo + motor'], naHybrid: ['自然吸气 + 电机', 'NA + motors']
 };
 
-export const LESSONS = [
+export const ENTRIES = [
   {
-    id: 'four-stroke', chapter: 1, no: '1.1', view: 'fourStroke', kind: 'crank', next: 'na',
+    id: 'four-stroke', group: 'basics', view: 'fourStroke', kind: 'crank',
     eyebrow: 'HOW IT BREATHES',
-    title: ['四冲程：发动机的一呼一吸', 'Four-stroke: how an engine breathes'],
+    name: ['四冲程', 'Four-stroke'],
+    tagline: ['发动机的一呼一吸', 'How an engine breathes'],
+    facts: [[['工作方式', 'Cycle'], ['吸气 → 压缩 → 做功 → 排气', 'Intake → compression → power → exhaust']], [['曲轴', 'Crank'], ['转两圈，出一次力', 'Two turns per power stroke']], [['常见于', 'Found in'], ['几乎所有汽油车，包括 F1', 'Nearly every petrol car, F1 included']]],
     card: ['吸气、压缩、点火、排气。', 'Intake, compression, power, exhaust.'],
     lead: ['吸气、压缩、点火、排气：曲轴转两圈，这个缸出一次力。街上的汽油车、赛道上的 F1，都是这样转起来的。',
       'Intake, compression, power, exhaust: two turns of the crank, one push from the cylinder. Road cars and F1 cars alike run on this cycle.'],
@@ -76,9 +70,11 @@ export const LESSONS = [
     }
   },
   {
-    id: 'na', chapter: 2, no: '2.1', view: 'na', kind: 'flow', next: 'turbo',
+    id: 'na', group: 'induction', view: 'na', kind: 'flow',
     eyebrow: 'NATURALLY ASPIRATED',
-    title: ['自然吸气：靠大气压"推"进来', 'Naturally aspirated: pushed in by the atmosphere'],
+    name: ['自然吸气', 'Naturally aspirated'],
+    tagline: ['靠大气压"推"进来', 'Pushed in by the atmosphere'],
+    facts: [[['进气方式', 'Induction'], ['自然吸气', 'Naturally aspirated']], [['增压', 'Boost'], ['无，最多 1 个大气压', 'None: one atmosphere at most']], [['参数表上', 'On spec sheets'], ['写成 "L"，如 2.0L', 'Written "L", as in 2.0L']]],
     card: ['不加任何帮手，靠自己吸气。', 'No helper: the engine breathes on its own.'],
     lead: ['参数表上写"1.5L""2.0L"的，多半就是它。没有任何增压装置：活塞往下一走，缸里变"空"，外面的大气就把空气压了进来。', 'Most spec sheets reading "1.5L" or "2.0L" mean this. No booster: the piston drops, the cylinder empties, and the air outside pushes its way in.'],
     analogy: ['像用吸管喝饮料：你只是把吸管里的气吸走，真正把饮料压上来的是外面的大气压。', 'Like a drinking straw: you only lower the pressure; the atmosphere is what pushes the drink up.'],
@@ -87,7 +83,7 @@ export const LESSONS = [
       { title: ['大气把空气压进来', 'The atmosphere pushes air in'], text: ['外面大约 1 个大气压的空气穿过滤清器，被"推"进缸里。空气不是被吸进去的，是被压进去的。', 'Outside air at about one atmosphere passes the filter and is pushed into the cylinder. Pushed, not sucked.'], focus: ['filter', 'intake-valve'] },
       { title: ['节气门管着进多少', 'The throttle sets how much'], text: ['你踩的油门，其实转的是这片节气门：开得越大，进气越顺，[[power|动力]]越大。', 'The pedal you press turns this throttle plate. The wider it opens, the easier air flows and the more power you get.'], focus: ['throttle'] },
       { title: ['上限：最多一个大气压', 'The limit: one atmosphere'], text: ['不管转多快，它最多只能把缸"装满"到外面的气压。想要更多空气，只能加大[[displacement|排量]]或者转得更快。', 'However fast it spins, it can only fill the cylinder up to outside pressure. For more air you need more displacement or more revs.'], focus: ['chamber'] },
-      { title: ['废气直接排掉', 'Exhaust goes straight out'], text: ['烧完的废气又热又快，却从排气管直接排走了。下一课的涡轮，就是要把这份能量用起来。', 'The burnt gas leaves hot and fast, straight out of the exhaust. The turbo in the next lesson puts that energy to use.'], focus: ['exhaust-pipe'] }
+      { title: ['废气直接排掉', 'Exhaust goes straight out'], text: ['烧完的废气又热又快，却从排气管直接排走了。涡轮增压，就是要把这份能量用起来。', 'The burnt gas leaves hot and fast, straight out of the exhaust. A turbo puts that energy to use.'], focus: ['exhaust-pipe'] }
     ],
     parts: {
       filter: { name: ['空气滤清器', 'Air filter'], text: ['挡住灰尘和沙粒，保护发动机。', 'Stops dust and grit getting into the engine.'] },
@@ -119,9 +115,11 @@ export const LESSONS = [
     }
   },
   {
-    id: 'turbo', chapter: 2, no: '2.2', view: 'turbo', kind: 'flow', next: 'super',
+    id: 'turbo', group: 'induction', view: 'turbo', kind: 'flow',
     eyebrow: 'TURBOCHARGED',
-    title: ['涡轮增压：让废气再干一份活', 'Turbocharged: putting exhaust to work'],
+    name: ['涡轮增压', 'Turbocharged'],
+    tagline: ['让废气再干一份活', 'Putting exhaust to work'],
+    facts: [[['进气方式', 'Induction'], ['涡轮增压', 'Turbocharged']], [['靠什么驱动', 'Driven by'], ['废气', 'Exhaust gas']], [['参数表上', 'On spec sheets'], ['写成 "T"，如 1.5T', 'Written "T", as in 1.5T']], [['常见于', 'Found in'], ['大多数新车、F1', 'Most new cars, and F1']]],
     card: ['用废气吹风车，把空气压进去。', 'Exhaust spins a fan that packs air in.'],
     lead: ['车尾的"T"就是它。排出去的废气先吹动一个风车（涡轮），同一根轴上的另一个风车（压气机）把空气压紧，再塞进缸里。F1 用的也是涡轮。', 'The "T" on the badge. Exhaust spins one fan (the turbine); a second fan on the same shaft (the compressor) packs air tight and forces it into the cylinder. F1 cars are turbocharged too.'],
     analogy: ['像用你呼出的气去转一个风车，再让风车帮你多吸几口气。', 'Like using your breath out to spin a fan that helps you breathe in more.'],
@@ -141,7 +139,7 @@ export const LESSONS = [
       intercooler: { name: ['中冷器', 'Intercooler'], text: ['给压缩后的热空气降温，空气越冷越密。', 'Cools the compressed air; colder air is denser.'] },
       wastegate: { name: ['废气旁通阀', 'Wastegate'], text: ['增压够了就打开，让一部分废气绕过涡轮。把转速拉高试试，看它打开。', 'Opens at full boost so some exhaust bypasses the turbine. Raise the rpm and watch it open.'] },
       bov: { name: ['泄压阀', 'Blow-off valve'], text: ['松油门时把多余的压缩空气放掉，那声"呲"就是它。', 'Lets surplus boost escape when you lift off: that "pssh".'] },
-      chamber: { name: ['气缸', 'Cylinder'], text: ['小圈的数量就是每次吸进的空气量，和上一课的自然吸气比一比。', 'The rings show how much air each breath holds; compare with the last lesson.'] }
+      chamber: { name: ['气缸', 'Cylinder'], text: ['小圈的数量就是每次吸进的空气量，和自然吸气比一比。', 'The rings show how much air each breath holds; compare with naturally aspirated.'] }
     },
     pros: [
       ['小排量出大力气：1.5T 常常有 2.0 升自吸的劲。', 'Big power from a small engine: a 1.5T often matches a 2.0 NA.'],
@@ -165,9 +163,11 @@ export const LESSONS = [
     }
   },
   {
-    id: 'super', chapter: 2, no: '2.3', view: 'super', kind: 'flow', next: 'throttle',
+    id: 'super', group: 'induction', view: 'super', kind: 'flow',
     eyebrow: 'SUPERCHARGED',
-    title: ['机械增压：用皮带直接打气', 'Supercharged: a belt-driven air pump'],
+    name: ['机械增压', 'Supercharged'],
+    tagline: ['用皮带直接打气', 'A belt-driven air pump'],
+    facts: [[['进气方式', 'Induction'], ['机械增压', 'Supercharged']], [['靠什么驱动', 'Driven by'], ['曲轴 + 皮带', 'Crank and belt']], [['特点', 'Character'], ['没有迟滞', 'No lag']], [['常见于', 'Found in'], ['美式 V8 肌肉车（越来越少）', 'American V8s (now rare)']]],
     card: ['曲轴带动的打气泵，没有迟滞。', 'A crank-driven air pump with no lag.'],
     lead: ['曲轴通过一条皮带带动增压器：发动机转多快，它就转多快，直接把空气挤进缸里。一踩就有，但它要吃掉发动机自己的一部分力气。', 'A belt from the crank drives the supercharger, so it turns whenever the engine does and forces air straight in. Instant, but it eats some of the engine\'s own power.'],
     analogy: ['像边骑车边用脚踩一个打气筒：一踩就有气，可你得多花一份力。', 'Like working a foot pump while you ride: instant air, but it costs you effort.'],
@@ -203,13 +203,15 @@ export const LESSONS = [
     ],
     myth: {
       q: ['机械增压和涡轮增压，哪个好？', 'Supercharger or turbo: which is better?'],
-      a: ['各有取舍：机械增压反应快但费油，涡轮省油、出力大但有迟滞。现在主流是涡轮，因为油耗和排放法规越来越严。下一课的实验能直接对比。', 'It is a trade-off: a supercharger responds faster but costs fuel; a turbo is efficient and powerful but lags. Turbos dominate because economy and emissions rules keep tightening. The next lesson puts them side by side.']
+      a: ['各有取舍：机械增压反应快但费油，涡轮省油、出力大但有迟滞。现在主流是涡轮，因为油耗和排放法规越来越严。去看看踩油门对比，三者并排。', 'It is a trade-off: a supercharger responds faster but costs fuel; a turbo is efficient and powerful but lags. Turbos dominate because economy and emissions rules keep tightening. The floor-it test puts them side by side.']
     }
   },
   {
-    id: 'throttle', chapter: 2, no: '2.4', view: 'throttle', kind: 'experiment', next: 'inline-4',
+    id: 'throttle', group: 'induction', view: 'throttle', kind: 'experiment',
     eyebrow: 'THE FLOOR-IT TEST',
-    title: ['踩油门实验：同一脚油门，三种反应', 'The floor-it test: one stomp, three responses'],
+    name: ['踩油门对比', 'Floor-it test'],
+    tagline: ['同一脚油门，三种反应', 'One stomp, three responses'],
+    facts: [[['对比', 'Comparing'], ['自吸 / 涡轮 / 机械增压', 'NA / turbo / supercharged']], [['条件', 'Set-up'], ['都是 2.0 升，同样转速', 'All 2.0 litres, same rpm']], [['可以切换', 'Switch'], ['海平面 / 3650 米', 'Sea level / 3,650 m']]],
     card: ['三台发动机，同时踩下地板油。', 'Three engines, floored together.'],
     lead: ['三台都是 2.0 升、转速相同，只是进气方式不同。同时踩下地板油：看谁先来劲，谁最后最猛，谁被吃掉了一块。', 'Three 2.0-litre engines at the same speed, differing only in how they breathe. Floor them together: who responds first, who ends strongest, who pays a toll?'],
     analogy: ['像三位选手同时起跑：一位反应快但力气小，一位慢热但后程最猛，一位反应快却背着个包。', 'Like three sprinters at the gun: one quick but light, one slow to start but strongest late, one quick but carrying a backpack.'],
@@ -248,11 +250,13 @@ export const LESSONS = [
     }
   },
   {
-    id: 'inline-4', chapter: 3, no: '3.1', view: 'inline4', kind: 'crank', next: 'v8', speed: 18,
+    id: 'inline-4', group: 'layout', view: 'inline4', kind: 'crank', speed: 18,
     eyebrow: 'INLINE-FOUR',
-    title: ['直列四缸：四个缸排一排', 'Inline-four: four in a row'],
+    name: ['直列四缸', 'Inline-four'],
+    tagline: ['四个缸排一排', 'Four in a row'],
+    facts: [[['布局', 'Layout'], ['直列', 'Inline']], [['缸数', 'Cylinders'], ['4', '4']], [['点火顺序', 'Firing order'], ['1-3-4-2', '1-3-4-2']], [['常见于', 'Found in'], ['大多数家用车和小钢炮', 'Most family cars and hot hatches']]],
     card: ['最常见的布局，1-3-4-2 轮流点火。', 'The most common layout, firing 1-3-4-2.'],
-    lead: ['街上大多数车都是它：四个缸排成一排，轮流出力，每转半圈就有一个缸在做功。前面几课的 MX-5、高尔夫 GTI、思域 Type R，都是直列四缸，只是进气方式不同。', 'Most cars on the road use it: four cylinders in a row taking turns, one power stroke every half turn. The MX-5, Golf GTI and Civic Type R from earlier lessons are all inline-fours that breathe differently.'],
+    lead: ['街上大多数车都是它：四个缸排成一排，轮流出力，每转半圈就有一个缸在做功。MX-5、高尔夫 GTI、思域 Type R 都是直列四缸，只是进气方式不同。', 'Most cars on the road use it: four cylinders in a row taking turns, one power stroke every half turn. The MX-5, Golf GTI and Civic Type R are all inline-fours that breathe differently.'],
     analogy: ['像四个人划同一条船：大家轮流用力，船就一直有人推着走。', 'Like four rowers in one boat taking turns to pull: there is always someone pushing.'],
     start: 10,
     steps: [
@@ -269,7 +273,8 @@ export const LESSONS = [
       crank: { name: ['曲轴', 'Crankshaft'], text: ['一根轴连着四个曲拐：1、4 缸的朝一边，2、3 缸的朝另一边。', 'One shaft with four throws: 1 and 4 point one way, 2 and 3 the other.'] },
       timeline: { name: ['点火顺序', 'Firing order'], text: ['一个循环（两圈）里谁先谁后点火，红线是现在的位置。', 'Who fires when over one cycle (two turns); the red line is now.'] },
       shake: { name: ['抖动表', 'Shake meter'], text: ['四个活塞上下时留下的"不平衡"，每转两次。', 'The imbalance left by four pistons moving up and down, twice per turn.'] },
-      balance: { name: ['平衡轴', 'Balance shafts'], text: ['以两倍转速反向旋转的配重轴，抵消抖动。', 'Weighted shafts spinning at twice crank speed in opposite directions, cancelling the shake.'] }
+      balance: { name: ['平衡轴', 'Balance shafts'], text: ['以两倍转速反向旋转的配重轴，抵消抖动。', 'Weighted shafts spinning at twice crank speed in opposite directions, cancelling the shake.'] },
+      push: { name: ['推力曲线', 'Push graph'], text: ['四个缸的做功正好首尾相接，所以推力会一次次掉到零：这就是四缸不如六缸顺的原因。', 'The four power strokes just touch end to end, so the push drops to zero between them: that is why a four feels less smooth than a six.'] }
     },
     pros: [
       ['结构紧凑、零件少，便宜好造。', 'Compact, few parts, cheap to build.'],
@@ -293,9 +298,104 @@ export const LESSONS = [
     }
   },
   {
-    id: 'v8', chapter: 3, no: '3.4', view: 'v8', kind: 'crank', speed: 14,
+    id: 'inline-6', group: 'layout', view: 'inline6', kind: 'crank', speed: 16,
+    eyebrow: 'INLINE-SIX',
+    name: ['直列六缸', 'Inline-six'],
+    tagline: ['天生平顺', 'Born smooth'],
+    facts: [[['布局', 'Layout'], ['直列', 'Inline']], [['缸数', 'Cylinders'], ['6', '6']], [['点火顺序', 'Firing order'], ['1-5-3-6-2-4', '1-5-3-6-2-4']], [['常见于', 'Found in'], ['宝马、丰田 Supra', 'BMW, Toyota Supra']]],
+    card: ['六缸一排，抖动自己抵消。', 'Six in a row; the shakes cancel themselves.'],
+    lead: ['在直列四缸后面再加两个缸：六个缸排一排，每转 120° 就有一个缸点火。它的抖动会自己互相抵消，连平衡轴都不用。宝马和丰田 Supra 的招牌就是它。', 'Add two cylinders to an inline-four: six in a row, one firing every 120°. Its shakes cancel each other out, with no balance shafts needed. It is the signature of BMW and the Toyota Supra.'],
+    analogy: ['像六个人划同一条船，前三个和后三个的动作像照镜子一样对称，船身一点也不晃。', 'Like six rowers where the front three mirror the back three: the boat does not rock at all.'],
+    start: 10,
+    steps: [
+      { at: 20, until: 120, title: ['1 缸点火', 'Cylinder 1 fires'], text: ['[[firing-order|点火顺序]]是 1-5-3-6-2-4：每转 120° 就有一个缸点火，比四缸的 180° 更密。', 'The firing order is 1-5-3-6-2-4: a cylinder fires every 120°, closer together than a four\'s 180°.'], focus: ['cyl1', 'timeline'] },
+      { at: 140, until: 240, title: ['5 缸点火', 'Cylinder 5 fires'], text: ['上一个缸还没推完，下一个缸已经开始推了。看上面的推力曲线：它从不掉到零。', 'The next cylinder starts pushing before the last one has finished. The push graph above never drops to zero.'], focus: ['cyl5', 'push'] },
+      { at: 260, until: 360, title: ['3 缸点火', 'Cylinder 3 fires'], text: ['1 和 6、2 和 5、3 和 4 两两一起上下，前半截和后半截像照镜子。', 'Pistons move in pairs, 1 with 6, 2 with 5, 3 with 4: the front half mirrors the back.'], focus: ['cyl3', 'cyl4'] },
+      { at: 380, until: 480, title: ['6 缸点火', 'Cylinder 6 fires'], text: ['所以四缸那种每转两次的抖动，在这里被完全抵消了：右边的抖动表一动不动。', 'So the twice-per-turn shake of a four cancels out completely: the shake meter on the right stays still.'], focus: ['cyl6', 'shake'] },
+      { at: 500, until: 600, title: ['2 缸点火', 'Cylinder 2 fires'], text: ['代价是长：六个缸排一排，发动机很长，一般只能纵向放在长长的车头里。', 'The cost is length: six in a row makes a long engine that usually has to sit lengthwise under a long bonnet.'], focus: ['cyl2', 'crank'] },
+      { at: 620, until: 720, title: ['4 缸点火', 'Cylinder 4 fires'], text: ['然后回到 1 缸，循环重复。', 'Then back to cylinder 1, and round again.'], focus: ['cyl4', 'timeline'] }
+    ],
+    parts: {
+      cyl1: { name: ['1 缸', 'Cylinder 1'], text: ['和 6 缸一起上下。', 'Moves with cylinder 6.'] },
+      cyl2: { name: ['2 缸', 'Cylinder 2'], text: ['和 5 缸一起上下。', 'Moves with cylinder 5.'] },
+      cyl3: { name: ['3 缸', 'Cylinder 3'], text: ['和 4 缸一起上下。', 'Moves with cylinder 4.'] },
+      cyl4: { name: ['4 缸', 'Cylinder 4'], text: ['和 3 缸一起上下，但晚一圈点火。', 'Moves with 3, but fires a turn later.'] },
+      cyl5: { name: ['5 缸', 'Cylinder 5'], text: ['和 2 缸一起上下。', 'Moves with cylinder 2.'] },
+      cyl6: { name: ['6 缸', 'Cylinder 6'], text: ['和 1 缸一起上下。', 'Moves with cylinder 1.'] },
+      crank: { name: ['曲轴', 'Crankshaft'], text: ['一根长轴连着六个曲拐，分成三对，互相差 120°。', 'One long shaft with six throws in three pairs, 120° apart.'] },
+      timeline: { name: ['点火顺序', 'Firing order'], text: ['一个循环（两圈）里谁先谁后点火，红线是现在的位置。', 'Who fires when over one cycle (two turns); the red line is now.'] },
+      push: { name: ['推力曲线', 'Push graph'], text: ['六个缸的做功互相重叠，推力从不掉到零。和直列四缸那一页比一比。', 'Six overlapping power strokes keep the push from ever dropping to zero. Compare with the inline-four.'] },
+      shake: { name: ['抖动表', 'Shake meter'], text: ['直六的一阶、二阶惯性力都能自己抵消，所以指针不动。', 'An inline-six cancels its primary and secondary forces, so the needle stays still.'] }
+    },
+    pros: [
+      ['一阶、二阶抖动都能自己抵消，不用平衡轴，天生平顺。', 'Primary and secondary forces cancel: smooth by nature, no balance shafts.'],
+      ['每 120° 一次做功，做功互相重叠，动力连绵不断。', 'A power stroke every 120°, overlapping, so the pull never lets up.'],
+      ['声音顺滑，配上涡轮也很容易出大马力。', 'A silky sound, and it takes a turbo well.']
+    ],
+    cons: [
+      ['很长，横着放不下，大多只能纵向放。', 'Long: it rarely fits sideways, so it usually sits lengthwise.'],
+      ['曲轴长，容易产生扭转振动，要专门减振。', 'A long crank is prone to twisting vibration and needs damping.'],
+      ['比四缸更重、更贵。', 'Heavier and more expensive than a four.']
+    ],
+    cars: [
+      { name: ['宝马 M3', 'BMW M3'], engine: ['S58 3.0', 'S58 3.0'], tags: [tags.i6, tags.twin], why: ['宝马直六的代表作。', 'BMW\'s signature inline-six.'] },
+      { name: ['丰田 GR Supra', 'Toyota GR Supra'], engine: ['B58 3.0', 'B58 3.0'], tags: [tags.i6, tags.turbo], why: ['用的是宝马 B58 直六。', 'Powered by BMW\'s B58 inline-six.'] },
+      { name: ['日产 Skyline GT-R（R34）', 'Nissan Skyline GT-R (R34)'], engine: ['RB26DETT 2.6', 'RB26DETT 2.6'], tags: [tags.i6, tags.twin], why: ['日本性能车的传奇直六。', 'A legendary Japanese inline-six.'] }
+    ],
+    myth: {
+      q: ['为什么都说直六是"最完美"的布局？', 'Why is the inline-six called "perfect"?'],
+      a: ['因为它的一阶、二阶惯性力和力矩都能自己抵消，不用平衡轴就很平顺。"完美"说的是平衡，不是最快；它的缺点是太长。', 'Because its primary and secondary forces and couples all cancel, so it runs smoothly with no balance shafts. "Perfect" means balance, not speed; its weakness is length.']
+    }
+  },
+  {
+    id: 'v6', group: 'layout', view: 'v6', kind: 'crank', speed: 16,
+    eyebrow: 'V6',
+    name: ['V6', 'V6'],
+    tagline: ['把六个缸折成 V 字', 'Six cylinders folded into a V'],
+    facts: [[['布局', 'Layout'], ['V 形，这里画的是 60°', 'V, drawn here at 60°']], [['缸数', 'Cylinders'], ['6', '6']], [['点火间隔', 'Firing interval'], ['120°', '120°']], [['常见于', 'Found in'], ['GT-R、法拉利 296、F1', 'GT-R, Ferrari 296, F1']]],
+    card: ['短小紧凑，F1 用的也是它。', 'Short and compact, and what F1 uses.'],
+    lead: ['把直列六缸从中间折起来：两排、各三个缸，摆成 V 字。长度只有直六的一半，什么车头都塞得进。F1 赛车用的就是 1.6 升 V6 涡轮。', 'Fold an inline-six in half: two banks of three in a V. Half the length of an inline-six, it fits almost anywhere. F1 cars run a 1.6-litre turbo V6.'],
+    analogy: ['像把一条长凳折成两张短凳并排放：能坐的人一样多，占的地方短了一半。', 'Like folding one long bench into two short ones side by side: the same seats in half the length.'],
+    steps: [
+      { title: ['两排各三个缸', 'Two banks of three'], text: ['从发动机正前方看，两排气缸成 60° 夹角，共用一根曲轴。', 'From the front, two banks sit 60° apart and share one crankshaft.'], focus: ['front', 'banks'] },
+      { title: ['两排轮流点火', 'The banks take turns'], text: ['左右两排交替点火，整台发动机还是每 120° 点一次火，和直六一样均匀。', 'The banks fire alternately, so the whole engine still fires every 120°, as evenly as an inline-six.'], focus: ['timeline', 'banks'] },
+      { title: ['曲拐错开一点', 'Offset crank pins'], text: ['为了在 60° 夹角下也能均匀点火，每对气缸的曲拐要错开：看左边，两根连杆连在不同的位置上。', 'To fire evenly with a 60° angle, each pair\'s crank pins are offset: on the left, the two rods sit on different pins.'], focus: ['front'] },
+      { title: ['推力和直六一样', 'As much push as a six'], text: ['六个缸的做功同样互相重叠，推力曲线和直六几乎一样平顺。', 'Six overlapping power strokes give a push graph almost as smooth as an inline-six.'], focus: ['push'] },
+      { title: ['短，所以好装', 'Short, so it fits'], text: ['只有直六一半长，可以横着放进普通轿车，也可以放在跑车座椅后面。代价是不如直六天生平衡，常常需要平衡轴。', 'Half as long as an inline-six, it fits sideways in a family car or behind a sports car\'s seats. The cost is that it is less naturally balanced, often needing a balance shaft.'], focus: ['front', 'rhythm'] }
+    ],
+    parts: {
+      front: { name: ['正面剖视', 'Front section'], text: ['从正前方看到的两排第一个缸，共用一根曲轴。', 'The front cylinder of each bank, seen head-on, sharing one crankshaft.'] },
+      banks: { name: ['两排气缸', 'The two banks'], text: ['每排三个缸，亮起的是正在点火的缸。', 'Three per bank; the lit one is firing.'] },
+      timeline: { name: ['点火顺序', 'Firing order'], text: ['左右两排交替，每 120° 一次。', 'The banks alternate, one firing every 120°.'] },
+      push: { name: ['推力曲线', 'Push graph'], text: ['六个缸互相接力，推力不会掉到零。', 'Six cylinders relay, so the push never drops out.'] },
+      rhythm: { name: ['每排的节奏', 'Rhythm per bank'], text: ['单看一排，它每 240° 点一次火，很均匀。', 'Within one bank it fires every 240°, evenly.'] }
+    },
+    pros: [
+      ['短小紧凑，横着放、竖着放都行。', 'Compact enough to sit sideways or lengthwise.'],
+      ['六缸的平顺和动力，体积接近四缸。', 'Six-cylinder smoothness and power in nearly a four\'s space.'],
+      ['比直六矮、重心低，适合中置跑车和赛车。', 'Lower than an inline-six, which suits mid-engined cars and racers.']
+    ],
+    cons: [
+      ['不如直六天生平衡，常常需要平衡轴或特殊的曲轴。', 'Less naturally balanced than an inline-six; often needs a balance shaft or special crank.'],
+      ['两个缸盖、两套凸轮轴，零件更多、更贵。', 'Two cylinder heads and two sets of cams: more parts, more cost.'],
+      ['比直列发动机更宽。', 'Wider than an inline engine.']
+    ],
+    cars: [
+      { name: ['日产 GT-R（R35）', 'Nissan GT-R (R35)'], engine: ['VR38DETT 3.8', 'VR38DETT 3.8'], tags: [tags.v6, tags.twin], why: ['60° 双涡轮 V6，每台由一位匠人手工组装。', 'A 60° twin-turbo V6, each hand-built by one craftsman.'] },
+      { name: ['法拉利 296 GTB', 'Ferrari 296 GTB'], engine: ['3.0 V6', '3.0 V6'], tags: [tags.v6, tags.twinHybrid], why: ['120° 夹角，两个涡轮装在 V 字中间，再加电机。', 'A 120° V with both turbos inside the vee, plus a motor.'] },
+      { name: ['F1 赛车', 'Formula 1 car'], engine: ['1.6 升 90° V6', '1.6 L 90° V6'], tags: [tags.v6, tags.turboHybrid], why: ['规则规定的 V6 涡轮，再配大功率电机。', 'A rules-mandated turbo V6 paired with a powerful motor.'] }
+    ],
+    myth: {
+      q: ['V6 是"缩水版"的 V8 吗？', 'Is a V6 just a downgraded V8?'],
+      a: ['不是。选 V6 往往是为了体积和效率：配上涡轮，V6 能比老式 V8 更有力。GT-R 和 F1 就是例子。', 'No. A V6 is usually chosen for size and efficiency, and with turbos it can out-muscle an older V8. The GT-R and F1 are proof.']
+    }
+  },
+  {
+    id: 'v8', group: 'layout', view: 'v8', kind: 'crank', speed: 14,
     eyebrow: 'CROSS-PLANE VS FLAT-PLANE V8',
-    title: ['V8：同样八个缸，两种声音', 'V8: eight cylinders, two voices'],
+    name: ['V8', 'V8'],
+    tagline: ['同样八个缸，两种声音', 'Eight cylinders, two voices'],
+    facts: [[['布局', 'Layout'], ['V 形 90°', '90° V']], [['缸数', 'Cylinders'], ['8', '8']], [['曲轴', 'Crank'], ['十字 / 平面', 'Cross-plane / flat-plane']], [['常见于', 'Found in'], ['美式肌肉车、超跑', 'Muscle cars and supercars']]],
     card: ['十字曲轴"突突"，平面曲轴尖啸。', 'Cross-plane burbles, flat-plane screams.'],
     lead: ['两排各四个缸，摆成 V 字。同样是 V8，美式肌肉车"突突突"，法拉利、Corvette Z06 却在尖啸。区别不在缸数，而在曲轴长什么样。', 'Two banks of four in a V. Some V8s burble like a muscle car, others scream like a Ferrari or a Corvette Z06. The difference is not the cylinder count but the shape of the crank.'],
     analogy: ['像两支鼓队：一支打着忽快忽慢的切分节奏，另一支每一下都均匀整齐。', 'Like two drum lines: one plays a lopsided, syncopated beat; the other hits every beat evenly.'],
@@ -334,7 +434,94 @@ export const LESSONS = [
       q: ['V8 的"突突"声是排气管调出来的吗？', 'Is the V8 burble just tuned into the exhaust?'],
       a: ['排气管能放大或修饰它，但根源在曲轴：十字曲轴让每一排的排气脉冲间隔不均，这种不规则的节奏就是"突突"声的来源。', 'The exhaust can amplify or shape it, but the root is the crank: a cross-plane gives each bank uneven exhaust pulses, and that lopsided rhythm is the burble.']
     }
+  },
+  {
+    id: 'v12', group: 'layout', view: 'v12', kind: 'crank', speed: 12,
+    eyebrow: 'V12',
+    name: ['V12', 'V12'],
+    tagline: ['两台直六，背靠背', 'Two inline-sixes back to back'],
+    facts: [[['布局', 'Layout'], ['V 形 60°', '60° V']], [['缸数', 'Cylinders'], ['12', '12']], [['点火间隔', 'Firing interval'], ['60°', '60°']], [['常见于', 'Found in'], ['法拉利、兰博基尼、劳斯莱斯', 'Ferrari, Lamborghini, Rolls-Royce']]],
+    card: ['每 60° 点一次火，顺滑得像电机。', 'A firing every 60°, as smooth as a motor.'],
+    lead: ['V12 就是两台直列六缸共用一根曲轴。每转 60° 就有一个缸点火，任何时候都有三个缸同时在推，所以它顺滑得像电机，高转时的声音像交响乐。', 'A V12 is two inline-sixes sharing one crankshaft. A cylinder fires every 60°, so three are always pushing at once: smooth as an electric motor, and at high revs it sings.'],
+    analogy: ['像一场接力赛，任何时候跑道上都有三个人同时在跑：速度永远不会断档。', 'Like a relay with three runners always on the track: the pace never drops.'],
+    steps: [
+      { title: ['两排各六个缸', 'Two banks of six'], text: ['每一排就是一台直列六缸，两排成 60° 夹角，共用一根曲轴。', 'Each bank is an inline-six; the two sit 60° apart on one crank.'], focus: ['front', 'banks'] },
+      { title: ['每 60° 点一次火', 'A firing every 60°'], text: ['十二个缸轮流点火：每转 60° 就有一个新的缸开始做功，左右两排交替。', 'Twelve cylinders take turns: a new power stroke every 60°, alternating banks.'], focus: ['timeline'] },
+      { title: ['三个缸同时在推', 'Three pushing at once'], text: ['每个缸的做功要持续 180°，所以任何时候都有三个缸一起在推。看推力曲线：几乎是一条平线。', 'Each power stroke lasts 180°, so three cylinders are always pushing together. The push graph is almost flat.'], focus: ['push'] },
+      { title: ['完美平衡', 'Perfect balance'], text: ['两台直六本来就各自平衡，合在一起还是平衡，完全不需要平衡轴。', 'Two balanced inline-sixes make a balanced whole: no balance shafts at all.'], focus: ['banks', 'rhythm'] },
+      { title: ['代价：又大又贵', 'The cost: big and expensive'], text: ['十二个缸、四根凸轮轴，又长又重又费油，所以只出现在顶级跑车和豪华车上，现在也大多加上了电机。', 'Twelve cylinders and four camshafts make it long, heavy and thirsty, so it lives only in supercars and limousines, now often with motors added.'], focus: ['front'] }
+    ],
+    parts: {
+      front: { name: ['正面剖视', 'Front section'], text: ['每排第一个缸，共用一个曲拐。', 'The front cylinder of each bank, sharing one crank pin.'] },
+      banks: { name: ['两排气缸', 'The two banks'], text: ['每排六个缸，亮起的是正在点火的缸。', 'Six per bank; the lit one is firing.'] },
+      timeline: { name: ['点火顺序', 'Firing order'], text: ['十二个缸，每 60° 一次。', 'Twelve cylinders, one every 60°.'] },
+      push: { name: ['推力曲线', 'Push graph'], text: ['任何时候都有三个缸在推，曲线几乎是平的。', 'Three always pushing, so the curve is almost flat.'] },
+      rhythm: { name: ['每排的节奏', 'Rhythm per bank'], text: ['单看一排，就是一台每 120° 点火的直六。', 'Each bank on its own is an inline-six firing every 120°.'] }
+    },
+    pros: [
+      ['几乎完美的平衡和顺滑。', 'Near-perfect balance and smoothness.'],
+      ['同时有三个缸在推，动力没有断档。', 'Three cylinders always pushing: no gaps in the pull.'],
+      ['高转时的声音，被很多人认为是最好听的发动机声。', 'At high revs, to many ears, the best engine sound there is.']
+    ],
+    cons: [
+      ['又长又重，车头要做得很长。', 'Long and heavy; the car needs a long nose.'],
+      ['零件多，造价和维护都很贵。', 'Lots of parts: expensive to build and maintain.'],
+      ['油耗高，越来越难通过排放法规，很多加上了电机。', 'Thirsty and hard to get through emissions rules, so many now add motors.']
+    ],
+    cars: [
+      { name: ['法拉利 12Cilindri', 'Ferrari 12Cilindri'], engine: ['6.5 V12', '6.5 V12'], tags: [tags.v12, tags.na], why: ['法拉利前置自吸 V12 的延续。', 'Ferrari\'s front-engined, naturally aspirated V12 lives on.'] },
+      { name: ['兰博基尼 Revuelto', 'Lamborghini Revuelto'], engine: ['6.5 V12', '6.5 V12'], tags: [tags.v12, tags.naHybrid], why: ['自吸 V12 加三个电机的插电混动。', 'A naturally aspirated V12 with three motors, as a plug-in hybrid.'] },
+      { name: ['劳斯莱斯 Phantom', 'Rolls-Royce Phantom'], engine: ['6.75 V12', '6.75 V12'], tags: [tags.v12, tags.twin], why: ['豪华车用它，看中的是安静和顺滑。', 'Luxury cars choose it for silence and smoothness.'] }
+    ],
+    myth: {
+      q: ['F1 以前也用过 V12 吗？', 'Did F1 ever use V12s?'],
+      a: ['用过。上世纪 90 年代法拉利等车队跑过自吸 V12，后来规则先后改成 V10、V8，现在是 1.6 升 V6 涡轮加电机。', 'Yes. In the 1990s Ferrari and others raced naturally aspirated V12s; the rules later moved to V10s, then V8s, and now 1.6-litre turbo V6s with motors.']
+    }
+  },
+  {
+    id: 'boxer', group: 'layout', view: 'boxer', kind: 'crank', speed: 16,
+    eyebrow: 'BOXER',
+    name: ['水平对置', 'Boxer'],
+    tagline: ['活塞面对面出拳', 'Pistons trading punches'],
+    facts: [[['布局', 'Layout'], ['水平对置（180°）', 'Horizontally opposed (180°)']], [['缸数', 'Cylinders'], ['4 或 6', '4 or 6']], [['特点', 'Character'], ['又扁又低，重心低', 'Flat and low']], [['常见于', 'Found in'], ['保时捷 911、斯巴鲁', 'Porsche 911, Subaru']]],
+    card: ['平躺的发动机，重心低。', 'An engine lying flat, with a low centre of gravity.'],
+    lead: ['把 V 字一直张开到 180°，两排气缸就平躺在曲轴两边。相对的两个活塞同时向外、同时向内，像拳击手对打，所以叫 Boxer。保时捷 911 和斯巴鲁一直在用。', 'Open a V all the way to 180° and the two banks lie flat either side of the crank. Opposite pistons punch out and pull back together, like boxers, hence the name. Porsche\'s 911 and Subaru have used it for decades.'],
+    analogy: ['像两个人隔着桌子同时伸手、同时收手：力气互相抵消，桌子一点不晃。', 'Like two people across a table reaching out and pulling back at the same moment: the forces cancel and the table stays still.'],
+    steps: [
+      { title: ['平躺的两排气缸', 'Two banks lying flat'], text: ['从正前方看，气缸横躺在曲轴两边，整台发动机又宽又扁。', 'From the front, the cylinders lie flat either side of the crank: wide and low.'], focus: ['front'] },
+      { title: ['同时向外，同时向内', 'Out together, in together'], text: ['相对的两个活塞总是同时往外推、同时往回收，像在拍手。它们的惯性力正好互相抵消。', 'Opposite pistons always move out together and back together, like clapping, so their forces cancel.'], focus: ['front', 'banks'] },
+      { title: ['重心很低', 'A low centre of gravity'], text: ['发动机扁，就能装得更低，整车重心跟着降低，过弯更稳。', 'A flat engine sits lower, bringing the whole car\'s centre of gravity down for steadier cornering.'], focus: ['cog'] },
+      { title: ['四缸还是六缸', 'Four or six'], text: ['用下面的开关切换：斯巴鲁 BRZ 和丰田 GR86 是对置四缸，保时捷 911 是对置六缸。六缸的推力曲线更平顺。', 'Use the switch below: the Subaru BRZ and Toyota GR86 have a flat-four, the Porsche 911 a flat-six. The six\'s push graph is smoother.'], focus: ['push', 'timeline'] },
+      { title: ['代价：很宽', 'The cost: width'], text: ['发动机很宽，占满了发动机舱两侧，火花塞之类的零件也更难够到。', 'It is wide, filling the sides of the engine bay, and parts like the spark plugs are harder to reach.'], focus: ['front'] }
+    ],
+    parts: {
+      front: { name: ['正面剖视', 'Front section'], text: ['相对的一对气缸，各有一个曲拐，方向正好相反。', 'One opposed pair, each on its own crank pin, pointing opposite ways.'] },
+      banks: { name: ['两排气缸', 'The two banks'], text: ['同一列上下两个格子就是一对相对的缸：看它们的活塞是不是一起动。', 'Each column is one opposed pair: watch their pistons move together.'] },
+      cog: { name: ['重心对比', 'Centre of gravity'], text: ['同样的发动机，躺平以后重心更低。', 'The same engine laid flat sits with a lower centre of gravity.'] },
+      timeline: { name: ['点火顺序', 'Firing order'], text: ['对置四缸每 180° 一次，对置六缸每 120° 一次。', 'A flat-four fires every 180°, a flat-six every 120°.'] },
+      push: { name: ['推力曲线', 'Push graph'], text: ['切换四缸和六缸，看曲线有什么变化。', 'Switch between four and six and watch the curve change.'] }
+    },
+    pros: [
+      ['相对活塞的惯性力互相抵消，运转平顺。', 'Opposed pistons cancel each other\'s forces, so it runs smoothly.'],
+      ['又扁又低，整车重心低，操控好。', 'Flat and low, giving the car a low centre of gravity and good handling.'],
+      ['很短，可以低低地装在车尾或车头。', 'Short, so it can sit low at either end of the car.']
+    ],
+    cons: [
+      ['很宽，占用发动机舱两侧的空间。', 'Wide, crowding the sides of the engine bay.'],
+      ['两个缸盖，零件和维修成本更高。', 'Two cylinder heads: more parts and costlier servicing.'],
+      ['对置四缸仍有一点摇摆，不如对置六缸完美。', 'A flat-four still rocks slightly; a flat-six is fully balanced.']
+    ],
+    cars: [
+      { name: ['保时捷 911 Carrera', 'Porsche 911 Carrera'], engine: ['3.0 水平对置六缸', '3.0 flat-six'], tags: [tags.flat6, tags.twin], why: ['911 从诞生起就是后置水平对置。', 'The 911 has had a rear-mounted boxer since day one.'] },
+      { name: ['保时捷 911 GT3', 'Porsche 911 GT3'], engine: ['4.0 水平对置六缸', '4.0 flat-six'], tags: [tags.flat6, tags.na], why: ['高转自吸的对置六缸。', 'A high-revving, naturally aspirated flat-six.'] },
+      { name: ['斯巴鲁 BRZ / 丰田 GR86', 'Subaru BRZ / Toyota GR86'], engine: ['FA24 2.4', 'FA24 2.4'], tags: [tags.flat4, tags.na], why: ['两家合作的后驱跑车，同一台对置四缸。', 'A jointly developed rear-drive coupé sharing one flat-four.'] },
+      { name: ['斯巴鲁 WRX', 'Subaru WRX'], engine: ['FA24 2.4T', 'FA24 2.4T'], tags: [tags.flat4, tags.turbo], why: ['拉力赛出身的涡轮对置四缸。', 'A rally-bred turbocharged flat-four.'] }
+    ],
+    myth: {
+      q: ['斯巴鲁那种"噗噗"声，是水平对置带来的吗？', 'Is the Subaru "burble" a boxer thing?'],
+      a: ['不完全是。那种不均匀的声音主要来自老款斯巴鲁的不等长排气歧管，而不是水平对置本身；换成等长排气以后，声音就变均匀了。', 'Not exactly. That uneven sound came mostly from older Subarus\' unequal-length exhaust headers, not the boxer layout itself; with equal-length headers it evens out.']
+    }
   }
 ];
 
-export const lessonById = id => LESSONS.find(l => l.id === id);
+export const entryById = id => ENTRIES.find(e => e.id === id);

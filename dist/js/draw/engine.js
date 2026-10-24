@@ -134,13 +134,15 @@ function bottomEnd(c, theta, ghost = 1) {
 
 // Draw a cylinder. Returns anchor points (stage coordinates) for labels and hit tests.
 export function drawCylinder(c, theta, o = {}) {
-  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, blur = 0, flowRate = 1, density = 1, intakeKind = 'air' } = o;
+  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, blur = 0, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true } = o;
   c.save(); c.translate(x, y); c.scale(s, s);
   const a = wrap(theta), crown = crownY(theta);
   part(c, 'cylinder', () => {
     for (const x0 of [-BORE - 20, BORE]) { c.beginPath(); c.rect(x0, DECK, 20, 166); fillCut(c); }
-    c.beginPath(); c.moveTo(-BORE - 20, DECK + 166); c.lineTo(-96, -42); c.arc(0, 8, 96, Math.PI * 1.15, Math.PI * 1.85, true);
-    c.lineTo(BORE + 20, DECK + 166); c.strokeStyle = C.ink; c.lineWidth = 1.4; c.stroke();
+    if (crankcase) {
+      c.beginPath(); c.moveTo(-BORE - 20, DECK + 166); c.lineTo(-96, -42); c.arc(0, 8, 96, Math.PI * 1.15, Math.PI * 1.85, true);
+      c.lineTo(BORE + 20, DECK + 166); c.strokeStyle = C.ink; c.lineWidth = 1.4; c.stroke();
+    }
   });
   part(c, 'chamber', () => {
     const burn = burnGlow(a);

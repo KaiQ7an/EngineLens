@@ -2,7 +2,7 @@
   "name": "enginelens",
   "version": "0.2.0",
   "private": true,
-  "description": "Bilingual, interactive blueprint lessons on how engines work.",
+  "description": "A bilingual, interactive blueprint atlas of how engines work.",
   "type": "module",
   "scripts": {
     "dev": "node server.mjs",

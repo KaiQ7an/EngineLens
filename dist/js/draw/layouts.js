@@ -1,19 +1,14 @@
 import { wrap, pistonDrop, sparkGlow } from '../sim/kinematics.js';
-import { ENGINES, localAngle, fireAngles, bankIntervals, throwAngle, inlineForces, cylinders } from '../sim/firing.js';
-import { C, MONO, part, text, rect, circle, stroke, dot, alpha } from './kit.js';
+import { ENGINES, localAngle, fireAngles, bankIntervals, throwAngle, inlineForces, cylinders, push, pushing, smoothness } from '../sim/firing.js';
+import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path } from './kit.js';
 import { drawCylinder, gasKind, R, L as ROD } from './engine.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
-// ── Inline-four ─────────────────────────────────────────────────────
-const I4 = { xs: [190, 393, 596, 799], y: 632, s: 0.72 };
-const STRIP = { x0: 150, x1: 850, y: 92 };
-const I4_SPOTS = {
-  cyl1: { dx: -64, dy: -40, r: 0 }, cyl2: { dx: -64, dy: -40, r: 0 }, cyl3: { dx: -64, dy: -40, r: 0 }, cyl4: { dx: -64, dy: -40, r: 0 },
-  crank: { dx: 0, dy: 70, r: 0 }, timeline: { dx: -40, dy: -34, r: 0 }, shake: { dx: 46, dy: -60, r: 0 }, balance: { dx: 0, dy: 40, r: 0 }
-};
-const BAL = [[292, 726], [698, 726]];
+const lit = local => sparkGlow(local) > 0 || (wrap(local) >= 360 && wrap(local) < 400);
+const fig = (c, n) => text(c, 'FIG. ' + n, 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+const bankName = b => (b === 'L' ? L('左排', 'Left bank') : L('右排', 'Right bank'));
 
 // The firing order on a 720° strip, with a playhead at the current crank angle.
 function strip(c, theta, engine, bank, { x0, x1, y }, label) {
@@ -22,78 +17,244 @@ function strip(c, theta, engine, bank, { x0, x1, y }, label) {
   for (let d = 0; d <= 720; d += 90) stroke(c, [[sx(d), y - 4], [sx(d), y + 4]], C.ink2, 1);
   if (label) text(c, label, x0 - 14, y + 5, { size: 13, color: C.ink2, align: 'right' });
   const mine = Object.entries(fires).filter(([cyl]) => !bank || cyl[0] === bank).sort((p, q) => p[1] - q[1]);
+  const inline = engine.banks.length === 1;
   mine.forEach(([cyl, d], i) => {
-    const since = wrap(a - d), lit = since < 60;
-    rect(c, sx(d) - 3, y - 26, 6, 26, 2, lit ? C.accent : C.ink);
-    text(c, bank ? cyl : cyl.slice(1), sx(d), y - 34, { size: 13, color: lit ? C.accent : C.ink, align: 'center', font: MONO, weight: 600 });
+    const on = wrap(a - d) < 60;
+    rect(c, sx(d) - 3, y - 26, 6, 26, 2, on ? C.accent : C.ink);
+    text(c, inline ? cyl.slice(1) : cyl, sx(d), y - 34, { size: mine.length > 8 ? 11 : 13, color: on ? C.accent : C.ink, align: 'center', font: MONO, weight: 600 });
     if (bank) { // the gap to the next firing in this bank
-      const next = mine[(i + 1) % mine.length][1] + (i === mine.length - 1 ? 720 : 0), gap = next - d, mid = sx(Math.min(720, (d + next) / 2));
-      if ((d + next) / 2 <= 720) text(c, gap + '°', mid, y + 20, { size: 12.5, font: MONO, color: gap === 180 ? C.ink2 : C.accent, align: 'center', weight: 600 });
+      const next = mine[(i + 1) % mine.length][1] + (i === mine.length - 1 ? 720 : 0), gap = next - d;
+      if ((d + next) / 2 <= 720) text(c, gap + '°', sx((d + next) / 2), y + 20, { size: 12.5, font: MONO, color: gap === 180 ? C.ink2 : C.accent, align: 'center', weight: 600 });
     }
   });
   stroke(c, [[sx(a), y - 40], [sx(a), y + 8]], C.accent, 2);
   return [sx(a), y - 12];
 }
 
-function shakeMeter(c, theta, balanced) {
-  const x = 940, y = 230, h = 120;
-  const f = balanced ? 0 : inlineForces(theta, ENGINES.inline4, R / ROD).secondary / (4 * R / ROD);
+// Total push on the crank through the cycle: with more cylinders it never drops out.
+function pushGraph(c, theta, engine, { x0, x1, y0, y1 }) {
+  const a = wrap(theta), sx = d => x0 + (x1 - x0) * d / 720;
+  let max = 0;
+  for (let d = 0; d < 720; d += 4) max = Math.max(max, push(d, engine));
+  const sy = v => y0 - (y0 - y1) * v / max;
+  const pts = [];
+  for (let d = 0; d <= 720; d += 4) pts.push([sx(d), sy(push(d, engine))]);
+  path(c, [[x0, y0], ...pts, [x1, y0]]); c.closePath(); c.fillStyle = alpha(C.ink, 0.08); c.fill();
+  stroke(c, pts, C.ink, 1.8);
+  stroke(c, [[x0, y0], [x1, y0]], C.ink2, 1);
+  const now = [sx(a), sy(push(a, engine))];
+  stroke(c, [[now[0], y0], now], C.accent, 1.5);
+  circle(c, now[0], now[1], 5, C.accent);
+  text(c, L('推曲轴的力（示意）', 'Push on the crank (model)'), x0, y1 - 12, { size: 13, color: C.ink2 });
+  const n = pushing(a, engine);
+  text(c, L(`同时在推：${n} 个缸`, `Pushing now: ${n} cylinder${n === 1 ? '' : 's'}`), x1, y1 - 12, { size: 14, weight: 700, color: n ? C.accent : C.ink2, align: 'right' });
+  text(c, L('最弱时 ≈ 最强时的 ', 'Weakest ≈ ') + Math.round(smoothness(engine, 4) * 100) + L('%', '% of strongest'), x1, y0 + 20, { size: 12.5, color: C.ink2, align: 'right' });
+  return [(x0 + x1) / 2, (y0 + y1) / 2];
+}
+
+function shakeMeter(c, theta, engine, balanced, [x, y]) {
+  const h = 110;
+  const f = balanced ? 0 : inlineForces(theta, engine, R / ROD).secondary / (4 * R / ROD);
+  const still = balanced || engine.firing.length >= 6;
   stroke(c, [[x, y - h / 2], [x, y + h / 2]], C.ink2, 1);
   for (const k of [-1, 0, 1]) stroke(c, [[x - 8, y + k * h / 2], [x + 8, y + k * h / 2]], C.ink2, 1);
-  const yy = y - f * h / 2;
-  rect(c, x - 18, yy - 6, 36, 12, 4, balanced ? C.ink2 : C.accent);
+  rect(c, x - 18, y - f * h / 2 - 6, 36, 12, 4, still ? C.ink2 : C.accent);
   text(c, L('抖动', 'Shake'), x, y - h / 2 - 16, { size: 14, weight: 700, align: 'center' });
-  text(c, balanced ? L('已抵消', 'cancelled') : L('每转两次', '2× per turn'), x, y + h / 2 + 22, { size: 12, color: C.ink2, align: 'center' });
+  text(c, balanced ? L('已抵消', 'cancelled') : still ? L('天生平衡', 'balanced') : L('每转两次', '2× per turn'), x, y + h / 2 + 22, { size: 12, color: C.ink2, align: 'center' });
   return [x, y];
 }
 
-export function drawInline4(c, st) {
+// ── Inline engines ──────────────────────────────────────────────────
+const INLINE = {
+  inline4: { y: 650, s: 0.7, figure: '3.1', order: '1 – 3 – 4 – 2', balance: true },
+  inline6: { y: 668, s: 0.58, figure: '3.2', order: '1 – 5 – 3 – 6 – 2 – 4', balance: false }
+};
+const BAL = [[292, 734], [698, 734]];
+
+function drawInline(c, st, key) {
   const { theta, time, parts } = st;
-  const e = ENGINES.inline4, a = wrap(theta);
+  const e = ENGINES[key], cfg = INLINE[key], a = wrap(theta), n = e.firing.length;
+  const step = 780 / (n - 1 + 0.6), x0 = 500 - step * (n - 1) / 2;
+  const top = cfg.y - 360 * cfg.s;
   const anchors = {};
   part(c, 'crank', () => {
-    stroke(c, [[120, I4.y], [880, I4.y]], C.ink, 9); stroke(c, [[120, I4.y], [880, I4.y]], C.paper, 5);
-    for (const x of [100, 300, 500, 700, 900]) rect(c, x - 12, I4.y - 16, 24, 32, 4, C.paper, C.ink, 1.4);
+    stroke(c, [[x0 - 80, cfg.y], [x0 + step * (n - 1) + 80, cfg.y]], C.ink, 9); stroke(c, [[x0 - 80, cfg.y], [x0 + step * (n - 1) + 80, cfg.y]], C.paper, 5);
+    for (let k = 0; k <= n; k++) rect(c, x0 + step * (k - 0.5) - 11, cfg.y - 15, 22, 30, 4, C.paper, C.ink, 1.4);
   });
-  anchors.crank = [500, I4.y];
+  anchors.crank = [500, cfg.y];
   cylinders(e).forEach((cyl, i) => {
-    const local = localAngle(a, e, cyl), id = 'cyl' + cyl.slice(1), x = I4.xs[i];
+    const local = localAngle(a, e, cyl), id = 'cyl' + cyl.slice(1), x = x0 + step * i;
     part(c, id, () => {
-      drawCylinder(c, local, { x, y: I4.y, s: I4.s, air: 14, time, flowRate: 0.9 });
-      const k = Math.floor(wrap(local) / 180), lit = sparkGlow(local) > 0 || (wrap(local) >= 360 && wrap(local) < 400);
-      text(c, cyl.slice(1), x, 300, { size: 32, weight: 900, align: 'center', color: lit ? C.accent : C.ink });
-      dot(c, x - 24, 332, 5, gasKind(local));
-      text(c, L(...STROKE_NAMES[k]), x - 12, 337, { size: 15, weight: 600, color: C.ink2 });
-      if (lit) text(c, L('点火！', 'FIRE!'), x + 26, 290, { size: 15, weight: 800, color: C.accent });
+      drawCylinder(c, local, { x, y: cfg.y, s: cfg.s, air: n > 4 ? 10 : 14, time, flowRate: 0.9 });
+      const on = lit(local);
+      text(c, cyl.slice(1), x, top - 44, { size: 30, weight: 900, align: 'center', color: on ? C.accent : C.ink });
+      dot(c, x - 22, top - 16, 5, gasKind(local));
+      text(c, L(...STROKE_NAMES[Math.floor(wrap(local) / 180)]), x - 10, top - 11, { size: 14, weight: 600, color: C.ink2 });
+      if (on) text(c, L('点火！', 'FIRE!'), x + 22, top - 56, { size: 14, weight: 800, color: C.accent });
     });
-    anchors[id] = [x, I4.y - 230];
+    anchors[id] = [x, top + 60];
   });
-  part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, STRIP, L('点火顺序', 'Firing order')); });
-  text(c, '1 – 3 – 4 – 2', STRIP.x1 + 20, STRIP.y + 5, { size: 15, font: MONO, weight: 600 });
-  part(c, 'shake', () => { anchors.shake = shakeMeter(c, a, st.balance); });
-  part(c, 'balance', () => {
-    if (!st.balance) { text(c, L('平衡轴：关', 'Balance shafts: off'), 500, 750, { size: 13, color: C.ink2, align: 'center' }); return; }
-    // Two shafts spin opposite ways at twice crank speed; their weights cancel the shake.
-    BAL.forEach(([x, y], i) => {
-      circle(c, x, y, 18, C.paper, C.ink, 1.4);
-      const ang = (i ? -2 : 2) * a * Math.PI / 180 + (i ? Math.PI : 0);
-      c.beginPath(); c.arc(x, y, 15, ang - 0.9, ang + 0.9); c.lineTo(x, y); c.closePath(); c.fillStyle = C.accent; c.fill();
-      circle(c, x, y, 3, C.ink);
+  part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 150, x1: 790, y: 82 }, L('点火顺序', 'Firing order')); });
+  text(c, cfg.order, 810, 87, { size: 14, font: MONO, weight: 600 });
+  part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 150, x1: 790, y0: 236, y1: 150 }); });
+  part(c, 'shake', () => { anchors.shake = shakeMeter(c, a, e, st.balance && cfg.balance, [930, 190]); });
+  if (cfg.balance) {
+    part(c, 'balance', () => {
+      if (!st.balance) { text(c, L('平衡轴：关', 'Balance shafts: off'), 500, 752, { size: 13, color: C.ink2, align: 'center' }); return; }
+      // Two shafts spin opposite ways at twice crank speed; their weights cancel the shake.
+      BAL.forEach(([x, y], i) => {
+        circle(c, x, y, 16, C.paper, C.ink, 1.4);
+        const ang = (i ? -2 : 2) * a * Math.PI / 180 + (i ? Math.PI : 0);
+        c.beginPath(); c.arc(x, y, 13, ang - 0.9, ang + 0.9); c.lineTo(x, y); c.closePath(); c.fillStyle = C.accent; c.fill();
+        circle(c, x, y, 3, C.ink);
+      });
+      text(c, L('平衡轴（2 倍转速，反向旋转）', 'Balance shafts (2× speed, counter-rotating)'), 495, 754, { size: 13, color: C.ink2, align: 'center' });
     });
-    text(c, L('平衡轴（2 倍转速，反向旋转）', 'Balance shafts (2× speed, counter-rotating)'), 495, 752, { size: 13, color: C.ink2, align: 'center' });
-  });
-  anchors.balance = [495, 726];
-  if (!st.preview) callouts(c, anchors, I4_SPOTS, parts);
-  text(c, 'FIG. 3.1', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+    anchors.balance = [495, 734];
+  }
+  if (!st.preview) callouts(c, anchors, inlineSpots(n), parts);
+  fig(c, cfg.figure);
 }
+const inlineSpots = n => ({
+  ...Object.fromEntries(Array.from({ length: n }, (_, i) => ['cyl' + (i + 1), { dx: -58, dy: -30, r: 0 }])),
+  crank: { dx: 0, dy: 64, r: 0 }, timeline: { dx: -40, dy: -32, r: 0 }, push: { dx: -60, dy: 40, r: 0 },
+  shake: { dx: 40, dy: -56, r: 0 }, balance: { dx: 0, dy: -36, r: 0 }
+});
 
+const balanceControls = st => `<div class="seg" role="group" aria-label="Balance shafts"><button type="button" data-balance="0" aria-pressed="${!st.balance}">${L('无平衡轴', 'No balance shafts')}</button><button type="button" data-balance="1" aria-pressed="${st.balance}">${L('加平衡轴', 'Balance shafts')}</button></div>`;
 export const inline4View = {
-  draw: drawInline4,
-  extraControls: st => `<div class="seg" role="group" aria-label="Balance shafts"><button type="button" data-balance="0" aria-pressed="${!st.balance}">${L('无平衡轴', 'No balance shafts')}</button><button type="button" data-balance="1" aria-pressed="${st.balance}">${L('加平衡轴', 'Balance shafts')}</button></div>`,
+  draw: (c, st) => drawInline(c, st, 'inline4'),
+  extraControls: balanceControls,
   bind(root, st) {
     root.querySelectorAll('[data-balance]').forEach(b => b.addEventListener('click', () => {
       st.balance = b.dataset.balance === '1';
       root.querySelectorAll('[data-balance]').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.balance === '1') === String(st.balance)));
+    }));
+  }
+};
+export const inline6View = { draw: (c, st) => drawInline(c, st, 'inline6') };
+
+// ── Bank grid: every cylinder of a V or boxer as a small cell ───────
+function bankGrid(c, e, a, x0, y0, gap = 52) {
+  const per = e.firing.length / 2;
+  ['L', 'R'].forEach((bank, row) => {
+    const y = y0 + row * 92;
+    text(c, bankName(bank), x0 - 12, y + 44, { size: 13, color: C.ink2, align: 'right' });
+    for (let p = 1; p <= per; p++) {
+      const cyl = bank + p, local = localAngle(a, e, cyl), x = x0 + (p - 1) * gap, w = gap - 12;
+      const drop = pistonDrop(local, R, ROD) / (2 * R), kind = gasKind(local), on = lit(local);
+      rect(c, x, y, w, 76, 4, null, C.ink, 1.4);
+      const crown = y + 6 + drop * 34;
+      if (kind === 'burning') rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, alpha(C.burn, on ? 0.8 : 0.35));
+      else if (kind === 'exhaust') rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, alpha(C.ink2, 0.3));
+      rect(c, x + 3, crown, w - 6, 18, 3, C.paper2, C.ink, 1.2);
+      if (on) circle(c, x + w / 2, y - 8, 4, C.accent);
+      text(c, cyl, x + w / 2, y + 90, { size: 11, font: MONO, color: C.ink2, align: 'center' });
+    }
+  });
+  return [x0 + (per * gap) / 2, y0 + 80];
+}
+
+// Front cross-section of a V or boxer: the front cylinder of each bank on one crank.
+// The right bank is drawn on the left and the crank turns clockwise, which matches
+// the firing convention in sim/firing.js (see throwAngle).
+function frontSection(c, e, a, time, { x, y, s }) {
+  const half = e.vAngle / 2;
+  const out = {};
+  for (const [bank, sign] of [['R', -1], ['L', 1]]) {
+    c.save(); c.translate(x, y); c.rotate(sign * half * Math.PI / 180);
+    const [hx, hy] = drawCylinder(c, localAngle(a, e, bank + '1'), { x: 0, y: 0, s, air: 12, time, flowRate: 0.9, crankcase: false }).chamber;
+    c.restore();
+    const ang = sign * half * Math.PI / 180, far = 360 * s + 26;
+    out[bank] = [x + Math.cos(ang) * hx - Math.sin(ang) * hy, y + Math.sin(ang) * hx + Math.cos(ang) * hy];
+    text(c, bankName(bank), x + Math.sin(ang) * far, y - Math.cos(ang) * far, { size: 14, weight: 700, align: 'center' });
+  }
+  circle(c, x, y, 104 * s, null, C.ink, 1.4);
+  // The V angle between the two cylinder axes, marked out in the gap between the banks.
+  if (e.vAngle < 180) {
+    const rr = 300 * s, from = -Math.PI / 2 - half * Math.PI / 180, to = -Math.PI / 2 + half * Math.PI / 180;
+    for (const q of [from, to]) stroke(c, [[x, y], [x + Math.cos(q) * (rr + 30), y + Math.sin(q) * (rr + 30)]], alpha(C.accent, 0.6), 1, [4, 5]);
+    c.beginPath(); c.arc(x, y, rr, from, to); c.strokeStyle = C.accent; c.lineWidth = 1.8; c.stroke();
+    text(c, e.vAngle + '°', x, y - rr - 10, { size: 17, weight: 700, color: C.accent, align: 'center', font: MONO });
+  }
+  return { ...out, front: [x, y] };
+}
+
+// ── V6 and V12 ──────────────────────────────────────────────────────
+const VCFG = {
+  v6: { figure: '3.3', gap: 64, front: { x: 270, y: 660, s: 0.8 } },
+  v12: { figure: '3.5', gap: 52, front: { x: 270, y: 660, s: 0.8 } }
+};
+const V_SPOTS = {
+  front: { dx: -150, dy: 120, r: 0 }, banks: { dx: 0, dy: -120, r: 0 },
+  timeline: { dx: -40, dy: -46, r: 0 }, push: { dx: -60, dy: 50, r: 0 }, rhythm: { dx: -40, dy: -30, r: 0 }
+};
+
+function drawV(c, st, key) {
+  const { theta, time, parts } = st;
+  const e = ENGINES[key], cfg = VCFG[key], a = wrap(theta), anchors = {};
+  part(c, 'front', () => { Object.assign(anchors, frontSection(c, e, a, time, cfg.front)); });
+  text(c, L('从发动机正前方看', 'Seen from the front'), 40, 52, { size: 13, color: C.ink2 });
+  part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 600, 64, cfg.gap); });
+  part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 560, x1: 960, y: 362 }, ''); });
+  text(c, L('点火顺序：每 ', 'Fires every ') + 720 / e.firing.length + L('° 一次，左右两排轮流', '°, banks taking turns'), 560, 400, { size: 13, color: C.ink2 });
+  part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 560, x1: 960, y0: 560, y1: 470 }); });
+  part(c, 'rhythm', () => {
+    const gaps = [...new Set(bankIntervals(e, 'L'))].join(' / ');
+    text(c, L('每一排自己的点火间隔：', 'Gaps within one bank: ') + gaps + '°', 560, 640, { size: 14, color: C.ink });
+  });
+  anchors.rhythm = [600, 636];
+  if (!st.preview) callouts(c, anchors, V_SPOTS, parts);
+  fig(c, cfg.figure);
+}
+export const v6View = { draw: (c, st) => drawV(c, st, 'v6') };
+export const v12View = { draw: (c, st) => drawV(c, st, 'v12') };
+
+// ── Boxer ───────────────────────────────────────────────────────────
+const BOXER_SPOTS = {
+  front: { dx: 0, dy: 150, r: 0 }, banks: { dx: 0, dy: -120, r: 0 }, cog: { dx: 0, dy: -110, r: 0 },
+  timeline: { dx: -40, dy: -46, r: 0 }, push: { dx: -60, dy: 50, r: 0 }
+};
+
+// Engine height decides how low it can sit, and so the car's centre of gravity.
+function cogCompare(c, x0, y0) {
+  const ground = y0 + 150;
+  stroke(c, [[x0, ground], [x0 + 400, ground]], C.ink2, 1.2);
+  const blocks = [
+    { x: x0 + 40, w: 90, h: 150, name: ['直列', 'Inline'] },
+    { x: x0 + 220, w: 160, h: 66, name: ['水平对置', 'Boxer'] }
+  ];
+  for (const b of blocks) {
+    c.beginPath(); c.roundRect(b.x, ground - b.h - 6, b.w, b.h, 8); c.fillStyle = alpha(C.ink, 0.08); c.fill(); c.strokeStyle = C.ink; c.lineWidth = 1.4; c.stroke();
+    const cy = ground - 6 - b.h / 2;
+    circle(c, b.x + b.w / 2, cy, 9, C.accent); circle(c, b.x + b.w / 2, cy, 3, C.paper);
+    stroke(c, [[x0, cy], [x0 + 400, cy]], alpha(C.accent, 0.5), 1, [4, 5]);
+    text(c, L(...b.name), b.x + b.w / 2, ground + 22, { size: 14, weight: 700, align: 'center' });
+  }
+  text(c, L('重心', 'Centre of gravity'), x0 + 400, ground - 6 - 66 / 2 - 10, { size: 12.5, color: C.accent, align: 'right' });
+  return [x0 + 200, ground - 70];
+}
+
+function drawBoxer(c, st) {
+  const { theta, time, parts } = st;
+  const key = st.boxer === 'flat4' ? 'flat4' : 'flat6', e = ENGINES[key], a = wrap(theta), anchors = {};
+  part(c, 'front', () => { Object.assign(anchors, frontSection(c, e, a, time, { x: 280, y: 280, s: 0.68 })); });
+  text(c, L('从发动机正前方看：相对的两个活塞同时向外、同时向内', 'From the front: opposite pistons move out and in together'), 40, 52, { size: 13, color: C.ink2 });
+  part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 640, 92, key === 'flat4' ? 72 : 60); });
+  part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 600, x1: 960, y: 392 }, ''); });
+  text(c, (key === 'flat4' ? L('对置四缸 1-3-2-4（斯巴鲁）', 'Flat-four 1-3-2-4 (Subaru)') : L('对置六缸 1-6-2-4-3-5（保时捷）', 'Flat-six 1-6-2-4-3-5 (Porsche)')), 600, 430, { size: 13, color: C.ink2 });
+  part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 600, x1: 960, y0: 620, y1: 520 }); });
+  part(c, 'cog', () => { anchors.cog = cogCompare(c, 60, 520); });
+  if (!st.preview) callouts(c, anchors, BOXER_SPOTS, parts);
+  fig(c, '3.6');
+}
+export const boxerView = {
+  draw: drawBoxer,
+  extraControls: st => `<div class="seg" role="group" aria-label="Boxer"><button type="button" data-boxer="flat6" aria-pressed="${st.boxer !== 'flat4'}">${L('对置六缸', 'Flat-six')}</button><button type="button" data-boxer="flat4" aria-pressed="${st.boxer === 'flat4'}">${L('对置四缸', 'Flat-four')}</button></div>`,
+  bind(root, st) {
+    root.querySelectorAll('[data-boxer]').forEach(b => b.addEventListener('click', () => {
+      st.boxer = b.dataset.boxer;
+      root.querySelectorAll('[data-boxer]').forEach(x => x.setAttribute('aria-pressed', x.dataset.boxer === st.boxer));
     }));
   }
 };
@@ -131,25 +292,6 @@ function endView(c, e, a, x, y) {
   return [x, y];
 }
 
-function banks(c, e, a, x0, y0) {
-  ['L', 'R'].forEach((bank, row) => {
-    const y = y0 + row * 92;
-    text(c, bank === 'L' ? L('左排', 'Left') : L('右排', 'Right'), x0 - 12, y + 44, { size: 13, color: C.ink2, align: 'right' });
-    for (let p = 1; p <= 4; p++) {
-      const cyl = bank + p, local = localAngle(a, e, cyl), x = x0 + (p - 1) * 52;
-      const drop = pistonDrop(local, R, ROD) / (2 * R), kind = gasKind(local), lit = wrap(local) >= 350 && wrap(local) < 395;
-      rect(c, x, y, 40, 76, 4, null, C.ink, 1.4);
-      const crown = y + 6 + drop * 34;
-      if (kind === 'burning') rect(c, x + 2, y + 2, 36, crown - y - 2, 2, alpha(C.burn, lit ? 0.8 : 0.35));
-      else if (kind === 'exhaust') rect(c, x + 2, y + 2, 36, crown - y - 2, 2, alpha(C.ink2, 0.3));
-      rect(c, x + 3, crown, 34, 18, 3, C.paper2, C.ink, 1.2);
-      if (lit) circle(c, x + 20, y - 8, 4, C.accent);
-      text(c, cyl, x + 20, y + 94 - 4, { size: 11, font: MONO, color: C.ink2, align: 'center' });
-    }
-  });
-  return [x0 + 90, y0 + 80];
-}
-
 export function drawV8(c, st) {
   const { theta, parts } = st;
   const a = wrap(theta), anchors = {};
@@ -159,7 +301,7 @@ export function drawV8(c, st) {
     text(c, L(...pnl.title), ox + 36, 58, { size: 24, weight: 900 });
     text(c, L(...pnl.sub), ox + 36, 84, { size: 14, color: C.ink2 });
     part(c, 'crank-' + pnl.id, () => { anchors['crank-' + pnl.id] = endView(c, e, a, ox + 130, 240); });
-    part(c, 'banks-' + pnl.id, () => { anchors['banks-' + pnl.id] = banks(c, e, a, ox + 270, 140); });
+    part(c, 'banks-' + pnl.id, () => { anchors['banks-' + pnl.id] = bankGrid(c, e, a, ox + 270, 140); });
     part(c, 'timeline-' + pnl.id, () => {
       strip(c, a, e, 'L', { x0: ox + 90, x1: ox + 460, y: 470 }, L('左排', 'Left'));
       strip(c, a, e, 'R', { x0: ox + 90, x1: ox + 460, y: 560 }, L('右排', 'Right'));
@@ -171,5 +313,5 @@ export function drawV8(c, st) {
     text(c, L(...pnl.car), ox + 36, 706, { size: 13, color: C.ink2 });
   }
   if (!st.preview) callouts(c, anchors, V8_SPOTS, parts);
-  text(c, 'FIG. 3.4', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  fig(c, '3.4');
 }
