@@ -1,7 +1,9 @@
 import { drawFourStroke } from './fourstroke.js';
 import { drawNA, drawTurbo, drawSuper, inductionView } from './induction.js';
 import { throttleView } from './experiment.js';
-import { inline4View, inline6View, v6View, v12View, boxerView, drawV8 } from './layouts.js';
+import { inline4View, inline6View, v6View, v12View, boxerView, w16View, drawV8 } from './layouts.js';
+import { twinView } from './twin.js';
+import { drawFuelCell } from './fuelcell.js';
 import { drawDiesel } from './diesel.js';
 import { drawRotary } from './rotary.js';
 import { drawMotor } from './motor.js';
@@ -26,5 +28,8 @@ export const VIEWS = {
   hybrid: powertrainView({ clutch: true }),
   erev: powertrainView({ clutch: false }),
   motor: { draw: drawMotor },
-  f1: f1View
+  f1: f1View,
+  w16: w16View,
+  twin: twinView,
+  fuelcell: { draw: drawFuelCell }
 };

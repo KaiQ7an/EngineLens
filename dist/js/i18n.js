@@ -19,7 +19,7 @@ export const ui = {
   model: ['示意动画 · 非工程比例 · 数值为示意模型', 'Schematic · not to scale · values are a teaching model'],
   rpm: ['发动机转速', 'Engine speed'], floor: ['地板油！', 'Floor it!'], tipIn: ['模拟一脚地板油', 'Floor the throttle'],
   altitude: ['海拔', 'Altitude'], sea: ['海平面', 'Sea level'], high: ['高原 3650 米', 'High altitude 3,650 m'],
-  filter: ['筛选', 'Filter'], all: ['全部', 'All'], comingSoon: ['即将收录', 'Coming soon'],
+  comingSoon: ['即将收录', 'Coming soon'],
   footer: ['把发动机拆开、放慢、上色给你看。', 'Engines, opened up, slowed down and colour-coded.']
 };
 export const t = (key, vars = {}) => bi(ui[key]).replace(/\{(\w+)\}/g, (_, k) => vars[k]);

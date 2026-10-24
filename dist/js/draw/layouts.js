@@ -134,25 +134,26 @@ export const inline4View = {
 };
 export const inline6View = { draw: (c, st) => drawInline(c, st, 'inline6') };
 
-// ── Bank grid: every cylinder of a V or boxer as a small cell ───────
-function bankGrid(c, e, a, x0, y0, gap = 52) {
-  const per = e.firing.length / 2;
-  ['L', 'R'].forEach((bank, row) => {
-    const y = y0 + row * 92;
-    text(c, bankName(bank), x0 - 12, y + 44, { size: 13, color: C.ink2, align: 'right' });
+// ── Bank grid: every cylinder as a small cell, one row per bank ─────
+const rowName = b => (b === 'L' || b === 'R' ? bankName(b) : L(b + ' 排', 'Row ' + b));
+function bankGrid(c, e, a, x0, y0, gap = 52, rowGap = 92, cellH = 76) {
+  const per = e.firing.length / e.banks.length;
+  e.banks.forEach((bank, row) => {
+    const y = y0 + row * rowGap;
+    text(c, rowName(bank), x0 - 12, y + cellH / 2 + 6, { size: 13, color: C.ink2, align: 'right' });
     for (let p = 1; p <= per; p++) {
       const cyl = bank + p, local = localAngle(a, e, cyl), x = x0 + (p - 1) * gap, w = gap - 12;
       const drop = pistonDrop(local, R, ROD) / (2 * R), kind = gasKind(local), on = lit(local);
-      rect(c, x, y, w, 76, 4, null, C.ink, 1.4);
-      const crown = y + 6 + drop * 34;
+      rect(c, x, y, w, cellH, 4, null, C.ink, 1.4);
+      const crown = y + 6 + drop * (cellH - 42);
       if (kind === 'burning') rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, alpha(C.burn, on ? 0.8 : 0.35));
       else if (kind === 'exhaust') rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, alpha(C.ink2, 0.3));
       rect(c, x + 3, crown, w - 6, 18, 3, C.paper2, C.ink, 1.2);
       if (on) circle(c, x + w / 2, y - 8, 4, C.accent);
-      text(c, cyl, x + w / 2, y + 90, { size: 11, font: MONO, color: C.ink2, align: 'center' });
+      if (rowGap > 80) text(c, cyl, x + w / 2, y + cellH + 14, { size: 11, font: MONO, color: C.ink2, align: 'center' });
     }
   });
-  return [x0 + (per * gap) / 2, y0 + 80];
+  return [x0 + (per * gap) / 2, y0 + (e.banks.length * rowGap) / 2];
 }
 
 // Front cross-section of a V or boxer: the front cylinder of each bank on one crank.
@@ -258,6 +259,57 @@ export const boxerView = {
     }));
   }
 };
+
+// ── W16 ─────────────────────────────────────────────────────────────
+const W16_SPOTS = {
+  front: { dx: -170, dy: 70, r: 0 }, banks: { dx: 0, dy: -150, r: 0 }, timeline: { dx: -40, dy: -46, r: 0 },
+  push: { dx: -60, dy: 50, r: 0 }, turbos: { dx: 0, dy: 70, r: 0 }
+};
+
+// Four rows fanned out on one crank, seen from the front: two narrow VR8 blocks in a V.
+function wFront(c, e, a, time, { x, y, s }) {
+  // Outer rows first, so the inner rows of each block sit on top.
+  const order = [0, 3, 1, 2];
+  for (const k of order) {
+    c.save(); c.translate(x, y); c.rotate(e.angles[k] * Math.PI / 180);
+    drawCylinder(c, localAngle(a, e, e.banks[k] + '1'), { x: 0, y: 0, s, air: 8, time, flowRate: 0.9, crankcase: false });
+    c.restore();
+  }
+  circle(c, x, y, 104 * s, null, C.ink, 1.4);
+  for (const [sign, zh, en] of [[-1, '左 VR8', 'Left VR8'], [1, '右 VR8', 'Right VR8']]) {
+    const q = sign * 45 * Math.PI / 180, far = 360 * s + 34;
+    text(c, L(zh, en), x + Math.sin(q) * far, y - Math.cos(q) * far, { size: 14, weight: 700, align: 'center' });
+  }
+  text(c, L('每个 VR8 里两排只差 15°', 'Two rows 15° apart in each VR8'), x, y + 92, { size: 13, color: C.ink2, align: 'center' });
+  return [x, y - 120];
+}
+
+function turbos(c, time) {
+  text(c, L('四个涡轮', 'Four turbos'), 40, 70, { size: 15, weight: 800 });
+  for (let i = 0; i < 4; i++) {
+    const x = 70 + i * 92, y = 130;
+    circle(c, x, y, 34, null, C.ink, 1.4);
+    c.save(); c.translate(x, y); c.rotate(time * (i < 2 ? 9 : 5) * (i % 2 ? -1 : 1));
+    for (let k = 0; k < 8; k++) { c.rotate(Math.PI / 4); stroke(c, [[5, 0], [28, -5]], C.ink, 1.4); }
+    c.restore();
+  }
+  text(c, L('低转速先用两个，转速上来后四个一起', 'Two at low revs, all four as the revs rise'), 40, 196, { size: 13, color: C.ink2 });
+  return [208, 130];
+}
+
+function drawW16(c, st) {
+  const { theta, time, parts } = st;
+  const e = ENGINES.w16, a = wrap(theta), anchors = {};
+  part(c, 'front', () => { anchors.front = wFront(c, e, a, time, { x: 270, y: 640, s: 0.52 }); });
+  part(c, 'turbos', () => { anchors.turbos = turbos(c, time); });
+  part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 640, 54, 56, 72, 56); });
+  part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 560, x1: 970, y: 410 }, ''); });
+  text(c, L('16 个缸，每 45° 点一次火（示例顺序）', 'Sixteen cylinders, one firing every 45° (example order)'), 560, 448, { size: 13, color: C.ink2 });
+  part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 560, x1: 970, y0: 640, y1: 540 }); });
+  if (!st.preview) callouts(c, anchors, W16_SPOTS, parts);
+  fig(c, '3.7');
+}
+export const w16View = { draw: drawW16 };
 
 // ── V8: cross-plane vs flat-plane ───────────────────────────────────
 const PANELS = [

@@ -3,19 +3,16 @@
 // effect the narration walks through on a timer. `focus` names the parts it highlights.
 
 export const GROUPS = [
-  { id: 'basics', name: ['基本原理', 'The basics'] },
-  { id: 'induction', name: ['进气方式', 'How it breathes'] },
-  { id: 'layout', name: ['气缸布局', 'Cylinder layouts'] },
-  { id: 'special', name: ['特殊结构', 'Different designs'] },
-  { id: 'electric', name: ['电动化', 'Going electric'] },
-  { id: 'racing', name: ['赛道', 'On track'] }
+  { id: 'basics', name: ['基本原理', 'The basics'], blurb: ['先看懂一个缸是怎么转起来的。', 'Start with how one cylinder works.'] },
+  { id: 'induction', name: ['进气方式', 'How it breathes'], blurb: ['空气怎么进到缸里：自己吸，还是用涡轮、机械增压往里压。', 'How air gets in: drawn in, or forced in by a turbo or supercharger.'] },
+  { id: 'layout', name: ['气缸布局', 'Cylinder layouts'], blurb: ['缸怎么排：直列、V 形、水平对置……决定了体积、平顺和声音。', 'How the cylinders are arranged, which sets size, smoothness and sound.'] },
+  { id: 'special', name: ['特殊结构', 'Different designs'], blurb: ['和普通汽油机不一样的点火方式和结构。', 'Ways of lighting and turning that break from the usual petrol engine.'] },
+  { id: 'electric', name: ['电动化', 'Going electric'], blurb: ['电在动力里占多大份量：从混动到纯电。', 'How much of the work electricity does, from hybrids to battery EVs.'] },
+  { id: 'racing', name: ['赛道', 'On track'], blurb: ['顶级赛车用的动力。', 'What powers the top of motorsport.'] }
 ];
 
-// Engines not in the gallery yet.
-export const COMING = [
-  ['W16 / V16', 'W16 / V16'], ['双增压与电动增压', 'Twincharging & e-boost'],
-  ['氢燃料电池', 'Fuel cell']
-];
+// Engines not in the atlas yet.
+export const COMING = [];
 
 const tags = {
   inline: ['直列', 'Inline'], i3: ['直列三缸', 'Inline-3'], i4: ['直列四缸', 'Inline-4'], v6: ['V6', 'V6'], v8: ['V8', 'V8'], v8cross: ['V8 十字曲轴', 'Cross-plane V8'], v8flat: ['V8 平面曲轴', 'Flat-plane V8'], i6: ['直列六缸', 'Inline-6'], v12: ['V12', 'V12'], flat4: ['水平对置四缸', 'Flat-4'],
@@ -23,7 +20,10 @@ const tags = {
   na: ['自然吸气', 'Naturally aspirated'], turbo: ['涡轮', 'Turbo'], twin: ['双涡轮', 'Twin-turbo'], sc: ['机械增压', 'Supercharged'],
   turboHybrid: ['涡轮 + 电机', 'Turbo + motor'], twinHybrid: ['双涡轮 + 电机', 'Twin-turbo + motor'], naHybrid: ['自然吸气 + 电机', 'NA + motors'],
   diesel: ['柴油', 'Diesel'], rotor1: ['单转子', 'Single rotor'], rotor2: ['双转子', 'Twin rotor'], rotor4: ['四转子', 'Four rotor'], rangeExt: ['只发电（增程）', 'Generator only'],
-  hybrid: ['混动', 'Hybrid'], phev: ['插电混动', 'Plug-in hybrid'], erev: ['增程', 'Range extender'], ev: ['纯电', 'Battery electric']
+  hybrid: ['混动', 'Hybrid'], phev: ['插电混动', 'Plug-in hybrid'], erev: ['增程', 'Range extender'], ev: ['纯电', 'Battery electric'],
+  w16: ['W16', 'W16'], v16: ['V16', 'V16'], w12: ['W12', 'W12'], quad: ['四涡轮', 'Quad-turbo'],
+  twincharged: ['双增压', 'Twincharged'], eboost: ['电动压气机', 'Electric compressor'], eturbo: ['电动涡轮', 'Electric turbo'],
+  fcev: ['氢燃料电池', 'Fuel cell'], h2ice: ['烧氢内燃机', 'Hydrogen combustion']
 };
 
 export const ENTRIES = [
@@ -255,6 +255,51 @@ export const ENTRIES = [
     }
   },
   {
+    id: 'twincharge', group: 'induction', view: 'twin', kind: 'flow',
+    eyebrow: 'TWINCHARGING & E-BOOST',
+    name: ['双增压与电动增压', 'Twincharging & e-boost'],
+    tagline: ['机械增压补低转，涡轮管高转', 'Supercharger down low, turbo up top'],
+    facts: [[['组合', 'Combines'], ['机械增压 + 涡轮，或电机带动压气机', 'Supercharger + turbo, or a motor-driven compressor']], [['目的', 'Aim'], ['消除迟滞，全转速都有劲', 'No lag, boost at every rpm']], [['常见于', 'Found in'], ['大众 1.4 TSI、沃尔沃 T6、AMG SL 43', 'VW 1.4 TSI, Volvo T6, AMG SL 43']]],
+    card: ['两种增压接力，或者用电机消除迟滞。', 'Two boosters in relay, or a motor that kills lag.'],
+    lead: ['涡轮怕低转速，机械增压怕高转速，那就两个一起上：低转速时机械增压先顶上，转速上来后交给涡轮。另一种思路更直接：用电机把压气机或涡轮先转起来，叫电动增压。', 'A turbo struggles at low revs, a supercharger at high revs, so use both: the supercharger covers the bottom and the turbo takes over as the revs rise. The more direct idea is to spin the compressor or turbo with an electric motor: electric boost.'],
+    analogy: ['像接力赛：起跑交给爆发力强的选手，后程交给耐力好的选手。', 'Like a relay: the explosive starter runs the first leg, the endurance runner the rest.'],
+    steps: [
+      { rpm: 1500, title: ['低转速：机械增压先顶上', 'Low revs: the supercharger steps in'], text: ['转速低时废气不够，涡轮转不起来；这时离合器把机械增压接上，马上就有增压。', 'At low revs there is too little exhaust to spin the turbo, so a clutch engages the supercharger for instant boost.'], focus: ['sc', 'clutch'] },
+      { rpm: 2800, title: ['中转速：两个一起', 'Mid revs: both together'], text: ['涡轮慢慢转起来了，两个增压器串联：机械增压先压一次，涡轮再压一次。', 'The turbo is spinning up and the two work in series: the supercharger squeezes first, then the turbo.'], focus: ['sc', 'turbo'] },
+      { rpm: 5000, title: ['高转速：交给涡轮', 'High revs: over to the turbo'], text: ['转速高了，一个涡轮就够：离合器松开、旁通阀打开，机械增压歇着，不再吃发动机的力气。', 'At high revs the turbo is enough on its own: the clutch lets go, a bypass valve opens, and the supercharger rests instead of eating power.'], focus: ['turbo', 'bypass'] },
+      { rpm: 3000, title: ['结果：全转速都有劲', 'The result: boost everywhere'], text: ['看左下的曲线：两个合在一起，从低转到高转的增压都很饱满，没有明显的空档。', 'See the curve bottom left: together they give strong boost from low to high revs, with no obvious gap.'], focus: ['chart'] },
+      { rpm: 2000, title: ['另一种办法：电动增压', 'The other way: electric boost'], text: ['用电机直接把压气机（或涡轮轴）先转起来，不用等废气。点"模拟一脚地板油"，看右下谁先到位。', 'Spin the compressor (or the turbo shaft) with an electric motor, so there is no waiting for exhaust. Press "Floor the throttle" and watch which arrives first, bottom right.'], focus: ['eboost'] }
+    ],
+    parts: {
+      sc: { name: ['机械增压器', 'Supercharger'], text: ['由曲轴经皮带驱动，低转速就能马上增压。', 'Belt-driven from the crank, it boosts instantly at low revs.'] },
+      clutch: { name: ['电磁离合器', 'Clutch'], text: ['需要时把机械增压接上，不需要时松开，免得白白吃动力。', 'Engages the supercharger when needed and lets go when not, so it does not waste power.'] },
+      bypass: { name: ['旁通阀', 'Bypass valve'], text: ['机械增压歇着的时候打开，让空气绕过它直接去涡轮。', 'Opens when the supercharger rests, letting air go around it to the turbo.'] },
+      turbo: { name: ['涡轮增压器', 'Turbocharger'], text: ['废气驱动，转速越高越有劲。', 'Exhaust-driven, stronger as the revs rise.'] },
+      chart: { name: ['增压曲线', 'Boost curves'], text: ['虚线是单独用一种增压，黄线是两个合起来。', 'The dashed lines are each booster alone; the yellow line is both together.'] },
+      eboost: { name: ['电动增压', 'Electric boost'], text: ['电机直接带动压气机或涡轮轴，几乎没有迟滞。', 'A motor drives the compressor or turbo shaft directly, with almost no lag.'] }
+    },
+    pros: [
+      ['从低转到高转都有增压，几乎没有迟滞。', 'Boost from low to high revs with almost no lag.'],
+      ['小排量也能兼顾低转扭矩和高转功率。', 'Even a small engine gets both low-rev torque and top-end power.'],
+      ['电动增压还能和 48V 轻混系统配合。', 'Electric boost pairs well with 48 V mild-hybrid systems.']
+    ],
+    cons: [
+      ['两套增压系统，结构复杂、成本高。', 'Two boost systems: complex and costly.'],
+      ['机械增压和涡轮的交接需要精细控制。', 'The handover between supercharger and turbo needs careful control.'],
+      ['电动增压需要更强的电气系统。', 'Electric boost needs a stronger electrical system.']
+    ],
+    cars: [
+      { name: ['大众高尔夫 1.4 TSI 双增压', 'VW Golf 1.4 TSI Twincharger'], engine: ['1.4 TSI', '1.4 TSI'], tags: [tags.i4, tags.twincharged], why: ['把双增压带进普通家用车。', 'Brought twincharging to an everyday car.'] },
+      { name: ['沃尔沃 XC90 T6', 'Volvo XC90 T6'], engine: ['2.0 Drive-E', '2.0 Drive-E'], tags: [tags.i4, tags.twincharged], why: ['2.0 升四缸，同时用机械增压和涡轮。', 'A 2.0-litre four with both a supercharger and a turbo.'] },
+      { name: ['奥迪 SQ7 TDI', 'Audi SQ7 TDI'], engine: ['4.0 V8 TDI', '4.0 V8 TDI'], tags: [tags.v8, tags.eboost], why: ['量产车上最早用电动压气机的车型之一。', 'One of the first production cars with an electric compressor.'] },
+      { name: ['梅赛德斯-AMG SL 43', 'Mercedes-AMG SL 43'], engine: ['2.0 四缸', '2.0 inline-four'], tags: [tags.i4, tags.eturbo], why: ['电动废气涡轮，技术来自 F1。', 'An electric exhaust gas turbocharger, with technology from F1.'] }
+    ],
+    myth: {
+      q: ['电动涡轮和 F1 的 MGU-H 有关系吗？', 'Is an e-turbo related to F1\'s MGU-H?'],
+      a: ['有。AMG 的电动废气涡轮就是从 F1 技术来的：涡轮轴上装一个电机，起步时用它把涡轮转起来消除迟滞。F1 在 2014–2025 年用的 MGU-H 也是这个思路，还能反过来发电。', 'Yes. AMG\'s electric exhaust gas turbocharger comes from F1: a motor on the turbo shaft spins it up to kill lag. F1\'s MGU-H (2014–2025) worked the same way, and could generate too.']
+    }
+  },
+  {
     id: 'inline-4', group: 'layout', view: 'inline4', kind: 'crank', speed: 18,
     eyebrow: 'INLINE-FOUR',
     name: ['直列四缸', 'Inline-four'],
@@ -481,6 +526,50 @@ export const ENTRIES = [
     myth: {
       q: ['F1 以前也用过 V12 吗？', 'Did F1 ever use V12s?'],
       a: ['用过。上世纪 90 年代法拉利等车队跑过自吸 V12，后来规则先后改成 V10、V8，现在是 1.6 升 V6 涡轮加电机。', 'Yes. In the 1990s Ferrari and others raced naturally aspirated V12s; the rules later moved to V10s, then V8s, and now 1.6-litre turbo V6s with motors.']
+    }
+  },
+  {
+    id: 'w16', group: 'layout', view: 'w16', kind: 'crank', speed: 12,
+    eyebrow: 'W16',
+    name: ['W16', 'W16'],
+    tagline: ['两台窄角 V8，拼成一个 W', 'Two narrow V8s folded into a W'],
+    facts: [[['布局', 'Layout'], ['W 形：两个窄角 VR8 摆成 V 字', 'W: two narrow-angle VR8s in a V']], [['缸数', 'Cylinders'], ['16', '16']], [['点火间隔', 'Firing interval'], ['45°', '45°']], [['常见于', 'Found in'], ['布加迪 Veyron、Chiron', 'Bugatti Veyron, Chiron']]],
+    card: ['16 个缸塞进 V8 的长度。', 'Sixteen cylinders in a V8\'s length.'],
+    lead: ['16 个缸排成一排会长得离谱，于是布加迪把它们分成 4 排：每两排挤在一起组成一个夹角很小的"VR8"，两个 VR8 再摆成 V 字，从正面看就像字母 W。整台发动机只有 V8 那么长。', 'Sixteen cylinders in a row would be absurdly long, so Bugatti split them into four rows: each pair of rows forms a narrow-angle "VR8", and the two VR8s sit in a V, so from the front it looks like a W. The whole engine is only as long as a V8.'],
+    analogy: ['像把一摞书错开着斜靠在一起：同样多的书，占的书架短得多。', 'Like stacking books staggered and leaning together: the same number of books on a much shorter shelf.'],
+    steps: [
+      { title: ['四排气缸', 'Four rows of cylinders'], text: ['从正前方看，16 个缸分成 4 排：每两排只差 15°，组成一个 VR8；两个 VR8 之间再成 90°。', 'From the front, sixteen cylinders sit in four rows: each pair of rows is only 15° apart, forming a VR8, and the two VR8s are 90° apart.'], focus: ['front'] },
+      { title: ['为什么要这样排', 'Why pack it like that'], text: ['16 个缸排成直列会长得离谱，排成 V16 也很长；W 布局把它压到和一台 V8 差不多长。', 'Sixteen in a row would be absurdly long, and even a V16 is long; the W squeezes it to roughly a V8\'s length.'], focus: ['front', 'banks'] },
+      { title: ['每 45° 点一次火', 'A firing every 45°'], text: ['16 个缸轮流点火，每转 45° 就有一个缸开始做功，任何时候都有 4 个缸在推，推力曲线几乎是一条平线。', 'Sixteen cylinders take turns: a new power stroke every 45°, with four always pushing, so the push graph is almost flat.'], focus: ['timeline', 'push'] },
+      { title: ['四个涡轮', 'Four turbos'], text: ['布加迪的 W16 配了四个涡轮：低转速先用两个，转速上来后四个一起工作。', 'Bugatti\'s W16 has four turbos: two at low revs, all four as the revs rise.'], focus: ['turbos'] },
+      { title: ['代价：极其复杂', 'The cost: extreme complexity'], text: ['16 个缸、4 个涡轮，散热和结构都极其复杂，所以又重又贵，只出现在顶级超跑上。布加迪的下一代 Tourbillon 已经换成了自然吸气 V16 加电机。', 'Sixteen cylinders and four turbos make cooling and structure extremely complex: heavy, costly and found only in hypercars. Bugatti\'s next car, the Tourbillon, switches to a naturally aspirated V16 with motors.'], focus: ['front', 'turbos'] }
+    ],
+    parts: {
+      front: { name: ['正面剖视', 'Front section'], text: ['每排第一个缸，四个围着同一根曲轴。', 'The front cylinder of each row, all four around one crankshaft.'] },
+      banks: { name: ['四排气缸', 'Four rows'], text: ['A、B 是左边的 VR8，C、D 是右边的；亮起的是正在点火的缸。', 'A and B make the left VR8, C and D the right; the lit one is firing.'] },
+      timeline: { name: ['点火顺序', 'Firing order'], text: ['16 个缸，每 45° 一次。这里画的是一种均匀点火的示例顺序。', 'Sixteen cylinders, one every 45°. The order drawn is an even-firing example.'] },
+      push: { name: ['推力曲线', 'Push graph'], text: ['任何时候都有 4 个缸在推。和 V12、直列四缸那几页比一比。', 'Four always pushing; compare with the V12 and the inline-four.'] },
+      turbos: { name: ['四个涡轮', 'Four turbos'], text: ['低转速先用两个，转速上来后四个一起，兼顾响应和最大功率。', 'Two at low revs, all four higher up, for both response and top-end power.'] }
+    },
+    pros: [
+      ['16 个缸的大排量和平顺，长度却和 V8 差不多。', 'The displacement and smoothness of sixteen cylinders in roughly a V8\'s length.'],
+      ['任何时候都有 4 个缸在推，动力极其连贯。', 'Four cylinders always pushing: extremely seamless power.'],
+      ['配上四个涡轮，能做出量产车里罕见的超高功率。', 'With four turbos, power rarely seen in a production car.']
+    ],
+    cons: [
+      ['结构极其复杂，造价和维护都极贵。', 'Hugely complex, and very expensive to build and maintain.'],
+      ['发热量巨大，需要大量散热器。', 'Huge heat output that needs many radiators.'],
+      ['又宽又重，只适合顶级超跑。', 'Wide and heavy: only for hypercars.']
+    ],
+    cars: [
+      { name: ['布加迪 Veyron', 'Bugatti Veyron'], engine: ['8.0 W16', '8.0 W16'], tags: [tags.w16, tags.quad], why: ['第一台用 W16 的量产车。', 'The first production car with a W16.'] },
+      { name: ['布加迪 Chiron', 'Bugatti Chiron'], engine: ['8.0 W16', '8.0 W16'], tags: [tags.w16, tags.quad], why: ['W16 的巅峰之作。', 'The W16 at its peak.'] },
+      { name: ['布加迪 Tourbillon', 'Bugatti Tourbillon'], engine: ['8.3 V16', '8.3 V16'], tags: [tags.v16, tags.naHybrid], why: ['布加迪的下一代：改用自然吸气 V16 加三个电机。', 'Bugatti\'s next chapter: a naturally aspirated V16 with three motors.'] },
+      { name: ['宾利 Continental GT（W12）', 'Bentley Continental GT (W12)'], engine: ['6.0 W12', '6.0 W12'], tags: [tags.w12, tags.twin], why: ['同样是 W 布局，12 个缸，2024 年停产。', 'The same W idea with twelve cylinders; production ended in 2024.'] }
+    ],
+    myth: {
+      q: ['W16 就是两台 V8 拼在一起吗？', 'Is a W16 just two V8s bolted together?'],
+      a: ['差不多：它是两个窄角的 VR8 摆成 V 字。但它们共用一个曲轴箱和一根曲轴，并不是把两台发动机简单连起来。', 'Close: it is two narrow-angle VR8s set in a V. But they share one crankcase and one crankshaft; it is not two engines coupled together.']
     }
   },
   {
@@ -756,6 +845,50 @@ export const ENTRIES = [
     myth: {
       q: ['电动车为什么起步这么快？', 'Why do EVs launch so hard?'],
       a: ['因为电机从 0 转开始就能输出最大扭矩，不用像发动机那样先转起来，也不用等换挡。', 'Because a motor delivers full torque from zero rpm: no revving up as an engine must, and no gearchanges to wait for.']
+    }
+  },
+  {
+    id: 'fuel-cell', group: 'electric', view: 'fuelcell', kind: 'scene',
+    eyebrow: 'HYDROGEN FUEL CELL',
+    name: ['氢燃料电池', 'Hydrogen fuel cell'],
+    tagline: ['氢和氧发电，只排出水', 'Hydrogen and oxygen make electricity; only water comes out'],
+    facts: [[['燃料', 'Fuel'], ['高压氢气', 'High-pressure hydrogen']], [['怎么发电', 'How it works'], ['氢和氧在电堆里反应，不燃烧', 'Hydrogen and oxygen react in a stack, without burning']], [['排放', 'Emissions'], ['只有水', 'Only water']], [['常见于', 'Found in'], ['丰田 Mirai、现代 Nexo', 'Toyota Mirai, Hyundai Nexo']]],
+    card: ['车上自己发电的电动车，只排出水。', 'An EV that makes its own electricity, emitting only water.'],
+    lead: ['燃料电池车其实是一台电动车，只是电不是从插头来，而是车上自己"发"的：氢气和空气里的氧气在电堆里反应，直接产生电，副产品只有水。加满一次氢只要几分钟。', 'A fuel-cell car is really an electric car whose electricity is made on board rather than from a plug: hydrogen and oxygen from the air react in the stack and produce electricity directly, with only water left over. Refuelling takes minutes.'],
+    analogy: ['像一块不用充电的电池：只要一直加氢，它就一直有电。', 'Like a battery that never needs charging: keep feeding it hydrogen and it keeps making electricity.'],
+    steps: [
+      { title: ['氢气进左边', 'Hydrogen in on the left'], text: ['氢气从高压储罐送进电堆的左边（负极）。', 'Hydrogen flows from the high-pressure tank into the left side of the stack (the anode).'], focus: ['tank', 'anode'] },
+      { title: ['拆成质子和电子', 'Split into protons and electrons'], text: ['催化剂把每个氢分子拆开，变成两个质子（H⁺）和两个电子（e⁻）。', 'A catalyst splits each hydrogen molecule into two protons (H⁺) and two electrons (e⁻).'], focus: ['anode', 'membrane'] },
+      { title: ['质子穿膜，电子绕路', 'Protons cross, electrons go round'], text: ['中间的膜只让质子穿过去；电子过不去，只能绕外面的电路走。这股电子流就是电流，带动电机。', 'The membrane in the middle lets only protons through; electrons have to take the outside circuit, and that flow of electrons is the current that drives the motor.'], focus: ['membrane', 'circuit'] },
+      { title: ['和氧结合成水', 'Combining with oxygen into water'], text: ['在右边（正极），质子、电子和空气里的氧气汇合，变成水，从排气口滴出来。', 'On the right (the cathode), protons, electrons and oxygen from the air meet and become water, which drips out of the exhaust.'], focus: ['cathode', 'water'] },
+      { title: ['整台车', 'The whole car'], text: ['真实的电堆由几百片这样的单元叠在一起。它发的电送给电机，车上还有一块小电池做缓冲，刹车时回收能量、加速时帮忙。', 'A real stack layers hundreds of these cells. Its electricity goes to the motor, and a small battery buffers it, recovering braking energy and helping under acceleration.'], focus: ['circuit', 'tank'] }
+    ],
+    parts: {
+      tank: { name: ['氢罐', 'Hydrogen tank'], text: ['碳纤维缠绕的高压储罐。', 'A carbon-fibre-wound high-pressure tank.'] },
+      anode: { name: ['负极（氢气侧）', 'Anode'], text: ['氢气在这里被催化剂拆成质子和电子。', 'Where the catalyst splits hydrogen into protons and electrons.'] },
+      membrane: { name: ['质子交换膜', 'Proton exchange membrane'], text: ['只让质子通过，挡住电子，逼电子走外面的电路。', 'Lets protons through but blocks electrons, forcing them round the outside circuit.'] },
+      cathode: { name: ['正极（空气侧）', 'Cathode'], text: ['质子、电子和氧气在这里结合成水。', 'Where protons, electrons and oxygen combine into water.'] },
+      circuit: { name: ['外部电路', 'Outside circuit'], text: ['电子绕道走的路，也就是驱动电机的电流。', 'The electrons\' detour, which is the current that drives the motor.'] },
+      water: { name: ['排出的水', 'Water out'], text: ['唯一的排放物。', 'The only emission.'] }
+    },
+    pros: [
+      ['唯一的排放是水。', 'The only emission is water.'],
+      ['加氢几分钟，续航和燃油车接近。', 'Refuels in minutes, with range close to a petrol car.'],
+      ['开起来和纯电车一样安静平顺。', 'As quiet and smooth to drive as an EV.']
+    ],
+    cons: [
+      ['加氢站非常少。', 'Very few hydrogen stations.'],
+      ['氢的生产、压缩和运输都很耗能，"绿氢"还很贵。', 'Making, compressing and transporting hydrogen takes a lot of energy, and green hydrogen is still expensive.'],
+      ['电堆要用铂这样的贵金属做催化剂，成本高。', 'The stack needs precious-metal catalysts such as platinum, which keeps costs high.']
+    ],
+    cars: [
+      { name: ['丰田 Mirai', 'Toyota Mirai'], engine: ['燃料电池电堆 + 电机', 'Fuel-cell stack + motor'], tags: [tags.fcev], why: ['量产燃料电池车的代表。', 'The best-known production fuel-cell car.'] },
+      { name: ['现代 Nexo', 'Hyundai Nexo'], engine: ['燃料电池电堆 + 电机', 'Fuel-cell stack + motor'], tags: [tags.fcev], why: ['燃料电池 SUV。', 'A fuel-cell SUV.'] },
+      { name: ['丰田氢燃料卡罗拉赛车', 'Toyota hydrogen Corolla race car'], engine: ['1.6 三缸涡轮，烧氢', '1.6 turbo three, burning hydrogen'], tags: [tags.i3, tags.h2ice], why: ['对照：它是直接"烧"氢的内燃机，不是燃料电池，在日本超级耐力赛里跑。', 'For contrast: an engine that burns hydrogen, not a fuel cell; it races in Japan\'s Super Taikyu series.'] }
+    ],
+    myth: {
+      q: ['燃料电池车会像氢气球一样爆炸吗？', 'Can a fuel-cell car explode like a hydrogen balloon?'],
+      a: ['氢罐用碳纤维缠绕，能承受很高的压力，还要通过碰撞和火烧测试；氢气比空气轻得多，一旦泄漏会很快向上散开。它的安全标准和其他新能源车一样严格。', 'The tanks are carbon-fibre wound to hold very high pressure and must pass crash and fire tests; hydrogen is much lighter than air and disperses upward quickly if it leaks. The safety standards are as strict as for other new-energy cars.']
     }
   },
   {

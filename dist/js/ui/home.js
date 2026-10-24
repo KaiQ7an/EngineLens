@@ -6,9 +6,8 @@ import { cardHTML, mountCards } from './cards.js';
 import { rich } from './terms.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let filter = 'all';
 
-// The gallery: a featured engine running top-left, then a wall of every engine.
+// The atlas: a featured engine running top-left, then one section per category.
 export function homePage() {
   const featured = entryById('four-stroke');
   const html = `
@@ -30,28 +29,33 @@ export function homePage() {
   </section>
   <section class="atlas wrap" id="atlas">
     <div class="atlas-head">
-      <h2>${bi(['全部发动机', 'All engines'])}<small>${ENTRIES.length}</small></h2>
-      <div class="filters" role="group" aria-label="${t('filter')}">
-        <button type="button" data-filter="all">${t('all')}</button>
-        ${GROUPS.map(g => `<button type="button" data-filter="${g.id}">${bi(g.name)}</button>`).join('')}
-      </div>
+      <h2>${bi(['发动机图鉴', 'The engine atlas'])}<small>${ENTRIES.length}</small></h2>
+      <nav class="group-nav" aria-label="${bi(['分类', 'Categories'])}">
+        ${GROUPS.map(g => `<button type="button" data-jump="${g.id}">${bi(g.name)}<span>${ENTRIES.filter(e => e.group === g.id).length}</span></button>`).join('')}
+      </nav>
     </div>
-    <div class="wall">${ENTRIES.map(cardHTML).join('')}</div>
-    <div class="coming">
-      <span>${t('comingSoon')}</span>
-      ${COMING.map(c => `<i>${bi(c)}</i>`).join('')}
-    </div>
+    ${GROUPS.map((g, i) => {
+      const list = ENTRIES.filter(e => e.group === g.id);
+      return `
+      <section class="group" id="group-${g.id}">
+        <div class="group-head">
+          <span class="gno">${String(i + 1).padStart(2, '0')}</span>
+          <h3>${bi(g.name)}</h3>
+          <p>${bi(g.blurb)}</p>
+        </div>
+        <div class="wall${list.length === 1 ? ' wall-feature' : ''}">${list.map(cardHTML).join('')}</div>
+      </section>`;
+    }).join('')}
+    ${COMING.length ? `<div class="coming"><span>${t('comingSoon')}</span>${COMING.map(c => `<i>${bi(c)}</i>`).join('')}</div>` : ''}
   </section>`;
 
   function mount(root) {
     const hero = root.querySelector('#hero');
     const cards = mountCards(root);
-    const apply = () => {
-      root.querySelectorAll('[data-filter]').forEach(b => b.setAttribute('aria-pressed', b.dataset.filter === filter));
-      root.querySelectorAll('.atlas .engine-card').forEach(a => { a.hidden = filter !== 'all' && a.dataset.group !== filter; });
-    };
-    root.querySelectorAll('[data-filter]').forEach(b => b.addEventListener('click', () => { filter = b.dataset.filter; apply(); }));
-    apply();
+    // Category buttons jump to their section; the route stays on the atlas.
+    root.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => {
+      root.querySelector('#group-' + b.dataset.jump).scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+    }));
     let theta = 30, time = 0;
     return {
       frame(dt) {

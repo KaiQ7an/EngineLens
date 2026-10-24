@@ -3,9 +3,8 @@
 看懂每一口动力 — an interactive, bilingual (中文 / English) atlas of how engines work,
 for people who love racing but have never opened an engine.
 
-The home page is a wall of engines, each card a live blueprint drawing, filterable by
-the basics, how the engine breathes and how its cylinders are laid out. Each engine
-page puts its cutaway top-left with narrated captions. Air is drawn as dots you can
+The home page sorts twenty engines into six categories, each card a live blueprint
+drawing. Each engine page puts its cutaway top-left with narrated captions. Air is drawn as dots you can
 count: a turbo visibly packs more into the same cylinder.
 
 ## Engines
@@ -17,20 +16,21 @@ count: a turbo visibly packs more into the same cylinder.
 | | Turbocharged | Exhaust spinning the turbine, boost, intercooler, wastegate, lag |
 | | Supercharged | Belt-driven Roots blower and the power it takes |
 | | Floor-it test | Three 2.0-litre engines floored together, at sea level or 3,650 m |
+| | Twincharging & e-boost | A supercharger handing over to a turbo, and how fast an electric compressor spools |
 | Cylinder layouts | Inline-four | Firing order 1-3-4-2, secondary shake and balance shafts |
 | | Inline-six | 1-5-3-6-2-4, overlapping power strokes, a shake meter that stays still |
 | | V6 | A 60° front section with split crank pins, banks taking turns |
 | | V8 | Cross-plane vs flat-plane: crank shape, per-bank firing rhythm |
 | | V12 | Two inline-sixes on one crank, three cylinders always pushing |
+| | W16 | Four rows on one crank: two narrow VR8s in a V, four turbos |
 | | Boxer | Opposed pistons moving together, flat-four or flat-six, centre of gravity |
 | Different designs | Diesel | Air-only intake, a hard squeeze to over 600°C, injector spray, glow plug |
 | | Rotary | Epitrochoid housing, three chambers at once, 3 : 1 shaft to rotor |
 | Going electric | Hybrid | Energy flows through five drive modes: electric, generating, engine drive, regen, plug-in |
 | | Range extender | The same drivetrain with no link from engine to wheels |
 | | Electric motor | Three-phase coils, a rotating field, the rotor following it, and regeneration |
+| | Hydrogen fuel cell | Hydrogen split at the anode, protons through the membrane, electrons round the circuit, water out |
 | On track | F1 power unit | The 2026 rules: 90° V6 turbo, 350 kW MGU-K, no MGU-H; energy over a lap; 2014–2025 for comparison |
-
-W16, twincharging and fuel cells are listed as coming soon.
 
 Each engine page has an identity card, parts you can tap (numbered callouts on the
 drawing), strengths and trade-offs, cars you may know (tagged by layout and
@@ -58,7 +58,8 @@ dist/
   js/main.js            router, theme, language, animation loop
   js/sim/               pure, tested models: crank and valve timing, firing orders, boost,
                         diesel compression heating, Wankel rotary geometry, three-phase
-                        motor field, hybrid and range-extender drive modes, the F1 power split
+                        motor field, hybrid and range-extender drive modes, the F1 power split,
+                        twincharger handover and spool-up, fuel-cell stoichiometry
   js/draw/              canvas views, all drawn from a single crank angle
   js/data/              entry copy, cars and glossary as [中文, English] pairs
   js/ui/                gallery, engine page, glossary, term tooltips
@@ -86,7 +87,8 @@ engine, and so is the "push on the crank" graph, which counts only power strokes
 The supercharger shown is a positive-displacement (Roots) type; centrifugal
 superchargers behave differently. Firing orders are examples: GM's LS-family order
 for the cross-plane V8, a typical alternating order for the flat-plane V8, Subaru's
-1-3-2-4 and Porsche's 1-6-2-4-3-5 for the boxers, and an even-firing 60° V6. The
+1-3-2-4 and Porsche's 1-6-2-4-3-5 for the boxers, an even-firing 60° V6, and an
+even-firing W16 that rotates through its four rows. The
 diesel thermometer uses ideal adiabatic compression from 27°C (16:1 against 10:1 for
 petrol); the rotary uses Mazda 13B-like proportions with a simplified rotor flank. The
 hybrid diagram is a generic series-parallel layout (like Honda e:HEV), not Toyota's
