@@ -86,8 +86,8 @@ export const ENTRIES = [
     steps: [
       { title: ['活塞往下走', 'The piston drops'], text: ['活塞下行，缸里的气压变得比外面低一点。', 'As the piston moves down, the pressure in the cylinder falls a little below the air outside.'], focus: ['piston', 'chamber'] },
       { title: ['大气把空气压进来', 'The atmosphere pushes air in'], text: ['外面大约 1 个大气压的空气穿过滤清器，被"推"进缸里。空气不是被吸进去的，是被压进去的。', 'Outside air at about one atmosphere passes the filter and is pushed into the cylinder. Pushed, not sucked.'], focus: ['filter', 'intake-valve'] },
-      { title: ['节气门管着进多少', 'The throttle sets how much'], text: ['你踩的油门，其实转的是这片节气门：开得越大，进气越顺，[[power|动力]]越大。', 'The pedal you press turns this throttle plate. The wider it opens, the easier air flows and the more power you get.'], focus: ['throttle'] },
-      { title: ['上限：最多一个大气压', 'The limit: one atmosphere'], text: ['不管转多快，它最多只能把缸"装满"到外面的气压。想要更多空气，只能加大[[displacement|排量]]或者转得更快。', 'However fast it spins, it can only fill the cylinder up to outside pressure. For more air you need more displacement or more revs.'], focus: ['chamber'] },
+      { title: ['节气门管着进多少', 'The throttle sets how much'], text: ['你踩的油门，其实转的是这片节气门：开得越大，进气越顺，[[power|动力]]越大。', 'The pedal you press turns this throttle plate. The wider it opens, the easier air flows and the more [[power|power]] you get.'], focus: ['throttle'] },
+      { title: ['上限：最多一个大气压', 'The limit: one atmosphere'], text: ['不管转多快，它最多只能把缸"装满"到外面的气压。想要更多空气，只能加大[[displacement|排量]]或者转得更快。', 'However fast it spins, it can only fill the cylinder up to outside pressure. For more air you need more [[displacement|displacement]] or more revs.'], focus: ['chamber'] },
       { title: ['废气直接排掉', 'Exhaust goes straight out'], text: ['烧完的废气又热又快，却从排气管直接排走了。涡轮增压，就是要把这份能量用起来。', 'The burnt gas leaves hot and fast, straight out of the exhaust. A turbo puts that energy to use.'], focus: ['exhaust-pipe'] }
     ],
     parts: {
@@ -132,10 +132,10 @@ export const ENTRIES = [
       { title: ['废气冲出气缸', 'Exhaust rushes out'], text: ['排气门一开，又热又快的废气冲进排气管。自然吸气就把它直接排掉了。', 'The exhaust valve opens and hot, fast gas rushes out. An NA engine just throws it away.'], focus: ['exhaust', 'chamber'] },
       { title: ['废气吹动涡轮', 'Exhaust spins the turbine'], text: ['废气先穿过涡轮，把它吹得飞快：每分钟能转十几万圈。', 'On its way out it spins the turbine, to well over 100,000 rpm.'], focus: ['turbine'] },
       { title: ['同一根轴带动压气机', 'One shaft drives the compressor'], text: ['涡轮和压气机装在同一根轴上：涡轮一转，压气机就跟着转。废气和新鲜空气走两条路，不会混在一起。', 'Turbine and compressor share a shaft. Exhaust and fresh air take separate paths and never mix.'], focus: ['shaft', 'compressor', 'turbine'] },
-      { title: ['压气机把空气压紧', 'The compressor packs the air'], text: ['压气机把新鲜空气压缩，压力比外面高出零点几个大气压，这就是[[boost|增压]]。', 'The compressor squeezes fresh air above outside pressure; that extra is boost.'], focus: ['compressor'] },
-      { title: ['中冷器给空气降温', 'The intercooler cools it'], text: ['空气被压缩会变热，热空气稀。[[intercooler|中冷器]]把它冷下来，变得更密。', 'Squeezing heats air, and hot air is thin. The intercooler cools it so it packs denser.'], focus: ['intercooler'] },
+      { title: ['压气机把空气压紧', 'The compressor packs the air'], text: ['压气机把新鲜空气压缩，压力比外面高出零点几个大气压，这就是[[boost|增压]]。', 'The compressor squeezes fresh air above outside pressure; that extra is [[boost|boost]].'], focus: ['compressor'] },
+      { title: ['中冷器给空气降温', 'The intercooler cools it'], text: ['空气被压缩会变热，热空气稀。[[intercooler|中冷器]]把它冷下来，变得更密。', 'Squeezing heats air, and hot air is thin. The [[intercooler|intercooler]] cools it so it packs denser.'], focus: ['intercooler'] },
       { title: ['更多空气进缸', 'More air in every breath'], text: ['同一个缸，每次能塞进多得多的空气（数数小圈），就能多烧油、多出力。', 'The same cylinder now takes far more air per breath (count the rings), so it can burn more fuel and make more power.'], focus: ['chamber'] },
-      { title: ['代价：迟滞', 'The catch: lag'], text: ['点"模拟一脚地板油"试试：涡轮要等废气把它吹快，增压慢半拍才上来，这就是[[lag|涡轮迟滞]]。', 'Press "Floor the throttle": the turbo waits for exhaust to spin it up, so boost arrives a beat late. That is turbo lag.'], focus: ['turbine', 'compressor'] }
+      { title: ['代价：迟滞', 'The catch: lag'], text: ['点"模拟一脚地板油"试试：涡轮要等废气把它吹快，增压慢半拍才上来，这就是[[lag|涡轮迟滞]]。', 'Press "Floor the throttle": the turbo waits for exhaust to spin it up, so boost arrives a beat late. That is [[lag|turbo lag]].'], focus: ['turbine', 'compressor'] }
     ],
     parts: {
       turbine: { name: ['涡轮', 'Turbine'], text: ['被废气吹转的轮子，泡在几百摄氏度的高温里。', 'The wheel the exhaust spins; it runs hundreds of degrees hot.'] },
@@ -152,7 +152,7 @@ export const ENTRIES = [
       ['到了高原掉动力少，涡轮能把稀薄的空气补回来。', 'Loses less at altitude: the turbo makes up for thin air.']
     ],
     cons: [
-      ['有[[lag|迟滞]]：踩下油门，动力晚半拍才到。', 'Lag: power arrives a beat after you press.'],
+      ['有[[lag|迟滞]]：踩下油门，动力晚半拍才到。', '[[lag|Lag]]: power arrives a beat after you press.'],
       ['热量大，对机油和冷却要求高。', 'Lots of heat; harder on oil and cooling.'],
       ['结构复杂，管路和零件更多。', 'More pipes and parts, more complexity.']
     ],
@@ -181,7 +181,7 @@ export const ENTRIES = [
       { title: ['皮带带动增压器', 'The belt drives the blower'], text: ['皮带另一头连着增压器，两者转速成固定比例：发动机转多快，它就转多快。', 'The other end drives the blower at a fixed ratio to engine speed.'], focus: ['belt', 'blower'] },
       { title: ['转子把空气挤进去', 'The rotors push air in'], text: ['两个互相咬合的转子像两只手，把空气一把一把往下推，压进进气管。', 'Two meshing rotors scoop air and push it down into the intake, like two hands.'], focus: ['blower'] },
       { title: ['马上就有增压', 'Boost right away'], text: ['因为是直接驱动，一踩油门立刻就有增压，低转速也很有劲。点"模拟一脚地板油"，和涡轮比比。', 'Driven directly, it boosts the instant you press, even at low rpm. Try "Floor the throttle" and compare with the turbo.'], focus: ['chamber'] },
-      { title: ['代价：吃掉一些动力', 'The catch: it costs power'], text: ['带动增压器的力气来自曲轴本身，所以有一部分动力被它"吃掉"了，这叫[[parasitic|驱动损失]]。', 'The power to drive it comes from the crank itself, so it eats some output: parasitic loss.'], focus: ['parasitic', 'pulley'] }
+      { title: ['代价：吃掉一些动力', 'The catch: it costs power'], text: ['带动增压器的力气来自曲轴本身，所以有一部分动力被它"吃掉"了，这叫[[parasitic|驱动损失]]。', 'The power to drive it comes from the crank itself, so it eats some output: [[parasitic|parasitic loss]].'], focus: ['parasitic', 'pulley'] }
     ],
     parts: {
       blower: { name: ['罗茨增压器', 'Roots blower'], text: ['两个三叶转子反向旋转，把空气推进去。这里画的是容积式；还有离心式，特性不一样。', 'Two three-lobe rotors turning opposite ways push air in. This is a positive-displacement type; centrifugal ones behave differently.'] },
@@ -192,7 +192,7 @@ export const ENTRIES = [
     },
     pros: [
       ['没有迟滞，一踩就有。', 'No lag: boost the instant you press.'],
-      ['低转速就有大[[torque|扭矩]]，起步特别有劲。', 'Strong torque from low rpm.'],
+      ['低转速就有大[[torque|扭矩]]，起步特别有劲。', 'Strong [[torque|torque]] from low rpm.'],
       ['那种独特的"呜呜"啸叫声。', 'That distinctive supercharger whine.']
     ],
     cons: [
@@ -223,7 +223,7 @@ export const ENTRIES = [
     steps: [
       { title: ['先收着油门巡航', 'Cruising on part throttle'], text: ['三台发动机以同样的转速巡航，现在都只吸进一部分空气。罐子里的小圈就是每次吸进的空气。', 'All three cruise at the same speed, each taking in only part of the air it could. The rings in each jar are the air per breath.'], focus: ['na-jar', 'turbo-jar', 'sc-jar'] },
       { title: ['一脚地板油', 'Floor it'], text: ['点「地板油！」。自然吸气和机械增压几乎立刻吸满；涡轮先像自吸一样，然后才把增压慢慢建立起来。', 'Press "Floor it!". The NA and supercharged engines fill almost at once; the turbo first breathes like an NA engine, then builds boost.'], focus: ['chart'] },
-      { title: ['涡轮：慢半拍，后劲最大', 'The turbo: late, then strongest'], text: ['等废气把涡轮吹快，它的动力最后最高。这就是[[lag|迟滞]]和后劲。', 'Once exhaust spins it up, it ends up strongest: lag, then pull.'], focus: ['turbo-jar'] },
+      { title: ['涡轮：慢半拍，后劲最大', 'The turbo: late, then strongest'], text: ['等废气把涡轮吹快，它的动力最后最高。这就是[[lag|迟滞]]和后劲。', 'Once exhaust spins it up, it ends up strongest: [[lag|lag]], then pull.'], focus: ['turbo-jar'] },
       { title: ['机械增压：马上有，但被吃掉一块', 'The supercharger: instant, minus a slice'], text: ['它一下就有增压，可读数里能看到被增压器自己用掉的那部分。', 'Boost is instant, but the readout shows the slice the blower uses itself.'], focus: ['sc-jar'] },
       { title: ['换到高原试试', 'Now try high altitude'], text: ['切到"高原 3650 米"再踩一次：自然吸气和机械增压都掉了三成多，涡轮能补回大部分。', 'Switch to 3,650 m and floor it again: NA and supercharged lose over a third, the turbo wins most of it back.'], focus: ['chart', 'turbo-jar'] }
     ],
@@ -311,9 +311,9 @@ export const ENTRIES = [
     start: 10,
     steps: [
       { at: 20, until: 180, title: ['1 缸点火', 'Cylinder 1 fires'], text: ['1 缸做功的时候，2 缸在排气、3 缸在压缩、4 缸在进气：四个缸永远各干各的一步。', 'While 1 fires, 2 exhausts, 3 compresses and 4 breathes in: each cylinder is always on a different stroke.'], focus: ['cyl1', 'timeline'] },
-      { at: 200, until: 360, title: ['3 缸点火', 'Cylinder 3 fires'], text: ['接着是 3 缸。[[firing-order|点火顺序]]是 1-3-4-2，每转半圈（180°）就有一个缸在出力。', 'Then cylinder 3. The firing order is 1-3-4-2: one power stroke every half turn (180°).'], focus: ['cyl3', 'timeline'] },
+      { at: 200, until: 360, title: ['3 缸点火', 'Cylinder 3 fires'], text: ['接着是 3 缸。[[firing-order|点火顺序]]是 1-3-4-2，每转半圈（180°）就有一个缸在出力。', 'Then cylinder 3. The [[firing-order|firing order]] is 1-3-4-2: one power stroke every half turn (180°).'], focus: ['cyl3', 'timeline'] },
       { at: 380, until: 540, title: ['4 缸点火', 'Cylinder 4 fires'], text: ['注意：1 缸和 4 缸的活塞总是一起上下，2 缸和 3 缸则和它们正好相反。', 'Notice that pistons 1 and 4 always move together, and 2 and 3 move opposite them.'], focus: ['cyl4', 'cyl1', 'timeline'] },
-      { at: 560, until: 720, title: ['2 缸点火', 'Cylinder 2 fires'], text: ['最后是 2 缸，然后循环。打开"加平衡轴"看右边的抖动表：直列四缸天生有一种每转两次的抖动，大排量四缸常用[[balance-shaft|平衡轴]]抵消它。', 'Finally cylinder 2, and round again. Turn on the balance shafts and watch the shake meter: an inline-four has a built-in shake twice per turn, which larger fours cancel with balance shafts.'], focus: ['cyl2', 'shake'] }
+      { at: 560, until: 720, title: ['2 缸点火', 'Cylinder 2 fires'], text: ['最后是 2 缸，然后循环。打开"加平衡轴"看右边的抖动表：直列四缸天生有一种每转两次的抖动，大排量四缸常用[[balance-shaft|平衡轴]]抵消它。', 'Finally cylinder 2, and round again. Turn on the balance shafts and watch the shake meter: an inline-four has a built-in shake twice per turn, which larger fours cancel with [[balance-shaft|balance shafts]].'], focus: ['cyl2', 'shake'] }
     ],
     parts: {
       cyl1: { name: ['1 缸', 'Cylinder 1'], text: ['离发动机前端最近的缸。', 'The cylinder nearest the front.'] },
@@ -358,7 +358,7 @@ export const ENTRIES = [
     analogy: ['像六个人划同一条船，前三个和后三个的动作像照镜子一样对称，船身一点也不晃。', 'Like six rowers where the front three mirror the back three: the boat does not rock at all.'],
     start: 10,
     steps: [
-      { at: 20, until: 120, title: ['1 缸点火', 'Cylinder 1 fires'], text: ['[[firing-order|点火顺序]]是 1-5-3-6-2-4：每转 120° 就有一个缸点火，比四缸的 180° 更密。', 'The firing order is 1-5-3-6-2-4: a cylinder fires every 120°, closer together than a four\'s 180°.'], focus: ['cyl1', 'timeline'] },
+      { at: 20, until: 120, title: ['1 缸点火', 'Cylinder 1 fires'], text: ['[[firing-order|点火顺序]]是 1-5-3-6-2-4：每转 120° 就有一个缸点火，比四缸的 180° 更密。', 'The [[firing-order|firing order]] is 1-5-3-6-2-4: a cylinder fires every 120°, closer together than a four\'s 180°.'], focus: ['cyl1', 'timeline'] },
       { at: 140, until: 240, title: ['5 缸点火', 'Cylinder 5 fires'], text: ['上一个缸还没推完，下一个缸已经开始推了。看上面的推力曲线：它从不掉到零。', 'The next cylinder starts pushing before the last one has finished. The push graph above never drops to zero.'], focus: ['cyl5', 'push'] },
       { at: 260, until: 360, title: ['3 缸点火', 'Cylinder 3 fires'], text: ['1 和 6、2 和 5、3 和 4 两两一起上下，前半截和后半截像照镜子。', 'Pistons move in pairs, 1 with 6, 2 with 5, 3 with 4: the front half mirrors the back.'], focus: ['cyl3', 'cyl4'] },
       { at: 380, until: 480, title: ['6 缸点火', 'Cylinder 6 fires'], text: ['所以四缸那种每转两次的抖动，在这里被完全抵消了：右边的抖动表一动不动。', 'So the twice-per-turn shake of a four cancels out completely: the shake meter on the right stays still.'], focus: ['cyl6', 'shake'] },
@@ -623,13 +623,13 @@ export const ENTRIES = [
     tagline: ['没有火花塞，压得够狠就自己着', 'No spark plug: squeeze hard enough and it lights itself'],
     facts: [[['点火方式', 'Ignition'], ['压燃（没有火花塞）', 'Compression (no spark plug)']], [['压缩比', 'Compression ratio'], ['约 15–20（汽油机约 10–13）', 'About 15–20 (petrol 10–13)']], [['常见于', 'Found in'], ['皮卡、越野车、卡车', 'Pickups, 4×4s and trucks']]],
     card: ['不点火，靠把空气压到滚烫。', 'No spark: it squeezes air until it is scorching.'],
-    lead: ['柴油机也是四个冲程，但它吸进来的只有空气。活塞把空气压得比汽油机狠得多，空气被压到六百多度，这时喷进柴油，油雾一碰到热空气就自己烧起来。所以它没有火花塞。', 'A diesel runs the same four strokes, but breathes in air alone. It squeezes that air far harder than a petrol engine, to over 600°C, then sprays in diesel, which lights the moment it meets the hot air. So there is no spark plug.'],
+    lead: ['柴油机也是四个冲程，但它吸进来的只有空气。活塞把空气压得比汽油机狠得多，空气被压到六百多度，这时喷进柴油，油雾一碰到热空气就自己烧起来。这就是[[compression-ignition|压燃]]，所以它没有火花塞。', 'A diesel runs the same four strokes, but breathes in air alone. It squeezes that air far harder than a petrol engine, to over 600°C, then sprays in diesel, which lights the moment it meets the hot air. That is [[compression-ignition|compression ignition]], so there is no spark plug.'],
     analogy: ['像用打气筒狠狠地打气，筒身会发烫：把空气压得够紧，热量就够把柴油点着。', 'Like a bike pump that gets hot when you pump hard: squeeze air tightly enough and it gets hot enough to light diesel.'],
     steps: [
       { at: 90, until: 180, title: ['只吸空气', 'Air only'], text: ['和汽油机不同，柴油机吸气时只吸进纯空气，一滴油都没有。', 'Unlike a petrol engine, a diesel breathes in air alone, with no fuel at all.'], focus: ['intake-valve', 'chamber'] },
       { at: 300, until: 352, title: ['狠狠压缩', 'A hard squeeze'], text: ['活塞把空气压到原来的大约十六分之一，空气被压得滚烫：看右边的温度计，超过 600°C。', 'The piston squeezes the air to about a sixteenth of its volume and it gets scorching: the thermometer passes 600°C.'], focus: ['chamber', 'thermo'] },
       { at: 366, until: 400, title: ['喷油，自己着火', 'Inject, and it lights itself'], text: ['活塞快到顶时，喷油嘴把柴油喷成细雾。滚烫的空气一碰到油雾就自己烧起来，不需要火花塞。', 'Just before the top, the injector sprays a fine mist of diesel. The scorching air lights it on contact: no spark plug needed.'], focus: ['injector', 'chamber'] },
-      { at: 450, until: 540, title: ['做功', 'Power'], text: ['燃烧推着活塞往下走。柴油机推得早、推得猛，所以低转速就有很大的[[torque|扭矩]]。', 'The burn drives the piston down. A diesel pushes early and hard, which is why it has big torque at low revs.'], focus: ['piston', 'chamber'] },
+      { at: 450, until: 540, title: ['做功', 'Power'], text: ['燃烧推着活塞往下走。柴油机推得早、推得猛，所以低转速就有很大的[[torque|扭矩]]。', 'The burn drives the piston down. A diesel pushes early and hard, which is why it has big [[torque|torque]] at low revs.'], focus: ['piston', 'chamber'] },
       { at: 630, until: 720, title: ['排气', 'Exhaust'], text: ['和汽油机一样，排气门打开，活塞把废气推出去。', 'As in a petrol engine, the exhaust valve opens and the piston pushes the burnt gas out.'], focus: ['exhaust-valve', 'exhaust-port'] }
     ],
     parts: {
@@ -711,7 +711,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'hybrid', group: 'electric', view: 'hybrid', kind: 'scene', figure: '5.1',
+    id: 'hybrid', group: 'electric', view: 'hybrid', kind: 'scene',
     eyebrow: 'HYBRID',
     name: ['混合动力', 'Hybrid'],
     tagline: ['发动机和电机分工合作', 'Engine and motor sharing the work'],
@@ -723,8 +723,8 @@ export const ENTRIES = [
       { mode: 'ev', title: ['起步：纯电', 'Pulling away: electric'], text: ['低速起步时发动机不工作，电池给电机供电，电机推着车走，安静又省油。', 'At low speed the engine stays off; the battery powers the motor, which drives the car quietly.'], focus: ['battery', 'motor', 'wheels'] },
       { mode: 'series', title: ['加速：发动机发电', 'Accelerating: the engine generates'], text: ['需要更多力气时，发动机启动、带动发电机，它发的电和电池的电一起送给电机。这时发动机还不直接推车轮。', 'For more push the engine starts and turns the generator; its electricity and the battery\'s both feed the motor. The engine is still not driving the wheels.'], focus: ['engine', 'generator', 'motor'] },
       { mode: 'parallel', title: ['高速巡航：发动机直驱', 'Cruising: the engine drives'], text: ['上了高速，离合器结合，发动机直接通过齿轮推车轮，这是它效率最高的时候；电机需要时再帮一把。', 'At motorway speed a clutch engages and the engine drives the wheels through gears, where it is most efficient; the motor helps when needed.'], focus: ['engine', 'clutch', 'wheels'] },
-      { mode: 'regen', title: ['刹车：动能回收', 'Braking: recovering energy'], text: ['松油门或刹车时，车轮反过来带着电机转，电机变成发电机，把动能变回电存进电池。', 'Lift off or brake and the wheels turn the motor, which becomes a generator and puts the energy back into the battery.'], focus: ['wheels', 'motor', 'battery'] },
-      { mode: 'plug', title: ['插电混动：电池更大', 'Plug-in: a bigger battery'], text: ['插电混动（PHEV）把电池做得更大，还能插电充电，日常通勤几乎可以全用电跑；普通混动（HEV）没有充电口。', 'A plug-in hybrid (PHEV) has a bigger battery you can charge from the wall, so daily commutes can be almost all electric; a regular hybrid (HEV) has no charge port.'], focus: ['plug', 'battery'] }
+      { mode: 'regen', title: ['刹车：动能回收', 'Braking: recovering energy'], text: ['松油门或刹车时，车轮反过来带着电机转，电机变成发电机，把动能变回电存进电池，这就是[[regen|动能回收]]。', 'Lift off or brake and the wheels turn the motor, which becomes a generator and puts the energy back into the battery: [[regen|regenerative braking]].'], focus: ['wheels', 'motor', 'battery'] },
+      { mode: 'plug', title: ['插电混动：电池更大', 'Plug-in: a bigger battery'], text: ['[[phev|插电混动（PHEV）]]把电池做得更大，还能插电充电，日常通勤几乎可以全用电跑；普通混动（HEV）没有充电口。', 'A [[phev|plug-in hybrid (PHEV)]] has a bigger battery you can charge from the wall, so daily commutes can be almost all electric; a regular hybrid (HEV) has no charge port.'], focus: ['plug', 'battery'] }
     ],
     parts: {
       engine: { name: ['发动机', 'Engine'], text: ['只在它效率高的时候才工作，其余时间熄火。', 'Runs only when it is efficient, and switches off otherwise.'] },
@@ -758,7 +758,7 @@ export const ENTRIES = [
     }
   },
   {
-    id: 'erev', group: 'electric', view: 'erev', kind: 'scene', figure: '5.2',
+    id: 'erev', group: 'electric', view: 'erev', kind: 'scene',
     eyebrow: 'RANGE EXTENDER',
     name: ['增程式', 'Range extender'],
     tagline: ['发动机只发电，从不推车轮', 'The engine only generates, never drives'],
@@ -813,11 +813,11 @@ export const ENTRIES = [
     lead: ['电动车没有发动机，只有电机。三组线圈轮流通电，在电机里造出一个会转的磁场，转子上的磁铁就被它一直拽着转。没有爆炸、没有气门，一踩就是最大扭矩。', 'An electric car has no engine, only a motor. Three sets of coils take turns carrying current and make a magnetic field that turns; the magnets on the rotor are pulled round after it. No explosions, no valves, and full torque the instant you press.'],
     analogy: ['像一圈人轮流举起手里的磁铁：中间的指南针就会跟着一圈一圈地转。', 'Like a ring of people taking turns to raise a magnet: the compass needle in the middle follows them round and round.'],
     steps: [
-      { mode: 'drive', title: ['三组线圈', 'Three sets of coils'], text: ['外圈的定子上有三组线圈（A、B、C），由电池经过电控（逆变器）供电。圆点表示电流朝外，叉表示朝里。', 'The stator round the outside carries three coil sets (A, B, C), fed from the battery through the inverter. A dot means current coming out of the page, a cross going in.'], focus: ['stator', 'inverter'] },
+      { mode: 'drive', title: ['三组线圈', 'Three sets of coils'], text: ['外圈的定子上有三组线圈（A、B、C），由电池经过[[inverter|电控（逆变器）]]供电。圆点表示电流朝外，叉表示朝里。', 'The stator round the outside carries three coil sets (A, B, C), fed from the battery through the [[inverter|inverter]]. A dot means current coming out of the page, a cross going in.'], focus: ['stator', 'inverter'] },
       { mode: 'drive', title: ['轮流通电', 'Taking turns'], text: ['三组线圈的电流像三条错开 120° 的波浪：一组最强时，另外两组正在变弱或变强。看右边的波形。', 'The three currents are waves 120° apart: as one peaks, the others fade or build. See the waveforms on the right.'], focus: ['waves', 'stator'] },
       { mode: 'drive', title: ['磁场在转', 'The field turns'], text: ['三组线圈合在一起，造出一个一直在转的磁场（黄色箭头），而线圈本身一动不动。', 'Together the coils make a magnetic field that keeps turning (the yellow arrow), while the coils themselves never move.'], focus: ['field'] },
       { mode: 'drive', title: ['转子被拽着转', 'The rotor is pulled round'], text: ['转子上的永磁铁被转动的磁场吸着走，稍稍落后一点，于是转子跟着转、带动车轮。', 'The rotor\'s permanent magnets are drawn after the turning field, trailing it slightly, so the rotor turns and drives the wheels.'], focus: ['rotor', 'field'] },
-      { mode: 'regen', title: ['反过来就是发电机', 'Run backwards, it is a generator'], text: ['松开油门时，车轮带着转子转，转子跑到了磁场前面，电机变成发电机，把电送回电池：这就是动能回收，也是"单踏板"的原理。', 'Lift off and the wheels push the rotor ahead of the field; the motor becomes a generator and sends current back to the battery. That is regenerative braking, and the idea behind one-pedal driving.'], focus: ['rotor', 'inverter', 'battery'] }
+      { mode: 'regen', title: ['反过来就是发电机', 'Run backwards, it is a generator'], text: ['松开油门时，车轮带着转子转，转子跑到了磁场前面，电机变成发电机，把电送回电池：这就是[[regen|动能回收]]，也是"单踏板"的原理。', 'Lift off and the wheels push the rotor ahead of the field; the motor becomes a generator and sends current back to the battery. That is [[regen|regenerative braking]], and the idea behind one-pedal driving.'], focus: ['rotor', 'inverter', 'battery'] }
     ],
     parts: {
       stator: { name: ['定子（线圈）', 'Stator'], text: ['固定不动的外圈，上面绕着三组线圈。', 'The fixed outer ring, wound with three sets of coils.'] },
@@ -902,10 +902,10 @@ export const ENTRIES = [
     analogy: ['像一个短跑运动员背着一个能充电的助推器：刹车时把力气存进去，出弯和直道上再放出来。', 'Like a sprinter wearing a rechargeable booster: it stores energy under braking and gives it back out of corners and down the straights.'],
     steps: [
       { title: ['1.6 升 V6 涡轮', 'A 1.6-litre turbo V6'], text: ['发动机部分还是 1.6 升、90° 夹角的 V6，带一个涡轮，和 2014 年以来一样。', 'The engine is still a 1.6-litre 90° V6 with one turbo, as it has been since 2014.'], focus: ['ice', 'turbo'] },
-      { title: ['油电差不多一半一半', 'Roughly half and half'], text: ['2026 年起，MGU-K 从 120 kW 提到 350 kW，内燃机降到约 400 kW：最大功率里，电占了将近一半。', 'From 2026 the MGU-K jumps from 120 kW to 350 kW and the engine drops to about 400 kW: electricity supplies nearly half the peak power.'], focus: ['split', 'mguk'] },
+      { title: ['油电差不多一半一半', 'Roughly half and half'], text: ['2026 年起，[[mgu-k|MGU-K]] 从 120 kW 提到 350 kW，内燃机降到约 400 kW：最大功率里，电占了将近一半。', 'From 2026 the [[mgu-k|MGU-K]] jumps from 120 kW to 350 kW and the engine drops to about 400 kW: electricity supplies nearly half the peak power.'], focus: ['split', 'mguk'] },
       { zone: 'brake', title: ['刹车时充电', 'Harvesting under braking'], text: ['进弯刹车时，MGU-K 反过来当发电机，把车的动能变成电，经过控制电子存进电池。', 'Braking into a corner, the MGU-K turns generator and sends the car\'s energy through the control electronics into the battery.'], focus: ['mguk', 'es', 'lap'] },
       { zone: 'deploy', title: ['出弯和直道放电', 'Deploying out of corners'], text: ['出弯加速和直道上，电池把电送回 MGU-K，和发动机一起推车。电池能存的电有限，所以每一圈在哪里放电要算好。', 'Out of corners and down the straights the battery feeds the MGU-K, which pushes alongside the engine. The battery only holds so much, so where to deploy is planned lap by lap.'], focus: ['mguk', 'es', 'lap'] },
-      { title: ['取消 MGU-H', 'No more MGU-H'], text: ['2014–2025 年，涡轮轴上还有一个 MGU-H，能从废气里回收能量、消除涡轮迟滞。它又贵又复杂，2026 年被取消。点下面的"2014–2025"对比一下。', 'From 2014 to 2025 the turbo shaft carried an MGU-H that recovered energy from the exhaust and killed turbo lag. It was costly and complex, so 2026 drops it. Tap "2014–2025" below to compare.'], focus: ['turbo', 'mguh'] },
+      { title: ['取消 MGU-H', 'No more MGU-H'], text: ['2014–2025 年，涡轮轴上还有一个 [[mgu-h|MGU-H]]，能从废气里回收能量、消除涡轮迟滞。它又贵又复杂，2026 年被取消。点下面的"2014–2025"对比一下。', 'From 2014 to 2025 the turbo shaft carried an [[mgu-h|MGU-H]] that recovered energy from the exhaust and killed turbo lag. It was costly and complex, so 2026 drops it. Tap "2014–2025" below to compare.'], focus: ['turbo', 'mguh'] },
       { title: ['100% 可持续燃料', '100% sustainable fuel'], text: ['燃料必须是 100% 可持续燃料，而且按能量限流：限制的是每小时烧进去多少能量，而不是多少公斤。', 'The fuel must be 100% sustainable, and its flow is capped by energy: the limit is how much energy goes in per hour, not how many kilograms.'], focus: ['fuel', 'ice'] }
     ],
     parts: {

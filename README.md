@@ -32,7 +32,8 @@ count: a turbo visibly packs more into the same cylinder.
 | | Hydrogen fuel cell | Hydrogen split at the anode, protons through the membrane, electrons round the circuit, water out |
 | On track | F1 power unit | The 2026 rules: 90° V6 turbo, 350 kW MGU-K, no MGU-H; energy over a lap; 2014–2025 for comparison |
 
-Each engine page has an identity card, parts you can tap (numbered callouts on the
+On phones the figures enlarge their small labels so they stay legible, and every
+figure redraws only while it is on screen. Each engine page has an identity card, parts you can tap (numbered callouts on the
 drawing), strengths and trade-offs, cars you may know (tagged by layout and
 induction), one common myth explained, and links to related engines. Dashed-underlined
 terms open a glossary.
@@ -43,7 +44,7 @@ Requires Node.js 20 or newer. There are no dependencies and no build step.
 
 ```sh
 npm run dev     # http://localhost:5173, reloads on changes in dist/
-npm test        # simulation unit tests
+npm test        # model and content tests
 npm run check   # syntax-check every module
 ```
 
@@ -64,6 +65,7 @@ dist/
   js/data/              entry copy, cars and glossary as [中文, English] pairs
   js/ui/                gallery, engine page, glossary, term tooltips
 tests/sim.test.js       node:test checks on the models
+tests/content.test.js   every entry has a view, both languages, and glossary links that resolve
 ```
 
 Every moving part is derived from one crank angle θ, so slowing down, pausing or

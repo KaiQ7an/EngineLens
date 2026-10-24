@@ -1,6 +1,6 @@
 import { steadyBoost } from '../sim/induction.js';
 import { twinBoost, superchargerOn, spool, HANDOVER } from '../sim/twincharge.js';
-import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, fillCut, fillPart, clamp } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, fillCut, fillPart, clamp, figLabel } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -117,7 +117,7 @@ export function drawTwin(c, st) {
   part(c, 'chart', () => { anchors.chart = boostChart(c, rpm); });
   part(c, 'eboost', () => { anchors.eboost = spoolChart(c, st.tip ?? -1); });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 2.5', 28, 752, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 export const twinView = {

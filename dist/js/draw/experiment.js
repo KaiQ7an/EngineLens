@@ -1,5 +1,5 @@
 import { manifold, gauge, parasitic, power, ALTITUDES, P_SEA } from '../sim/induction.js';
-import { C, MONO, part, text, circle, stroke, path, dot, hash, clamp, lerp } from './kit.js';
+import { C, MONO, part, text, circle, stroke, path, dot, hash, clamp, lerp, figLabel } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -86,7 +86,7 @@ export function drawThrottle(c, st) {
   part(c, 'alt', () => text(c, st.alt === 'high' ? L('海拔 3650 米（约拉萨）· 空气稀薄', '3,650 m (about Lhasa) · thin air') : L('海平面', 'Sea level'), 976, 30, { size: 13, color: st.alt === 'high' ? C.accent : C.ink2, align: 'right' }));
   anchors.alt = [940, 26];
   if (!st.preview) callouts(c, anchors, SPOTS, st.parts);
-  text(c, 'FIG. 2.4', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 export const throttleView = {

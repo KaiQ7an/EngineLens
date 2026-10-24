@@ -1,5 +1,5 @@
 import { ROTOR, housing, apex, rotorCentre, rotorAngle, apexAlpha, faceStroke, faceProgress, flankPoint } from '../sim/rotary.js';
-import { C, MONO, part, text, rect, circle, stroke, path, pipe, flow, arrow, dot, hatch, fillPart, alpha, hash, lerp } from './kit.js';
+import { C, part, text, rect, circle, stroke, path, pipe, flow, arrow, dot, hatch, fillPart, alpha, hash, lerp, figLabel } from './kit.js';
 import { note } from './induction.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
@@ -125,5 +125,5 @@ export function drawRotary(c, st) {
   rows.forEach(([kind, name], i) => { dot(c, 716, 300 + i * 28, 5, kind); text(c, L(...name), 732, 305 + i * 28, { size: 14, color: C.ink2 }); });
   text(c, L('每个腔转一圈，就走完四个冲程', 'Each chamber runs all four strokes per rotor turn'), 700, 452, { size: 13, color: C.ink2 });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 4.2', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }

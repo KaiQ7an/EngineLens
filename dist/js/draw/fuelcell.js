@@ -1,4 +1,4 @@
-import { C, MONO, part, partAny, text, rect, circle, stroke, pipe, fillCut, alpha, pointAt, pathLength, lerp, hash, clamp } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, pipe, fillCut, alpha, pointAt, pathLength, lerp, hash, clamp, figLabel } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -83,5 +83,5 @@ export function drawFuelCell(c, st) {
   text(c, '2H₂ + O₂ → 2H₂O + ' + L('电', 'electricity'), 600, 500, { size: 22, weight: 800, font: MONO });
   text(c, L('不燃烧，没有火焰', 'No burning, no flame'), 600, 530, { size: 14, color: C.ink2 });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 5.4', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }

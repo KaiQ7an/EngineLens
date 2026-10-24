@@ -1,6 +1,6 @@
 import { steadyBoost, tipIn, airCharge, wastegateOpen } from '../sim/induction.js';
 import { wrap } from '../sim/kinematics.js';
-import { C, MONO, part, text, rect, circle, stroke, path, pipe, flow, arrow, fillCut, fillPart, clamp, alpha } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, path, pipe, flow, arrow, fillCut, fillPart, clamp, alpha, figLabel } from './kit.js';
 import { drawCylinder } from './engine.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -93,7 +93,7 @@ export function drawNA(c, st) {
     [L('增压装置', 'Booster'), L('无', 'None')]
   ]);
   if (!st.preview) callouts(c, anchors, NA_SPOTS, parts);
-  text(c, 'FIG. 2.1', 28, 740, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 // ── Turbocharged ────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ export function drawTurbo(c, st) {
     [L('状态', 'State'), state]
   ]);
   if (!st.preview) callouts(c, anchors, TB_SPOTS, parts);
-  text(c, 'FIG. 2.2', 28, 740, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 // ── Supercharged ────────────────────────────────────────────────────
@@ -235,7 +235,7 @@ export function drawSuper(c, st) {
   ]);
   Object.assign(anchors, { blower: BLOWER, belt: [420, 630], pulley: CRANK.slice(0, 2), parasitic: [700, at[1] + 40] });
   if (!st.preview) callouts(c, anchors, SC_SPOTS, parts);
-  text(c, 'FIG. 2.3', 28, 740, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 // Lesson controls shared by the three induction views: a tip-in replays boost build-up.

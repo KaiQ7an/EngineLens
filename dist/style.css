@@ -204,6 +204,9 @@ main { outline: none; }
 
 .foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 28px 0 36px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13.5px; flex-wrap: wrap; }
 .foot p { margin: 0; }
+.foot nav { display: flex; gap: 18px; }
+.foot nav a { color: var(--muted); }
+.foot nav a:hover { color: var(--ink); }
 
 @media (max-width: 1080px) {
   .entry-grid, .hero { grid-template-columns: 1fr; gap: 26px; }
@@ -222,7 +225,13 @@ main { outline: none; }
   .ctl-speed { min-width: 100%; }
   .facts { grid-template-columns: 1fr; margin-top: 40px; }
   .hero { padding-top: 18px; }
-  .siblings { margin-left: 0; }
+  .siblings { margin-left: 0; max-width: 100%; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .siblings::-webkit-scrollbar { display: none; }
+  .siblings a { flex: none; }
+  .group-nav { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; }
+  .group-nav::-webkit-scrollbar { display: none; }
+  .group-nav button { flex: none; }
+  .atlas-head { margin-bottom: 8px; }
   .cap-nav { flex-direction: column; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }

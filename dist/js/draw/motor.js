@@ -1,5 +1,5 @@
 import { phaseCurrents, field, rotorAngle, COIL_AXES } from '../sim/motor.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, poly, fillCut, fillPart, alpha, pointAt, pathLength } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, poly, fillCut, fillPart, alpha, pointAt, pathLength, figLabel } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -104,5 +104,5 @@ export function drawMotor(c, st) {
   anchors.inverter ??= [CHAIN[1][1], CHAIN[1][2] - 30];
   text(c, L('看：线圈不动，磁场在转，转子跟着它跑', 'Watch: the coils stay put, the field turns, the rotor follows'), 640, 400, { size: 14, color: C.ink2 });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 5.3', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }

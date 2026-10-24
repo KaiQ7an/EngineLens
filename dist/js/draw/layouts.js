@@ -1,13 +1,12 @@
 import { wrap, pistonDrop, sparkGlow } from '../sim/kinematics.js';
 import { ENGINES, localAngle, fireAngles, bankIntervals, throwAngle, inlineForces, cylinders, push, pushing, smoothness } from '../sim/firing.js';
-import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path, figLabel } from './kit.js';
 import { drawCylinder, gasKind, R, L as ROD } from './engine.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
 const lit = local => sparkGlow(local) > 0 || (wrap(local) >= 360 && wrap(local) < 400);
-const fig = (c, n) => text(c, 'FIG. ' + n, 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
 const bankName = b => (b === 'L' ? L('左排', 'Left bank') : L('右排', 'Right bank'));
 
 // The firing order on a 720° strip, with a playhead at the current crank angle.
@@ -66,8 +65,8 @@ function shakeMeter(c, theta, engine, balanced, [x, y]) {
 
 // ── Inline engines ──────────────────────────────────────────────────
 const INLINE = {
-  inline4: { y: 650, s: 0.7, figure: '3.1', order: '1 – 3 – 4 – 2', balance: true },
-  inline6: { y: 668, s: 0.58, figure: '3.2', order: '1 – 5 – 3 – 6 – 2 – 4', balance: false }
+  inline4: { y: 650, s: 0.7, order: '1 – 3 – 4 – 2', balance: true },
+  inline6: { y: 668, s: 0.58, order: '1 – 5 – 3 – 6 – 2 – 4', balance: false }
 };
 const BAL = [[292, 734], [698, 734]];
 
@@ -113,7 +112,7 @@ function drawInline(c, st, key) {
     anchors.balance = [495, 734];
   }
   if (!st.preview) callouts(c, anchors, inlineSpots(n), parts);
-  fig(c, cfg.figure);
+  figLabel(c, st.figure);
 }
 const inlineSpots = n => ({
   ...Object.fromEntries(Array.from({ length: n }, (_, i) => ['cyl' + (i + 1), { dx: -58, dy: -30, r: 0 }])),
@@ -183,8 +182,8 @@ export function frontSection(c, e, a, time, { x, y, s }) {
 
 // ── V6 and V12 ──────────────────────────────────────────────────────
 const VCFG = {
-  v6: { figure: '3.3', gap: 64, front: { x: 270, y: 660, s: 0.8 } },
-  v12: { figure: '3.5', gap: 52, front: { x: 270, y: 660, s: 0.8 } }
+  v6: { gap: 64, front: { x: 270, y: 660, s: 0.8 } },
+  v12: { gap: 52, front: { x: 270, y: 660, s: 0.8 } }
 };
 const V_SPOTS = {
   front: { dx: -150, dy: 120, r: 0 }, banks: { dx: 0, dy: -120, r: 0 },
@@ -206,7 +205,7 @@ function drawV(c, st, key) {
   });
   anchors.rhythm = [600, 636];
   if (!st.preview) callouts(c, anchors, V_SPOTS, parts);
-  fig(c, cfg.figure);
+  figLabel(c, st.figure);
 }
 export const v6View = { draw: (c, st) => drawV(c, st, 'v6') };
 export const v12View = { draw: (c, st) => drawV(c, st, 'v12') };
@@ -247,7 +246,7 @@ function drawBoxer(c, st) {
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 600, x1: 960, y0: 620, y1: 520 }); });
   part(c, 'cog', () => { anchors.cog = cogCompare(c, 60, 520); });
   if (!st.preview) callouts(c, anchors, BOXER_SPOTS, parts);
-  fig(c, '3.6');
+  figLabel(c, st.figure);
 }
 export const boxerView = {
   draw: drawBoxer,
@@ -307,7 +306,7 @@ function drawW16(c, st) {
   text(c, L('16 个缸，每 45° 点一次火（示例顺序）', 'Sixteen cylinders, one firing every 45° (example order)'), 560, 448, { size: 13, color: C.ink2 });
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 560, x1: 970, y0: 640, y1: 540 }); });
   if (!st.preview) callouts(c, anchors, W16_SPOTS, parts);
-  fig(c, '3.7');
+  figLabel(c, st.figure);
 }
 export const w16View = { draw: drawW16 };
 
@@ -365,5 +364,5 @@ export function drawV8(c, st) {
     text(c, L(...pnl.car), ox + 36, 706, { size: 13, color: C.ink2 });
   }
   if (!st.preview) callouts(c, anchors, V8_SPOTS, parts);
-  fig(c, '3.4');
+  figLabel(c, st.figure);
 }

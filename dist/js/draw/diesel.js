@@ -1,6 +1,6 @@
 import { wrap, strokeIndex } from '../sim/kinematics.js';
 import { compressionTemp, injection, DIESEL_CR, PETROL_CR, AUTOIGNITION_C, IGNITE } from '../sim/diesel.js';
-import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, dot, alpha, clamp } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, dot, alpha, clamp, figLabel } from './kit.js';
 import { drawCylinder, gasKind } from './engine.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
@@ -74,6 +74,6 @@ export function drawDiesel(c, st) {
   dot(c, 640, 712, 6, gasKind(a, true));
   text(c, L(...STROKE_NAMES[k]) + (fuel ? L(' · 正在喷油', ' · injecting') : ''), 656, 718, { size: 17, weight: 700, color: fuel ? C.accent : C.ink });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 4.1', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
   return { anchors, speed };
 }

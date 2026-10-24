@@ -91,8 +91,22 @@ export function hatch(c) {
   return hatchCache;
 }
 
+// On a narrow screen the whole figure shrinks, so small labels are drawn larger to stay
+// legible. Text of 12 units or less gets the full boost; text of 20 or more, none.
+let boost = 1;
+export const setTextBoost = k => { boost = clamp(k || 1, 1, 1.6); };
+const boosted = size => (boost > 1 ? size * (1 + (boost - 1) * clamp((20 - size) / 8)) : size);
+
+// Match a canvas's backing store to its displayed size and pixel density, keeping the
+// W × H proportions. Cheap to call every frame: it only resizes when something changed.
+export function fitCanvas(canvas, maxRatio = 2) {
+  const w = Math.round(canvas.clientWidth * Math.min(devicePixelRatio || 1, maxRatio));
+  if (w > 0 && canvas.width !== w) { canvas.width = w; canvas.height = Math.round(w * H / W); }
+}
+
 // ── Primitives ──────────────────────────────────────────────────────
 export function text(c, str, x, y, { size = 16, color = C.ink, align = 'left', weight = 500, font = SANS, spacing = 0, base = 'alphabetic' } = {}) {
+  size = boosted(size);
   c.font = `${weight} ${size}px ${font}`; c.fillStyle = color; c.textAlign = align; c.textBaseline = base;
   if ('letterSpacing' in c) c.letterSpacing = spacing + 'px';
   c.fillText(str, x, y);
@@ -191,6 +205,11 @@ export function arrow(c, x, y, ang, color = C.ink, size = 10) {
 export function marker(c, n, x, y, on) {
   circle(c, x, y, 11, on ? C.accent : C.paper, on ? C.accent : C.ink, 1.4);
   text(c, String(n), x, y + 0.5, { size: 12.5, weight: 700, color: on ? C.paper : C.ink, align: 'center', base: 'middle', font: MONO });
+}
+
+// The figure number in the bottom-left corner, as in a printed plate. Thumbnails omit it.
+export function figLabel(c, n) {
+  if (n) text(c, 'FIG. ' + n, 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
 }
 
 // The EngineLens: a thin accent ring that frames whatever is being explained.

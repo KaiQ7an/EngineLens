@@ -1,6 +1,6 @@
 import { ENGINES } from '../sim/firing.js';
 import { ERAS, electricShare, LAP, zoneAt, speedAt, FLOW } from '../sim/f1.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, path, fillCut, fillPart, alpha, pointAt, pathLength } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel } from './kit.js';
 import { frontSection } from './layouts.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -139,7 +139,7 @@ export function drawF1(c, st) {
   part(c, 'split', () => { anchors.split = splitBars(c, era); });
   part(c, 'lap', () => { anchors.lap = lapTrace(c, lap); });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 6.1', 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 export const f1View = {

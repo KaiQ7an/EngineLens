@@ -1,5 +1,5 @@
 import { MODES } from '../sim/powertrain.js';
-import { C, MONO, part, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, clamp } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, clamp, figLabel } from './kit.js';
 import { drawCylinder } from './engine.js';
 import { note } from './induction.js';
 import { callouts } from './callouts.js';
@@ -141,7 +141,7 @@ export function drawPowertrain(c, st, entry, { clutch }) {
     [L('车速', 'Speed'), m.speed + ' km/h']
   ]);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. ' + entry.figure, 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
 }
 
 const SPOTS = {

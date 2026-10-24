@@ -1,5 +1,5 @@
 import { wrap, strokeIndex, VALVES, SPARK, valvesOverlap } from '../sim/kinematics.js';
-import { C, text, MONO, circle, stroke, pipe, flow, arrow, dot, part } from './kit.js';
+import { C, text, MONO, circle, stroke, pipe, flow, arrow, dot, part, figLabel } from './kit.js';
 import { drawCylinder, GAS_KIND } from './engine.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -79,6 +79,6 @@ export function drawFourStroke(c, st) {
   if (valvesOverlap(a)) text(c, L('两个气门同时开着：气门重叠', 'Both valves open: valve overlap'), 836, 400, { size: 13, color: C.accent, align: 'center', weight: 600 });
   gasKey(c, 790, 470);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
-  text(c, 'FIG. 1', 28, 740, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  figLabel(c, st.figure);
   return { anchors, gas: GAS_KIND[strokeIndex(a)], speed };
 }

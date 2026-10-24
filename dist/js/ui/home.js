@@ -1,6 +1,6 @@
 import { ENTRIES, GROUPS, COMING, entryById } from '../data/entries.js';
 import { bi, t } from '../i18n.js';
-import { W, H } from '../draw/kit.js';
+import { W, H, fitCanvas } from '../draw/kit.js';
 import { drawPreview } from './preview.js';
 import { cardHTML, mountCards } from './cards.js';
 import { rich } from './terms.js';
@@ -56,16 +56,18 @@ export function homePage() {
     root.querySelectorAll('[data-jump]').forEach(b => b.addEventListener('click', () => {
       root.querySelector('#group-' + b.dataset.jump).scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
     }));
-    let theta = 30, time = 0;
+    let theta = 30, time = 0, heroVisible = true;
+    const io = 'IntersectionObserver' in window && new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; });
+    if (io) io.observe(hero);
     return {
       frame(dt) {
         if (document.hidden) return;
         time += dt;
         if (!reduced) theta += 32 * 6 * dt;
-        drawPreview(hero, featured, theta, time);
+        if (heroVisible) { fitCanvas(hero); drawPreview(hero, featured, theta, time, 700 / hero.clientWidth); }
         cards.frame(dt);
       },
-      stop() { cards.stop(); }
+      stop() { cards.stop(); if (io) io.disconnect(); }
     };
   }
   return { html, mount, title: '' };

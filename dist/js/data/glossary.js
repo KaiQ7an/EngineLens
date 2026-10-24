@@ -17,6 +17,12 @@ export const GLOSSARY = [
   { id: 'bov', name: ['泄压阀', 'Blow-off valve'], text: ['松油门时节气门突然关上，压缩好的空气没处去，就从这里放掉。"呲"的一声就是它。', 'When the throttle snaps shut, the pressurised air has nowhere to go and escapes here. That "pssh" is this valve.'] },
   { id: 'valve-overlap', name: ['气门重叠', 'Valve overlap'], text: ['排气快结束时进气门已经开始打开，两个门同时开着一小会儿，利用气流把废气"带"出去。', 'Near the end of exhaust the intake valve starts opening, so both are open briefly and the moving gas helps scavenge the cylinder.'] },
   { id: 'balance-shaft', name: ['平衡轴', 'Balance shaft'], text: ['带偏心配重、跟着曲轴转的轴，用来抵消发动机天生的抖动。', 'A shaft with offset weights that turns with the crank to cancel out vibration the engine makes by design.'] },
+  { id: 'compression-ignition', name: ['压燃', 'Compression ignition'], text: ['不用火花塞，靠把空气压到滚烫，让喷进来的燃油自己着火。柴油机就是这样点火的。', 'No spark plug: the air is squeezed until it is hot enough to light the fuel sprayed into it. It is how diesels ignite.'] },
+  { id: 'regen', name: ['动能回收', 'Regenerative braking'], text: ['减速时让电机反过来当发电机，把车的动能变成电存进电池，而不是全变成刹车片上的热。', 'Slowing down by running the motor as a generator, so the car\'s energy goes back into the battery instead of turning into brake heat.'] },
+  { id: 'inverter', name: ['电控（逆变器）', 'Inverter'], text: ['把电池的直流电变成电机要的三相交流电，并控制电机转多快、出多大力。', 'Turns the battery\'s direct current into the three-phase current a motor needs, and controls its speed and torque.'] },
+  { id: 'phev', name: ['插电混动（PHEV）', 'Plug-in hybrid (PHEV)'], text: ['电池更大、可以插电充电的混动车，日常短途可以基本只用电。', 'A hybrid with a bigger battery you can charge from a plug, so short daily trips can be almost all electric.'] },
+  { id: 'mgu-k', name: ['MGU-K', 'MGU-K'], text: ['F1 动力单元里和曲轴相连的电机：刹车时发电，加速时出力。2026 年起最大 350 kW。', 'The F1 power unit\'s motor-generator geared to the crankshaft: it harvests under braking and pushes under acceleration, up to 350 kW from 2026.'] },
+  { id: 'mgu-h', name: ['MGU-H', 'MGU-H'], text: ['2014–2025 年 F1 动力单元里装在涡轮轴上的电机，能从废气回收能量、消除涡轮迟滞。2026 年取消。', 'The motor-generator on the turbo shaft of 2014–2025 F1 power units; it recovered exhaust energy and removed turbo lag. Dropped in 2026.'] },
   { id: 'parasitic', name: ['驱动损失', 'Parasitic loss'], text: ['机械增压器靠曲轴带动，所以要"吃掉"发动机的一部分动力。', 'A supercharger is driven by the crank, so it eats some of the engine\'s own power.'] }
 ];
 

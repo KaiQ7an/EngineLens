@@ -1,6 +1,6 @@
 import { ENTRIES, GROUPS, entryById } from '../data/entries.js';
 import { bi, t, ui } from '../i18n.js';
-import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, clamp } from '../draw/kit.js';
+import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, clamp, fitCanvas, setTextBoost } from '../draw/kit.js';
 import { VIEWS } from '../draw/views.js';
 import { wrap, valveLift } from '../sim/kinematics.js';
 import { rich } from './terms.js';
@@ -71,6 +71,8 @@ export function entryPage(id) {
   const siblings = ENTRIES.filter(e => e.group === entry.group);
   const view = VIEWS[entry.view];
   const n = entry.steps.length;
+  // Figures are numbered like plates in a book: category, then place in it.
+  const figure = `${GROUPS.indexOf(group) + 1}.${siblings.indexOf(entry) + 1}`;
 
   const html = `
   <article class="entry" data-kind="${entry.kind}">
@@ -214,7 +216,14 @@ export function entryPage(id) {
       st.theta = after;
     }
 
+    // Drawing pauses while the figure is scrolled out of view; the animation's state
+    // keeps advancing so it picks up where it should be.
+    let visible = true;
+    const io = 'IntersectionObserver' in window && new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
+    if (io) io.observe(canvas);
+
     function draw() {
+      fitCanvas(canvas);
       const i = currentStep();
       const s = entry.steps[i];
       const guidedFocus = (st.guided || !st.playing) && s.focus;
@@ -225,12 +234,14 @@ export function entryPage(id) {
       const a = wrap(st.theta);
       const vis = Math.min(st.speed, VISUAL_CAP);
       const frame = {
-        ...st, theta: st.theta, parts: entry.parts,
+        ...st, theta: st.theta, parts: entry.parts, figure,
         blur: entry.kind === 'crank' ? clamp((st.speed - VISUAL_CAP) / 1500) : 0,
         flow: { intake: valveLift(a, 'intake') * (0.5 + vis / 60), exhaust: valveLift(a, 'exhaust') * (0.5 + vis / 60) },
         step: s
       };
+      setTextBoost(700 / canvas.clientWidth);
       withFocus(c, () => view.draw(c, frame, entry));
+      setTextBoost(1);
       setFocus(null);
       updateCaption();
     }
@@ -263,8 +274,8 @@ export function entryPage(id) {
 
     render();
     return {
-      frame(dt) { if (!document.hidden) { advance(dt); draw(); cards.frame(dt); } },
-      stop() { cards.stop(); },
+      frame(dt) { if (!document.hidden) { advance(dt); if (visible) draw(); cards.frame(dt); } },
+      stop() { cards.stop(); if (io) io.disconnect(); },
       key(e) {
         if (e.key === ' ') { st.playing = !st.playing; st.hold = 0; render(); return true; }
         if (e.key === 'ArrowRight') { goStep(currentStep() + 1); return true; }
