@@ -1,4 +1,5 @@
 import { pistonDrop, pinHeight, valveLift, sparkGlow, burnGlow, camAngle, wrap, strokeIndex } from '../sim/kinematics.js';
+import { injection, IGNITE } from '../sim/diesel.js';
 import { C, part, alpha, hash, clamp, lerp, ease, circle, path, stroke, dot, flow, fillCut, fillPart } from './kit.js';
 
 // One cylinder in cross-section, drawn around its crank centre. Units are local and
@@ -7,23 +8,26 @@ export const R = 40, L = 150;
 const BORE = 75, DECK = -240, HEAD = -318, CROWN = 36, SKIRT = 30;
 const VALVE_X = 36, PORT_Y = -292;
 
-// What the gas in the cylinder is doing at crank angle θ, as a dot style.
+// What the gas in the cylinder is doing at crank angle θ, as a dot style. A diesel's
+// charge starts burning when the injected fuel meets the hot air, not at a spark.
 export const GAS_KIND = ['air', 'squeezed', 'burning', 'exhaust'];
-export const gasKind = theta => {
+export const gasKind = (theta, diesel = false) => {
   const a = wrap(theta);
   if (a < 180) return 'air';
-  if (a < 350) return 'squeezed';
+  if (a < (diesel ? IGNITE : 350)) return 'squeezed';
   if (a < 540) return 'burning';
   return 'exhaust';
 };
 
-const crownY = theta => -pinHeight(theta, R, L) - CROWN;
+// A diesel piston rides higher at the top, leaving far less room: a higher compression ratio.
+const crownHeight = diesel => CROWN + (diesel ? 9 : 0);
+const crownY = (theta, diesel) => -pinHeight(theta, R, L) - crownHeight(diesel);
 
 // Dots of air inside the cylinder: their number is the air charge, so a turbo
 // visibly packs in more. They stream in through the intake valve, crowd together as
 // the piston rises, burn, and leave through the exhaust valve.
-function gas(c, theta, n, time) {
-  const a = wrap(theta), crown = crownY(theta), kind = gasKind(a);
+function gas(c, theta, n, time, diesel) {
+  const a = wrap(theta), crown = crownY(theta, diesel), kind = gasKind(a, diesel);
   const intakeFill = a < 180 ? pistonDrop(a, R, L) / (2 * R) : 1;
   const remaining = a >= 540 ? pistonDrop(a, R, L) / (2 * R) : 1;
   const jitter = kind === 'burning' ? 3 : 1.1;
@@ -54,7 +58,27 @@ function spring(c, x, top, bottom) {
   stroke(c, pts, C.ink2, 1.3);
 }
 
-function head(c, theta, time, { cams, flowRate, density, intakeKind }) {
+// Diesel head: an injector where the spark plug would be, and a glow plug for cold starts.
+function dieselHead(c, theta, time) {
+  part(c, 'injector', () => {
+    c.beginPath(); c.roundRect(-8, HEAD - 46, 16, 34, 3); fillPart(c);
+    stroke(c, [[0, HEAD - 12], [0, DECK - 2]], C.ink, 6);
+    const q = injection(theta);
+    if (q > 0) { // a fine cone of fuel spray
+      for (let i = 0; i < 26; i++) {
+        const side = i % 2 ? 1 : -1, t = hash(i * 7 + Math.floor(time * 30)), d = 6 + t * 46 * q;
+        const ang = Math.PI / 2 + side * (0.35 + hash(i) * 0.5);
+        circle(c, Math.cos(ang) * d, DECK + 2 + Math.sin(ang) * d, 1.8, alpha(C.accent, 0.9));
+      }
+    }
+  });
+  part(c, 'glow-plug', () => {
+    stroke(c, [[28, HEAD - 6], [16, DECK - 6]], C.ink, 4);
+    circle(c, 16, DECK - 6, 3.5, C.burn);
+  });
+}
+
+function head(c, theta, time, { cams, flowRate, density, intakeKind, diesel }) {
   const li = valveLift(theta, 'intake'), le = valveLift(theta, 'exhaust');
   const intakePort = [[-118, PORT_Y], [-96, PORT_Y], [-VALVE_X - 6, DECK - 22], [-VALVE_X, DECK - 2]];
   const exhaustPort = [[VALVE_X, DECK - 2], [VALVE_X + 6, DECK - 22], [96, PORT_Y], [118, PORT_Y]];
@@ -87,6 +111,7 @@ function head(c, theta, time, { cams, flowRate, density, intakeKind }) {
       c.restore();
     }
   });
+  if (diesel) return dieselHead(c, theta, time);
   part(c, 'spark', () => {
     c.beginPath(); c.roundRect(-10, HEAD - 42, 20, 30, 3); fillPart(c);
     stroke(c, [[-10, HEAD - 30], [10, HEAD - 30]], C.ink, 1); stroke(c, [[-10, HEAD - 22], [10, HEAD - 22]], C.ink, 1);
@@ -103,7 +128,7 @@ function head(c, theta, time, { cams, flowRate, density, intakeKind }) {
   });
 }
 
-function bottomEnd(c, theta, ghost = 1) {
+function bottomEnd(c, theta, ghost = 1, diesel = false) {
   const a = theta * Math.PI / 180;
   const pin = [R * Math.sin(a), -R * Math.cos(a)];
   const wrist = [0, -pinHeight(theta, R, L)];
@@ -124,9 +149,12 @@ function bottomEnd(c, theta, ghost = 1) {
     circle(c, pin[0], pin[1], 10, C.paper, C.ink, 1.4);
   });
   part(c, 'piston', () => {
-    const top = wrist[1] - CROWN;
-    c.beginPath(); c.roundRect(-BORE + 2, top, 2 * BORE - 4, CROWN + SKIRT, 4); fillPart(c);
-    for (let k = 0; k < 3; k++) stroke(c, [[-BORE + 2, top + 8 + k * 6], [BORE - 2, top + 8 + k * 6]], C.ink, 1.1);
+    const h = crownHeight(diesel), top = wrist[1] - h;
+    c.beginPath(); c.roundRect(-BORE + 2, top, 2 * BORE - 4, h + SKIRT, 4); fillPart(c);
+    if (diesel) { // the combustion bowl cut into a diesel piston's crown
+      c.beginPath(); c.ellipse(0, top, 34, 9, 0, 0, Math.PI); c.fillStyle = C.paper; c.fill(); c.strokeStyle = C.ink; c.lineWidth = 1.2; c.stroke();
+    }
+    for (let k = 0; k < 3; k++) stroke(c, [[-BORE + 2, top + 12 + k * 6], [BORE - 2, top + 12 + k * 6]], C.ink, 1.1);
     circle(c, 0, wrist[1], 11, C.paper, C.ink, 1.4);
   });
   c.restore();
@@ -134,9 +162,9 @@ function bottomEnd(c, theta, ghost = 1) {
 
 // Draw a cylinder. Returns anchor points (stage coordinates) for labels and hit tests.
 export function drawCylinder(c, theta, o = {}) {
-  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, blur = 0, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true } = o;
+  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, blur = 0, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true, diesel = false } = o;
   c.save(); c.translate(x, y); c.scale(s, s);
-  const a = wrap(theta), crown = crownY(theta);
+  const a = wrap(theta), crown = crownY(theta, diesel);
   part(c, 'cylinder', () => {
     for (const x0 of [-BORE - 20, BORE]) { c.beginPath(); c.rect(x0, DECK, 20, 166); fillCut(c); }
     if (crankcase) {
@@ -145,24 +173,24 @@ export function drawCylinder(c, theta, o = {}) {
     }
   });
   part(c, 'chamber', () => {
-    const burn = burnGlow(a);
+    const burn = burnGlow(diesel ? a - (IGNITE - 350) : a);
     if (burn > 0) {
       const col = C.burn;
       const f = c.createRadialGradient(0, DECK + 6, 0, 0, DECK + 6, 26 + (crown - DECK) * 1.3);
       f.addColorStop(0, alpha(col, burn * 0.45)); f.addColorStop(1, alpha(col, 0));
       c.fillStyle = f; c.fillRect(-BORE, DECK, 2 * BORE, crown - DECK);
     }
-    gas(c, a, air, time);
+    gas(c, a, air, time, diesel);
   });
-  for (let k = 3; k >= 1 && blur > 0; k--) bottomEnd(c, theta - k * 9, 0.16 * blur);
-  bottomEnd(c, theta);
-  head(c, a, time, { cams, flowRate, density, intakeKind });
+  for (let k = 3; k >= 1 && blur > 0; k--) bottomEnd(c, theta - k * 9, 0.16 * blur, diesel);
+  bottomEnd(c, theta, 1, diesel);
+  head(c, a, time, { cams, flowRate, density, intakeKind, diesel });
   c.restore();
   const at = (lx, ly) => [x + lx * s, y + ly * s];
   return {
     'intake-valve': at(-VALVE_X, DECK + 4), 'exhaust-valve': at(VALVE_X, DECK + 4),
     'intake-port': at(-118, PORT_Y), 'exhaust-port': at(118, PORT_Y),
-    spark: at(0, HEAD - 28), cams: at(-VALVE_X, HEAD - 49), chamber: at(0, (DECK + crown) / 2),
+    spark: at(0, HEAD - 28), injector: at(0, HEAD - 30), 'glow-plug': at(22, HEAD - 30), cams: at(-VALVE_X, HEAD - 49), chamber: at(0, (DECK + crown) / 2),
     piston: at(-BORE + 22, crown + 24), rod: at(0, (-pinHeight(theta, R, L) - R) / 2), crank: at(-38, 26),
     cylinder: at(BORE + 10, DECK + 100), stroke: strokeIndex(a), scale: s
   };

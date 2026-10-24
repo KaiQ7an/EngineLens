@@ -2,6 +2,8 @@ import { drawFourStroke } from './fourstroke.js';
 import { drawNA, drawTurbo, drawSuper, inductionView } from './induction.js';
 import { throttleView } from './experiment.js';
 import { inline4View, inline6View, v6View, v12View, boxerView, drawV8 } from './layouts.js';
+import { drawDiesel } from './diesel.js';
+import { drawRotary } from './rotary.js';
 
 // Each entry names a view: how to draw it, plus optional extra controls and state updates.
 export const VIEWS = {
@@ -15,5 +17,7 @@ export const VIEWS = {
   v6: v6View,
   v8: { draw: drawV8 },
   v12: v12View,
-  boxer: boxerView
+  boxer: boxerView,
+  diesel: { draw: drawDiesel },
+  rotary: { draw: drawRotary }
 };

@@ -5,12 +5,13 @@
 export const GROUPS = [
   { id: 'basics', name: ['基本原理', 'The basics'] },
   { id: 'induction', name: ['进气方式', 'How it breathes'] },
-  { id: 'layout', name: ['气缸布局', 'Cylinder layouts'] }
+  { id: 'layout', name: ['气缸布局', 'Cylinder layouts'] },
+  { id: 'special', name: ['特殊结构', 'Different designs'] }
 ];
 
 // Engines not in the gallery yet.
 export const COMING = [
-  ['W16 / V16', 'W16 / V16'], ['双增压与电动增压', 'Twincharging & e-boost'], ['柴油', 'Diesel'], ['转子', 'Rotary'],
+  ['W16 / V16', 'W16 / V16'], ['双增压与电动增压', 'Twincharging & e-boost'],
   ['混合动力', 'Hybrid'], ['增程', 'Range extender'], ['纯电电机', 'Electric motor'], ['氢燃料电池', 'Fuel cell'], ['2026 F1 动力单元', '2026 F1 power unit']
 ];
 
@@ -18,7 +19,8 @@ const tags = {
   inline: ['直列', 'Inline'], i3: ['直列三缸', 'Inline-3'], i4: ['直列四缸', 'Inline-4'], v6: ['V6', 'V6'], v8: ['V8', 'V8'], v8cross: ['V8 十字曲轴', 'Cross-plane V8'], v8flat: ['V8 平面曲轴', 'Flat-plane V8'], i6: ['直列六缸', 'Inline-6'], v12: ['V12', 'V12'], flat4: ['水平对置四缸', 'Flat-4'],
   flat6: ['水平对置六缸', 'Flat-6'],
   na: ['自然吸气', 'Naturally aspirated'], turbo: ['涡轮', 'Turbo'], twin: ['双涡轮', 'Twin-turbo'], sc: ['机械增压', 'Supercharged'],
-  turboHybrid: ['涡轮 + 电机', 'Turbo + motor'], twinHybrid: ['双涡轮 + 电机', 'Twin-turbo + motor'], naHybrid: ['自然吸气 + 电机', 'NA + motors']
+  turboHybrid: ['涡轮 + 电机', 'Turbo + motor'], twinHybrid: ['双涡轮 + 电机', 'Twin-turbo + motor'], naHybrid: ['自然吸气 + 电机', 'NA + motors'],
+  diesel: ['柴油', 'Diesel'], rotor1: ['单转子', 'Single rotor'], rotor2: ['双转子', 'Twin rotor'], rotor4: ['四转子', 'Four rotor'], rangeExt: ['只发电（增程）', 'Generator only']
 };
 
 export const ENTRIES = [
@@ -520,6 +522,100 @@ export const ENTRIES = [
     myth: {
       q: ['斯巴鲁那种"噗噗"声，是水平对置带来的吗？', 'Is the Subaru "burble" a boxer thing?'],
       a: ['不完全是。那种不均匀的声音主要来自老款斯巴鲁的不等长排气歧管，而不是水平对置本身；换成等长排气以后，声音就变均匀了。', 'Not exactly. That uneven sound came mostly from older Subarus\' unequal-length exhaust headers, not the boxer layout itself; with equal-length headers it evens out.']
+    }
+  },
+  {
+    id: 'diesel', group: 'special', view: 'diesel', kind: 'crank', speed: 18,
+    eyebrow: 'DIESEL',
+    name: ['柴油机', 'Diesel'],
+    tagline: ['没有火花塞，压得够狠就自己着', 'No spark plug: squeeze hard enough and it lights itself'],
+    facts: [[['点火方式', 'Ignition'], ['压燃（没有火花塞）', 'Compression (no spark plug)']], [['压缩比', 'Compression ratio'], ['约 15–20（汽油机约 10–13）', 'About 15–20 (petrol 10–13)']], [['常见于', 'Found in'], ['皮卡、越野车、卡车', 'Pickups, 4×4s and trucks']]],
+    card: ['不点火，靠把空气压到滚烫。', 'No spark: it squeezes air until it is scorching.'],
+    lead: ['柴油机也是四个冲程，但它吸进来的只有空气。活塞把空气压得比汽油机狠得多，空气被压到六百多度，这时喷进柴油，油雾一碰到热空气就自己烧起来。所以它没有火花塞。', 'A diesel runs the same four strokes, but breathes in air alone. It squeezes that air far harder than a petrol engine, to over 600°C, then sprays in diesel, which lights the moment it meets the hot air. So there is no spark plug.'],
+    analogy: ['像用打气筒狠狠地打气，筒身会发烫：把空气压得够紧，热量就够把柴油点着。', 'Like a bike pump that gets hot when you pump hard: squeeze air tightly enough and it gets hot enough to light diesel.'],
+    steps: [
+      { at: 90, until: 180, title: ['只吸空气', 'Air only'], text: ['和汽油机不同，柴油机吸气时只吸进纯空气，一滴油都没有。', 'Unlike a petrol engine, a diesel breathes in air alone, with no fuel at all.'], focus: ['intake-valve', 'chamber'] },
+      { at: 300, until: 352, title: ['狠狠压缩', 'A hard squeeze'], text: ['活塞把空气压到原来的大约十六分之一，空气被压得滚烫：看右边的温度计，超过 600°C。', 'The piston squeezes the air to about a sixteenth of its volume and it gets scorching: the thermometer passes 600°C.'], focus: ['chamber', 'thermo'] },
+      { at: 366, until: 400, title: ['喷油，自己着火', 'Inject, and it lights itself'], text: ['活塞快到顶时，喷油嘴把柴油喷成细雾。滚烫的空气一碰到油雾就自己烧起来，不需要火花塞。', 'Just before the top, the injector sprays a fine mist of diesel. The scorching air lights it on contact: no spark plug needed.'], focus: ['injector', 'chamber'] },
+      { at: 450, until: 540, title: ['做功', 'Power'], text: ['燃烧推着活塞往下走。柴油机推得早、推得猛，所以低转速就有很大的[[torque|扭矩]]。', 'The burn drives the piston down. A diesel pushes early and hard, which is why it has big torque at low revs.'], focus: ['piston', 'chamber'] },
+      { at: 630, until: 720, title: ['排气', 'Exhaust'], text: ['和汽油机一样，排气门打开，活塞把废气推出去。', 'As in a petrol engine, the exhaust valve opens and the piston pushes the burnt gas out.'], focus: ['exhaust-valve', 'exhaust-port'] }
+    ],
+    parts: {
+      injector: { name: ['喷油嘴', 'Injector'], text: ['在缸顶正中间，压缩快结束时用极高的压力把柴油喷成雾。它代替了火花塞的位置。', 'Sits at the centre of the head and sprays diesel as a mist at very high pressure near the top of compression. It takes the spark plug\'s place.'] },
+      'glow-plug': { name: ['预热塞', 'Glow plug'], text: ['天冷时发动机还是冷的，压缩也不够热，预热塞会先把燃烧室加热，帮它点着。', 'On a cold morning the compression is not hot enough yet, so the glow plug heats the chamber to help it start.'] },
+      'intake-valve': { name: ['进气门', 'Intake valve'], text: ['只放空气进来，燃油不从这里进。', 'Lets in air only; fuel does not come this way.'] },
+      'exhaust-valve': { name: ['排气门', 'Exhaust valve'], text: ['排气时打开。', 'Opens for the exhaust stroke.'] },
+      chamber: { name: ['燃烧室', 'Combustion chamber'], text: ['比汽油机的小得多：空间越小，压得越狠，空气越烫。', 'Much smaller than a petrol engine\'s: the tighter the space, the harder the squeeze and the hotter the air.'] },
+      piston: { name: ['活塞', 'Piston'], text: ['顶上有一个凹坑（燃烧碗），让喷进来的油雾和空气搅在一起。', 'Its crown has a bowl that swirls the fuel mist into the air.'] },
+      thermo: { name: ['温度计', 'Thermometer'], text: ['缸内空气被压缩时的温度（示意）。柴油机能压到 600 多度，汽油机大约 480 度。', 'The air temperature as it is squeezed (a model). A diesel reaches over 600°C, a petrol engine about 480°C.'] },
+      'exhaust-port': { name: ['排气管', 'Exhaust'], text: ['现代柴油车的排气里有颗粒捕集器，专门拦下黑烟。', 'Modern diesels have a particulate filter in the exhaust to trap soot.'] }
+    },
+    pros: [
+      ['省油：同样一箱油，柴油机能跑得更远。', 'Frugal: it goes further on a tank.'],
+      ['低转速扭矩大，拖车、越野、拉货都很有劲。', 'Huge low-rev torque for towing, off-road and hauling.'],
+      ['结构结实，寿命长。', 'Built tough and long-lived.']
+    ],
+    cons: [
+      ['转速不高，声音粗，振动大。', 'Low revs, a gruff sound and more vibration.'],
+      ['排放里氮氧化物和颗粒多，需要复杂的尾气处理。', 'More NOx and soot, needing complex exhaust treatment.'],
+      ['为了扛住高压，发动机更重、更贵。', 'Heavier and more expensive, to withstand the pressure.']
+    ],
+    cars: [
+      { name: ['丰田 Hilux / Land Cruiser', 'Toyota Hilux / Land Cruiser'], engine: ['1GD-FTV 2.8', '1GD-FTV 2.8'], tags: [tags.i4, tags.diesel, tags.turbo], why: ['澳洲路上最常见的皮卡和越野车之一。', 'One of the most common pickups and 4×4s on Australian roads.'] },
+      { name: ['福特 Ranger', 'Ford Ranger'], engine: ['3.0 V6', '3.0 V6'], tags: [tags.v6, tags.diesel, tags.turbo], why: ['V6 柴油皮卡。', 'A V6 diesel pickup.'] },
+      { name: ['奥迪 R10 TDI', 'Audi R10 TDI'], engine: ['5.5 V12', '5.5 V12'], tags: [tags.v12, tags.diesel, tags.twin], why: ['2006 年勒芒 24 小时冠军，第一台赢下勒芒的柴油赛车。', 'Won Le Mans in 2006, the first diesel to do so.'] }
+    ],
+    myth: {
+      q: ['柴油车一定冒黑烟吗？', 'Do diesels always smoke?'],
+      a: ['老柴油车加速时冒黑烟，是油喷多了烧不完。现代柴油机用高压共轨精确喷油，排气里还有颗粒捕集器，正常情况下几乎看不到烟。', 'Old diesels smoked under load because fuel was not burning completely. Modern ones meter fuel precisely with high-pressure common-rail injection and trap soot in a particulate filter, so you rarely see smoke.']
+    }
+  },
+  {
+    id: 'rotary', group: 'special', view: 'rotary', kind: 'crank', speed: 24,
+    eyebrow: 'WANKEL ROTARY',
+    name: ['转子发动机', 'Rotary'],
+    tagline: ['没有活塞，三角形在画圈', 'No pistons, just a triangle going round'],
+    facts: [[['运动方式', 'Motion'], ['只有旋转，没有往复活塞', 'All rotation, no pistons']], [['转速比', 'Speed ratio'], ['偏心轴 3 圈 : 转子 1 圈', 'Shaft 3 turns : rotor 1']], [['做功', 'Power strokes'], ['偏心轴每转一圈，每个转子一次', 'One per rotor per shaft turn']], [['常见于', 'Found in'], ['马自达 RX-7、RX-8', 'Mazda RX-7, RX-8']]],
+    card: ['一个三角转子，四个冲程同时进行。', 'One triangular rotor, all four strokes at once.'],
+    lead: ['转子发动机（汪克尔发动机）没有上下跑的活塞：一个三角形的转子在一个"花生形"的缸里画圈，三个面各自围出一个腔，同时在进气、压缩、做功、排气。马自达把它做成了传奇。', 'A rotary (Wankel) engine has no pistons going up and down: a triangular rotor orbits inside a peanut-shaped housing, and each of its three faces seals off a chamber that is breathing in, squeezing, firing or exhausting, all at once. Mazda made it a legend.'],
+    analogy: ['像一扇三角形的旋转门：转一圈，三个隔间都依次经过入口、压紧、点火和出口。', 'Like a three-sided revolving door: one turn carries each compartment past the entrance, the squeeze, the spark and the exit.'],
+    steps: [
+      { title: ['三角转子在画圈', 'A triangle going round'], text: ['转子的三个角始终贴着花生形的缸壁，把空间隔成三个腔。', 'The rotor\'s three tips always touch the peanut-shaped housing, dividing it into three chambers.'], focus: ['rotor', 'housing'] },
+      { title: ['三个腔同时在干活', 'Three chambers at work'], text: ['同一时刻，一个腔在进气，一个在压缩或做功，一个在排气。每个腔里都写着它正在做什么。', 'At any moment one chamber is breathing in, one compressing or firing, one exhausting. Each chamber is labelled with what it is doing.'], focus: ['rotor', 'intake', 'exhaust'] },
+      { title: ['挤到最小时点火', 'Spark at the squeeze'], text: ['腔被挤到最小的时候，正好转到右边的火花塞旁：火花一点，燃气推着转子继续转。', 'A chamber is squeezed smallest just as it reaches the spark plugs on the right; they fire and the burning gas pushes the rotor on.'], focus: ['spark', 'rotor'] },
+      { title: ['3 : 1', '3 : 1'], text: ['中间的偏心轴转三圈，转子才转一圈。盯着黄色的轴标记和白色的转子标记，数一数。', 'The eccentric shaft in the middle turns three times for each turn of the rotor. Watch the yellow shaft marker and the white rotor marker, and count.'], focus: ['shaft', 'gears'] },
+      { title: ['每转一圈做一次功', 'One power stroke per turn'], text: ['偏心轴每转一圈，转子就有一个腔在做功，和两缸四冲程发动机一样多，体积却小得多。', 'Each turn of the shaft brings one power stroke, as many as a two-cylinder four-stroke, in a much smaller package.'], focus: ['shaft', 'spark'] },
+      { title: ['代价：密封片', 'The catch: the seals'], text: ['三个角上的密封片要一直贴着缸壁滑动，容易磨损；燃烧室又长又扁，所以更费油，也会消耗一点机油。', 'The tip seals slide against the housing all the time and wear; the long, thin chamber burns less efficiently, so it uses more fuel and a little oil.'], focus: ['seals'] }
+    ],
+    parts: {
+      rotor: { name: ['三角转子', 'Rotor'], text: ['相当于活塞：三个面各推着一个腔，面上的凹坑是燃烧的地方。', 'It plays the piston\'s role: each face works one chamber, and the recess in each face is where the charge burns.'] },
+      housing: { name: ['缸体（花生形）', 'Housing'], text: ['内壁是一种叫"外旋轮线"的曲线，正好让转子的三个角一直贴着它。', 'Its inner wall is an epitrochoid, the curve that keeps all three rotor tips touching it.'] },
+      shaft: { name: ['偏心轴', 'Eccentric shaft'], text: ['相当于曲轴：转子套在它偏心的轴颈上，推着它转。', 'It plays the crank\'s role: the rotor rides on its off-centre journal and pushes it round.'] },
+      gears: { name: ['相位齿轮', 'Phasing gears'], text: ['固定齿轮和转子里的内齿圈是 2 : 3，正是它们让转子只转轴的三分之一。', 'A fixed gear and the rotor\'s internal ring gear, 2 : 3, hold the rotor to a third of shaft speed.'] },
+      spark: { name: ['火花塞（两个）', 'Spark plugs'], text: ['燃烧室又长又扁，所以用前后两个火花塞，烧得更完全。', 'The chamber is long and thin, so two plugs fire to burn it more fully.'] },
+      intake: { name: ['进气口', 'Intake port'], text: ['开在缸体侧面，转子转过时自动打开、关上，不需要气门。', 'Cut into the housing; the rotor uncovers and covers it as it passes, so there are no valves.'] },
+      exhaust: { name: ['排气口', 'Exhaust port'], text: ['同样没有气门，转子转过就打开。', 'Also valveless: the rotor opens it as it goes by.'] },
+      seals: { name: ['顶端密封片', 'Apex seals'], text: ['三个角上的密封片把三个腔隔开，是转子发动机最关键、也最容易磨损的零件。', 'The seals at the three tips keep the chambers apart: the rotary\'s most critical and most worn part.'] }
+    },
+    pros: [
+      ['零件少、体积小、重量轻：没有气门，也没有凸轮轴。', 'Few parts, small and light: no valves, no camshafts.'],
+      ['只有旋转没有往复，非常顺滑，能转得很高。', 'All rotation, nothing reciprocating: very smooth and high-revving.'],
+      ['同样的体积，功率大。', 'Strong power for its size.']
+    ],
+    cons: [
+      ['顶端密封片会磨损，寿命和可靠性一直是老问题。', 'Apex seal wear: a long-standing reliability issue.'],
+      ['燃烧室长而扁，油耗高、排放难达标。', 'A long, thin chamber hurts economy and emissions.'],
+      ['设计上要消耗一点机油来润滑密封片。', 'By design it burns a little oil to lubricate the seals.']
+    ],
+    cars: [
+      { name: ['马自达 RX-7（FD）', 'Mazda RX-7 (FD)'], engine: ['13B-REW', '13B-REW'], tags: [tags.rotor2, tags.twin], why: ['双转子加顺序双涡轮，转子跑车的代表。', 'Twin rotors with sequential twin turbos: the rotary sports car.'] },
+      { name: ['马自达 RX-8', 'Mazda RX-8'], engine: ['Renesis 13B-MSP', 'Renesis 13B-MSP'], tags: [tags.rotor2, tags.na], why: ['自然吸气的双转子，侧面进排气口。', 'A naturally aspirated twin-rotor with side ports.'] },
+      { name: ['马自达 787B', 'Mazda 787B'], engine: ['R26B', 'R26B'], tags: [tags.rotor4, tags.na], why: ['1991 年勒芒冠军，至今唯一用转子赢下勒芒的赛车。', 'Won Le Mans in 1991, still the only rotary-powered winner.'] },
+      { name: ['马自达 MX-30 R-EV', 'Mazda MX-30 R-EV'], engine: ['8C', '8C'], tags: [tags.rotor1, tags.rangeExt], why: ['单转子不驱动车轮，只负责发电。', 'A single rotor that drives no wheels and only generates power.'] }
+    ],
+    myth: {
+      q: ['"转子烧机油"是故障吗？', 'Is a rotary burning oil a fault?'],
+      a: ['不是。转子发动机会故意把少量机油喷进燃烧室，润滑三个角上的密封片，所以消耗机油是设计如此；需要的是定期检查和补充。', 'No. A rotary deliberately meters a little oil into the chambers to lubricate the apex seals, so using oil is by design; it just needs checking and topping up.']
     }
   }
 ];
