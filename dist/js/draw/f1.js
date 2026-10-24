@@ -1,6 +1,6 @@
 import { ENGINES } from '../sim/firing.js';
 import { ERAS, electricShare, LAP, zoneAt, speedAt, FLOW } from '../sim/f1.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel, para, below } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel, para, below, note, isCompact } from './kit.js';
 import { frontSection } from './layouts.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -60,6 +60,8 @@ function splitBars(c, era) {
   return [x0 + 120, 130];
 }
 
+const ZONE_NAMES = { deploy: ['放电：电机帮着推', 'Deploying: the motor pushes'], top: ['接近极速：电机出力减小', 'Near top speed: the motor eases off'], brake: ['刹车：电机发电充电', 'Braking: the motor harvests'], corner: ['过弯', 'Cornering'] };
+
 function lapTrace(c, lap) {
   const { x0, x1, y0, y1 } = LAPBOX, sx = p => x0 + (x1 - x0) * p, sy = v => y0 - (y0 - y1) * (v - 80) / 260;
   for (const [i, z] of LAP.entries()) {
@@ -73,8 +75,7 @@ function lapTrace(c, lap) {
   const z = zoneAt(lap), car = [sx(lap % 1), sy(speedAt(lap))];
   circle(c, car[0], car[1], 7, C.accent, C.ink, 1.4);
   para(c, L('一圈的车速（示意）· 黄色区域是刹车区', 'Speed over a lap (model) · yellow: braking zones'), x0, y1 - 20, x1 - x0, { size: 13, color: C.ink2, anchor: 'bottom' });
-  const names = { deploy: ['放电：电机帮着推', 'Deploying: the motor pushes'], top: ['接近极速：电机出力减小', 'Near top speed: the motor eases off'], brake: ['刹车：电机发电充电', 'Braking: the motor harvests'], corner: ['过弯', 'Cornering'] };
-  text(c, L(...names[z.zone]), x0, y0 + 38, { size: 16, weight: 800, color: z.zone === 'brake' ? C.accent : C.ink, fit: x1 - x0 });
+  text(c, L(...ZONE_NAMES[z.zone]), x0, y0 + 38, { size: 16, weight: 800, color: z.zone === 'brake' ? C.accent : C.ink, fit: x1 - x0 });
   text(c, Math.round(speedAt(lap)) + ' km/h', x0, y0 + 38 + below(16, 28), { size: 16, font: MONO, weight: 600 });
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 }
@@ -138,6 +139,12 @@ export function drawF1(c, st) {
   anchors.es = [ES[0], ES[1] - 30];
   part(c, 'split', () => { anchors.split = splitBars(c, era); });
   part(c, 'lap', () => { anchors.lap = lapTrace(c, lap); });
+  if (isCompact()) note(c, 0, 0, 0, L('此刻', 'RIGHT NOW'), [
+    [L('这一段', 'On the lap'), L(...ZONE_NAMES[zone]), zone === 'brake'],
+    [L('车速（示意）', 'Speed (model)'), Math.round(speedAt(lap)) + ' km/h'],
+    [L('电池', 'Battery'), flow < 0 ? L('充电中', 'charging') : flow > 0.3 ? L('放电中', 'discharging') : '—', flow < 0],
+    [L('MGU-K 最大功率', 'MGU-K peak'), e.k + ' kW']
+  ]);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
 }

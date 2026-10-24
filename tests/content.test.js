@@ -19,7 +19,8 @@ test('every entry has a known view and group and a unique id', () => {
 test('every entry is written in both languages', () => {
   for (const e of ENTRIES) {
     for (const key of ['name', 'tagline', 'card', 'lead', 'analogy']) assert.ok(pair(e[key]), `${e.id}.${key}`);
-    assert.ok(e.steps.length >= 3 && e.steps.every(s => pair(s.title) && pair(s.text)), `${e.id} steps`);
+    // Every step says what happens, then why: the standard the four-stroke page set.
+    assert.ok(e.steps.length >= 3 && e.steps.every(s => pair(s.title) && pair(s.text) && pair(s.why)), `${e.id} steps`);
     assert.ok(Object.keys(e.parts).length >= 4 && Object.values(e.parts).every(p => pair(p.name) && pair(p.text)), `${e.id} parts`);
     assert.ok(e.facts.every(([k, v]) => pair(k) && pair(v)), `${e.id} facts`);
     assert.ok(e.pros.length && e.cons.length && e.cars.length && pair(e.myth.q) && pair(e.myth.a), `${e.id} sections`);

@@ -1,5 +1,5 @@
-import { phaseCurrents, field, rotorAngle, COIL_AXES } from '../sim/motor.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, poly, fillCut, fillPart, alpha, pointAt, pathLength, figLabel, para } from './kit.js';
+import { phaseCurrents, field, rotorAngle, COIL_AXES, LOAD_ANGLE } from '../sim/motor.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, poly, fillCut, fillPart, alpha, pointAt, pathLength, figLabel, para, note, isCompact } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -105,6 +105,13 @@ export function drawMotor(c, st) {
   anchors.battery ??= [CHAIN[0][1], CHAIN[0][2] - 30];
   anchors.inverter ??= [CHAIN[1][1], CHAIN[1][2] - 30];
   para(c, L('看：线圈不动，磁场在转，转子跟着它跑', 'Watch: the coils stay put, the field turns, the rotor follows'), 640, 386, 330, { size: 14, color: C.ink2, minor: true });
+  const lag = Math.round(LOAD_ANGLE * 180 / Math.PI), regen = mode === 'regen';
+  if (isCompact()) note(c, 0, 0, 0, L('此刻', 'RIGHT NOW'), [
+    [L('模式', 'Mode'), regen ? L('回收发电', 'regenerating') : L('驱动', 'driving'), regen],
+    [L('磁场转到', 'Field at'), Math.round(((f.angle * 180 / Math.PI) % 360 + 360) % 360) + '°'],
+    [L('转子', 'Rotor'), regen ? L(`领先磁场 ${lag}°`, `${lag}° ahead of the field`) : L(`落后磁场 ${lag}°`, `${lag}° behind the field`)],
+    [L('电流', 'Current'), regen ? L('电机 → 电池', 'motor → battery') : L('电池 → 电机', 'battery → motor'), regen]
+  ]);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
 }

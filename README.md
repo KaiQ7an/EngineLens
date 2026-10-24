@@ -34,7 +34,8 @@ count: a turbo visibly packs more into the same cylinder.
 
 The four-stroke page sets the pattern for the others. The narrated guide stops at each
 dead centre (the diesel page does the same, and the inline engines stop as each
-cylinder fires) and explains what happens, then why. A crank-angle scrubber under the figure
+cylinder fires) and explains what happens, then why; every page's steps are written
+that way, and a test keeps it so. A crank-angle scrubber under the figure
 (or a sideways drag on the drawing) turns the engine by hand; it stays where you leave it
 and plays on from there. Playback speed is set apart from the engine speed being
 described, which has its own readout of firings per second and how much the drawing is
