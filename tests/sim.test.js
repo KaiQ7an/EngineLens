@@ -5,6 +5,8 @@ import { ENGINES, fireAngles, localAngle, bankIntervals, throwAngle, lastFired, 
 import { steadyBoost, tipIn, manifold, gauge, parasitic, power, airCharge, ALTITUDES, P_SEA } from '../dist/js/sim/induction.js';
 import { compressionTemp, injection, DIESEL_CR, PETROL_CR, AUTOIGNITION_C } from '../dist/js/sim/diesel.js';
 import { housing, apex, apexAlpha, rotorAngle, faceStroke, chamberArea } from '../dist/js/sim/rotary.js';
+import { phaseCurrents, field, rotorAngle as motorRotor } from '../dist/js/sim/motor.js';
+import { FLOWS, MODES, active } from '../dist/js/sim/powertrain.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
 const r = 27, l = 106;
@@ -197,4 +199,31 @@ test('rotary chamber is smallest at the waists and largest across the long axis'
   const spark = chamberArea(at(1.5 * Math.PI), 0), widest = chamberArea(at(Math.PI), 0);
   assert.ok(widest / spark > 5);
   assert.equal(faceStroke(at(1.5 * Math.PI) + 0.01, 0), 2); // just past the plugs: power
+});
+
+test('three-phase currents make a field of constant strength that turns', () => {
+  for (const e of [0, 0.4, 1.9, 3.3, 5.1]) {
+    near(phaseCurrents(e).reduce((a, b) => a + b, 0), 0, 1e-12);
+    const f = field(e);
+    near(f.strength, 1.5, 1e-12);
+    near(Math.cos(f.angle), Math.cos(e), 1e-12); near(Math.sin(f.angle), Math.sin(e), 1e-12);
+  }
+});
+
+test('the rotor trails the field when driving and leads it when regenerating', () => {
+  assert.ok(motorRotor(1, 'drive') < 1 && motorRotor(1, 'regen') > 1);
+});
+
+test('powertrain modes: every flow is a known path and its ends are active', () => {
+  for (const [name, m] of Object.entries(MODES)) {
+    const on = active(name);
+    for (const f of m.flows) { assert.ok(FLOWS[f], f); FLOWS[f].forEach(c => assert.ok(on.has(c))); }
+    assert.equal(on.has('engine'), m.engine, name);
+    assert.equal(m.flows.includes('engine-wheels'), m.clutch, name);
+  }
+});
+
+test('a range extender never drives the wheels from the engine', () => {
+  for (const mode of ['ev', 'extend', 'regen', 'plug']) assert.ok(!MODES[mode].flows.includes('engine-wheels'));
+  assert.ok(MODES.extend.battery > 0 && MODES.regen.battery > 0 && MODES.ev.battery < 0);
 });
