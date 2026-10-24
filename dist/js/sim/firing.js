@@ -9,6 +9,8 @@ export const ENGINES = {
   // An even-firing 60° V6 alternates banks every 120°; its crank pins are split, so
   // each pair of cylinders sits on its own offset pin.
   v6: { banks: ['L', 'R'], vAngle: 60, firing: ['R1', 'L1', 'R2', 'L2', 'R3', 'L3'] },
+  // F1's rules fix the V6 at 90°; it is drawn here firing evenly, like the 60° V6.
+  v6f1: { banks: ['L', 'R'], vAngle: 90, firing: ['R1', 'L1', 'R2', 'L2', 'R3', 'L3'] },
   // GM LS-family cross-plane order 1-8-7-2-6-5-4-3, with odd cylinders on the left bank.
   v8cross: { banks: ['L', 'R'], vAngle: 90, firing: ['L1', 'R4', 'L4', 'R1', 'R3', 'L3', 'R2', 'L2'] },
   // A typical flat-plane order: the banks alternate, and each bank fires like an inline-four.

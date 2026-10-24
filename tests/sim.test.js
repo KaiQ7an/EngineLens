@@ -7,6 +7,7 @@ import { compressionTemp, injection, DIESEL_CR, PETROL_CR, AUTOIGNITION_C } from
 import { housing, apex, apexAlpha, rotorAngle, faceStroke, chamberArea } from '../dist/js/sim/rotary.js';
 import { phaseCurrents, field, rotorAngle as motorRotor } from '../dist/js/sim/motor.js';
 import { FLOWS, MODES, active } from '../dist/js/sim/powertrain.js';
+import { ERAS, electricShare, LAP, zoneAt, speedAt } from '../dist/js/sim/f1.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
 const r = 27, l = 106;
@@ -226,4 +227,22 @@ test('powertrain modes: every flow is a known path and its ends are active', () 
 test('a range extender never drives the wheels from the engine', () => {
   for (const mode of ['ev', 'extend', 'regen', 'plug']) assert.ok(!MODES[mode].flows.includes('engine-wheels'));
   assert.ok(MODES.extend.battery > 0 && MODES.regen.battery > 0 && MODES.ev.battery < 0);
+});
+
+test('2026 F1: the motor nearly matches the engine, and the MGU-H is gone', () => {
+  assert.ok(electricShare(2026) > 0.45 && electricShare(2026) < 0.5);
+  assert.ok(electricShare(2014) < 0.2);
+  assert.equal(ERAS[2026].k, 350); assert.equal(ERAS[2014].k, 120);
+  assert.ok(!ERAS[2026].mguH && ERAS[2014].mguH);
+});
+
+test('the lap zones cover the lap; braking slows the car and deployment speeds it up', () => {
+  LAP.forEach((z, i) => assert.ok(z.to > (LAP[i - 1]?.to ?? 0)));
+  assert.equal(LAP[LAP.length - 1].to, 1);
+  for (const z of LAP) {
+    const from = zoneAt(z.to - 1e-6).from, mid = (from + z.to) / 2;
+    if (z.zone === 'brake') assert.ok(speedAt(z.to - 0.005) < speedAt(from + 0.005), 'brake ' + mid);
+    if (z.zone === 'deploy') assert.ok(speedAt(z.to - 0.005) > speedAt(from + 0.005), 'deploy ' + mid);
+  }
+  assert.equal(zoneAt(1.25).zone, zoneAt(0.25).zone);
 });
