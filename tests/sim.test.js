@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { pistonDrop, strokeAt, valveLift, valvesOverlap, sparkGlow, burnGlow, camAngle } from '../dist/js/sim/kinematics.js';
 import { ENGINES, fireAngles, localAngle, bankIntervals, throwAngle, lastFired, inlineForces, interval, pushing, smoothness } from '../dist/js/sim/firing.js';
 import { steadyBoost, tipIn, manifold, gauge, parasitic, power, airCharge, ALTITUDES, P_SEA } from '../dist/js/sim/induction.js';
+import { compressionTemp, injection, DIESEL_CR, PETROL_CR, AUTOIGNITION_C } from '../dist/js/sim/diesel.js';
+import { housing, apex, apexAlpha, rotorAngle, faceStroke, chamberArea } from '../dist/js/sim/rotary.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
 const r = 27, l = 106;
@@ -153,4 +155,46 @@ test('at altitude NA power falls with pressure, the turbo mostly recovers', () =
 
 test('boost packs more air per cycle', () => {
   assert.ok(airCharge(0.85) > 1.8 && airCharge(-0.03) === 1);
+});
+
+test('diesel squeezes the air hotter than a petrol engine, well past self-ignition', () => {
+  const top = compressionTemp(360), petrol = compressionTemp(360, PETROL_CR);
+  assert.ok(top > 600 && top > petrol && top > AUTOIGNITION_C);
+  assert.ok(DIESEL_CR > PETROL_CR);
+  let prev = -Infinity;
+  for (let a = 180; a <= 360; a += 5) { const t = compressionTemp(a); assert.ok(t >= prev); prev = t; }
+  assert.equal(compressionTemp(90), null);
+});
+
+test('diesel fuel is injected only around compression TDC', () => {
+  assert.ok(injection(365) > 0.5);
+  for (const a of [90, 300, 345, 400, 600]) assert.equal(injection(a), 0);
+});
+
+test('rotary: the rotor turns at a third of shaft speed with its apexes on the housing', () => {
+  near(rotorAngle(6 * Math.PI), 2 * Math.PI);
+  for (const phi of [0, 0.7, 2.9, 11.3]) for (let k = 0; k < 3; k++) {
+    const [x, y] = apex(phi, k), [hx, hy] = housing(apexAlpha(phi, k));
+    near(x, hx, 1e-12); near(y, hy, 1e-12);
+  }
+});
+
+test('rotary: each face runs the four strokes in order, one power stroke per shaft turn', () => {
+  const TAU = Math.PI * 2, step = TAU / 720;
+  const seen = [], starts = [];
+  for (let phi = 0; phi < 3 * TAU; phi += step) {
+    const s = faceStroke(phi, 0);
+    if (seen[seen.length - 1] !== s) seen.push(s);
+    for (let k = 0; k < 3; k++) if (faceStroke(phi, k) === 2 && faceStroke(phi - step, k) !== 2) starts.push(phi);
+  }
+  assert.deepEqual(seen.slice(0, 5).map(s => (s - seen[0] + 4) % 4), [0, 1, 2, 3, 0]);
+  assert.equal(starts.length, 3);                       // three shaft turns, three power strokes
+  near(starts[1] - starts[0], TAU, 2 * step);
+});
+
+test('rotary chamber is smallest at the waists and largest across the long axis', () => {
+  const at = m => 3 * (m - Math.PI / 3); // shaft angle that puts face 0's middle at housing angle m
+  const spark = chamberArea(at(1.5 * Math.PI), 0), widest = chamberArea(at(Math.PI), 0);
+  assert.ok(widest / spark > 5);
+  assert.equal(faceStroke(at(1.5 * Math.PI) + 0.01, 0), 2); // just past the plugs: power
 });
