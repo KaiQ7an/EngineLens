@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { pistonDrop, strokeAt, valveLift, valvesOverlap, sparkGlow, burnGlow, camAngle } from '../dist/js/sim/kinematics.js';
-import { ENGINES, fireAngles, localAngle, bankIntervals, throwAngle, lastFired, inlineForces } from '../dist/js/sim/firing.js';
+import { ENGINES, fireAngles, localAngle, bankIntervals, throwAngle, lastFired, inlineForces, interval, pushing, smoothness } from '../dist/js/sim/firing.js';
 import { steadyBoost, tipIn, manifold, gauge, parasitic, power, airCharge, ALTITUDES, P_SEA } from '../dist/js/sim/induction.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
@@ -75,6 +75,52 @@ test('V8 cylinders sharing a crank throw agree on its direction', () => {
   const throws = e => [1, 2, 3, 4].map(p => throwAngle(e, 'L' + p));
   assert.deepEqual(new Set(throws(ENGINES.v8cross)).size, 4); // four directions: a cross
   assert.deepEqual(new Set(throws(ENGINES.v8flat)).size, 2);  // two directions: flat
+});
+
+test('every engine fires at even intervals of 720° / cylinders', () => {
+  for (const e of Object.values(ENGINES)) {
+    const angles = Object.values(fireAngles(e)).sort((a, b) => a - b);
+    angles.forEach((a, i) => near(a, i * interval(e)));
+    assert.equal(new Set(e.firing).size, e.firing.length);
+  }
+});
+
+test('inline-six fires 1-5-3-6-2-4 and is balanced without shafts', () => {
+  const e = ENGINES.inline6;
+  assert.deepEqual(e.firing.map(c => c.slice(1)).join('-'), '1-5-3-6-2-4');
+  for (const theta of [0, 25, 70, 133]) {
+    const f = inlineForces(theta, e, 0.25);
+    near(f.primary, 0, 1e-9); near(f.secondary, 0, 1e-9);
+  }
+  const drop = (theta, c) => pistonDrop(localAngle(theta, e, c), r, l);
+  for (const theta of [0, 50, 200]) for (const [a, b] of [['A1', 'A6'], ['A2', 'A5'], ['A3', 'A4']]) near(drop(theta, a), drop(theta, b), 1e-6);
+});
+
+test('V6 and V12 alternate banks; each bank fires evenly', () => {
+  assert.deepEqual(bankIntervals(ENGINES.v6, 'L'), [240, 240, 240]);
+  assert.deepEqual(bankIntervals(ENGINES.v12, 'R'), [120, 120, 120, 120, 120, 120]);
+  for (const key of ['v6', 'v12']) ENGINES[key].firing.forEach((c, i, all) => assert.notEqual(c[0], all[(i + 1) % all.length][0]));
+  // Each V12 bank is an inline-six firing 1-5-3-6-2-4, and its pairs share crank pins.
+  const left = ENGINES.v12.firing.filter(c => c[0] === 'L').map(c => c.slice(1)).join('-');
+  assert.equal(left, '1-5-3-6-2-4');
+  for (let p = 1; p <= 6; p++) near(throwAngle(ENGINES.v12, 'L' + p), throwAngle(ENGINES.v12, 'R' + p), 1e-9);
+});
+
+test('boxer: opposite pistons move out and in together', () => {
+  for (const key of ['flat4', 'flat6']) {
+    const e = ENGINES[key], n = e.firing.length / 2;
+    for (const theta of [0, 40, 155, 400]) for (let p = 1; p <= n; p++)
+      near(pistonDrop(localAngle(theta, e, 'L' + p), r, l), pistonDrop(localAngle(theta, e, 'R' + p), r, l), 1e-6);
+  }
+});
+
+test('more cylinders share the work more evenly', () => {
+  const s = k => smoothness(ENGINES[k], 2);
+  assert.ok(s('inline4') < 0.05);           // the push drops out between firings
+  assert.ok(s('inline4') < s('inline6') && s('inline6') < s('v8cross') && s('v8cross') < s('v12'));
+  assert.ok(s('v12') > 0.6);
+  assert.equal(pushing(400, ENGINES.v12), 3);
+  for (let t = 0; t < 720; t += 7) assert.ok(pushing(t, ENGINES.inline4) <= 1);
 });
 
 test('naturally aspirated manifold never exceeds ambient pressure', () => {

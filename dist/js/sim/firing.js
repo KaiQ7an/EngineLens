@@ -5,10 +5,21 @@ import { CYCLE, wrap } from './kinematics.js';
 // Cylinders fire at even intervals of 720° / cylinder count, in firing order.
 export const ENGINES = {
   inline4: { banks: ['A'], vAngle: 0, firing: ['A1', 'A3', 'A4', 'A2'] },
+  inline6: { banks: ['A'], vAngle: 0, firing: ['A1', 'A5', 'A3', 'A6', 'A2', 'A4'] },
+  // An even-firing 60° V6 alternates banks every 120°; its crank pins are split, so
+  // each pair of cylinders sits on its own offset pin.
+  v6: { banks: ['L', 'R'], vAngle: 60, firing: ['R1', 'L1', 'R2', 'L2', 'R3', 'L3'] },
   // GM LS-family cross-plane order 1-8-7-2-6-5-4-3, with odd cylinders on the left bank.
   v8cross: { banks: ['L', 'R'], vAngle: 90, firing: ['L1', 'R4', 'L4', 'R1', 'R3', 'L3', 'R2', 'L2'] },
   // A typical flat-plane order: the banks alternate, and each bank fires like an inline-four.
-  v8flat: { banks: ['L', 'R'], vAngle: 90, firing: ['L1', 'R3', 'L3', 'R4', 'L4', 'R2', 'L2', 'R1'] }
+  v8flat: { banks: ['L', 'R'], vAngle: 90, firing: ['L1', 'R3', 'L3', 'R4', 'L4', 'R2', 'L2', 'R1'] },
+  // Two inline-sixes (1-5-3-6-2-4 each) on six shared pins, firing alternately every 60°.
+  v12: { banks: ['L', 'R'], vAngle: 60, firing: ['L1', 'R2', 'L5', 'R4', 'L3', 'R1', 'L6', 'R5', 'L2', 'R3', 'L4', 'R6'] },
+  // Boxers: opposite cylinders share a position and reach TDC together, so their
+  // pistons move out and in at the same time. Subaru's flat-four fires 1-3-2-4 and
+  // Porsche's flat-six 1-6-2-4-3-5 (cylinders 1-3 on one bank, 4-6 on the other).
+  flat4: { banks: ['L', 'R'], vAngle: 180, boxer: true, firing: ['L1', 'L2', 'R1', 'R2'] },
+  flat6: { banks: ['L', 'R'], vAngle: 180, boxer: true, firing: ['L1', 'R3', 'L2', 'R1', 'L3', 'R2'] }
 };
 
 export const interval = engine => CYCLE / engine.firing.length;
@@ -58,4 +69,25 @@ export function inlineForces(theta, engine, ratio) {
     secondary += ratio * Math.cos(2 * a);
   }
   return { primary, secondary };
+}
+
+// ── How evenly the cylinders share the work ─────────────────────────
+// A teaching model of one cylinder's push on the crank through its power stroke:
+// zero outside it, peaking about 60° after TDC. Compression is left out.
+export function powerPulse(local) {
+  const x = (wrap(local) - 360) / 180;
+  if (x <= 0 || x >= 1) return 0;
+  return Math.sin(Math.PI * x ** 0.65);
+}
+
+export const push = (theta, engine) => engine.firing.reduce((sum, cyl) => sum + powerPulse(localAngle(theta, engine, cyl)), 0);
+
+// How many cylinders are in their power stroke at crank angle θ.
+export const pushing = (theta, engine) => engine.firing.filter(cyl => { const a = localAngle(theta, engine, cyl); return a >= 360 && a < 540; }).length;
+
+// Weakest push over the cycle as a share of the strongest: 0 means the push drops out.
+export function smoothness(engine, step = 1) {
+  let lo = Infinity, hi = 0;
+  for (let t = 0; t < CYCLE; t += step) { const p = push(t, engine); lo = Math.min(lo, p); hi = Math.max(hi, p); }
+  return lo / hi;
 }
