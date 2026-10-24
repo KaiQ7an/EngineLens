@@ -1,6 +1,6 @@
 import { ENTRIES, GROUPS, entryById } from '../data/entries.js';
 import { bi, t, ui } from '../i18n.js';
-import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, fitCanvas, setTextBoost, STROKE_TONES } from '../draw/kit.js';
+import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, fitCanvas, setTextBoost, setCompact, readouts, STROKE_TONES } from '../draw/kit.js';
 import { VIEWS } from '../draw/views.js';
 import { STROKE_NAMES } from '../draw/fourstroke.js';
 import { wrap, valveLift, strokeIndex } from '../sim/kinematics.js';
@@ -8,8 +8,8 @@ import { rich } from './terms.js';
 import { cardHTML, mountCards } from './cards.js';
 
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-// On a phone the figure is too small for a panel of small text, so views that can
-// leave theirs out do, and the same readout is shown as text under the figure.
+// On a phone the figure is too small for boxes of small text, so views leave their
+// readouts out of the drawing and the page shows them as text under the figure.
 const narrow = matchMedia('(max-width: 640px)');
 const HOLD = 1.6;          // seconds the guide pauses on each step, unless the entry says otherwise
 const STEP_TIME = 4.8;     // seconds per step for cause-and-effect narration
@@ -81,7 +81,6 @@ function scrubber(entry, st) {
     ${strokes ? `<div class="scrub-strokes">${STROKE_NAMES.map((nm, k) => `<span data-tone="${STROKE_TONES[k]}">${bi(nm)}</span>`).join('')}</div>` : ''}
     <input id="angle" type="range" min="0" max="719" step="1" value="${Math.round(wrap(st.theta))}" data-mode="${entry.scrub}">
     <div class="scrub-marks">${[0, 180, 360, 540, 720].map(d => `<span style="left:${d / 7.2}%">${strokes ? t(d % 360 ? 'bdc' : 'tdc') : d + '°'}</span>`).join('')}</div>
-    ${VIEWS[entry.view].readout ? '<dl class="scrub-read"></dl>' : ''}
   </div>`;
 }
 
@@ -113,6 +112,7 @@ export function entryPage(id) {
       <div class="stage-col">
         <figure class="stage">
           <canvas id="stage" width="${W * 1.5}" height="${H * 1.5}" role="img" aria-label="${bi(entry.name)}"></canvas>
+          <div class="fig-read" hidden></div>
           ${entry.scrub ? scrubber(entry, st) : ''}
           <figcaption class="caption">
             <div class="cap-body" aria-live="polite"><span class="cap-step"></span><span class="cap-text"></span></div>
@@ -266,20 +266,22 @@ export function entryPage(id) {
       const a = wrap(st.theta);
       const vis = playRpm(entry, st);
       const frame = {
-        ...st, theta: st.theta, parts: entry.parts, figure, speed: vis, compact: narrow.matches,
+        ...st, theta: st.theta, parts: entry.parts, figure, speed: vis,
         flow: { intake: valveLift(a, 'intake') * (0.5 + vis / 60), exhaust: valveLift(a, 'exhaust') * (0.5 + vis / 60) },
         step: s
       };
       setTextBoost(1000 / canvas.clientWidth);
+      setCompact(narrow.matches);
       withFocus(c, () => view.draw(c, frame, entry));
-      setTextBoost(1);
+      setTextBoost(1); setCompact(false);
+      showReadouts();
       setFocus(null);
       updateCaption();
       updateScrub();
     }
 
     // Keep the scrubber on the crank angle while it plays.
-    const angle = $('#angle'), angleOut = $('#angle-out'), scrubStrokes = root.querySelectorAll('.scrub-strokes span'), read = $('.scrub-read');
+    const angle = $('#angle'), angleOut = $('#angle-out'), scrubStrokes = root.querySelectorAll('.scrub-strokes span');
     let shownAngle = -1;
     function updateScrub() {
       if (!angle) return;
@@ -291,7 +293,16 @@ export function entryPage(id) {
       angleOut.textContent = d + '°' + name;
       angle.setAttribute('aria-valuetext', d + '°' + name);
       scrubStrokes.forEach((el, i) => el.classList.toggle('on', i === k));
-      if (read) read.innerHTML = view.readout(d).map(r => `<div class="r-${r.id}${r.hot ? ' hot' : ''}"><dt>${r.label}</dt><dd>${r.value}</dd></div>`).join('');
+    }
+
+    // Readout boxes the view handed over instead of drawing (phones only).
+    const figRead = $('.fig-read');
+    let shownRead = '';
+    function showReadouts() {
+      const html = readouts.map(r => `<section><h3>${r.title}</h3><dl>${r.rows.map(row =>
+        `<div${row.hot ? ' class="hot"' : ''}><dt>${row.label}</dt><dd>${row.value}</dd></div>`).join('')}</dl></section>`).join('');
+      if (html === shownRead) return;
+      shownRead = html; figRead.innerHTML = html; figRead.hidden = !html;
     }
     // Turning the crank by hand pauses the animation; it carries on from there when played.
     const turnTo = theta => { st.theta = theta; st.playing = false; st.tween = null; st.hold = 0; render(); };

@@ -1,5 +1,5 @@
 import { wrap, strokeIndex, strokeProgress, valveLift, sparkGlow, valvesOverlap } from '../sim/kinematics.js';
-import { C, text, para, MONO, rect, stroke, pipe, flow, arrow, dot, part, alpha, figLabel, STROKE_TONES } from './kit.js';
+import { C, text, para, MONO, rect, stroke, pipe, flow, arrow, dot, part, alpha, figLabel, note, isCompact, STROKE_TONES } from './kit.js';
 import { drawCylinder, crownY, GAS_KIND } from './engine.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -30,11 +30,11 @@ export function pistonState(theta) {
   const a = wrap(theta, 360);
   if (a < 6 || a > 354) return { at: 'tdc', text: L('在上止点（最高）', 'At TDC (top)') };
   if (Math.abs(a - 180) < 6) return { at: 'bdc', text: L('在下止点（最低）', 'At BDC') };
-  return a < 180 ? { text: L('↓ 往下走', '↓ moving down') } : { text: L('↑ 往上走', '↑ moving up') };
+  return a < 180 ? { text: L('↓ 往下走', '↓ down') } : { text: L('↑ 往上走', '↑ up') };
 }
 
-// What each moving part is doing at crank angle θ. The panel in the figure shows it,
-// and so does the text readout that replaces the panel on narrow screens.
+// What each moving part is doing at crank angle θ. The panel in the figure shows it;
+// on a phone it goes to the page as a text readout instead.
 export function readout(theta) {
   const a = wrap(theta), ps = pistonState(a), spark = sparkGlow(a) > 0;
   const valve = (kind, label) => {
@@ -95,7 +95,7 @@ function deadCentres(c, a, cx) {
 
 export function drawFourStroke(c, st) {
   const { theta, time, parts, speed = 24 } = st;
-  const a = wrap(theta), dx = st.compact ? COMPACT_SHIFT : 0, intake = shift(INTAKE, dx), exhaust = shift(EXHAUST, dx);
+  const compact = isCompact(), a = wrap(theta), dx = compact ? COMPACT_SHIFT : 0, intake = shift(INTAKE, dx), exhaust = shift(EXHAUST, dx);
   part(c, 'intake-port', () => {
     pipe(c, intake, 38);
     flow(c, intake, 'air', time, { rate: st.flow.intake, strength: Math.min(1, st.flow.intake * 3), lanes: 2, spread: 12 });
@@ -110,7 +110,8 @@ export function drawFourStroke(c, st) {
   text(c, L('废气', 'Exhaust'), 722 + dx, 52, { size: 14, color: C.ink2, weight: 500 });
   const anchors = drawCylinder(c, a, { x: CX + dx, y: CY, s: S, air: 26, time, cams: true });
   deadCentres(c, a, CX + dx);
-  if (!st.compact) panel(c, a, 752, 978);
+  if (compact) note(c, 0, 0, 0, L('此刻', 'RIGHT NOW'), readout(a).map(r => [r.label, r.value, r.hot]));
+  else panel(c, a, 752, 978);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
   return { anchors, gas: GAS_KIND[strokeIndex(a)], speed };

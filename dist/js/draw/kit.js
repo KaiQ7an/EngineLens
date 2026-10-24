@@ -74,7 +74,7 @@ export const clearHits = () => { hits.length = 0; };
 
 // ── Page ────────────────────────────────────────────────────────────
 export function stage(c, w, h) {
-  placed.length = 0;
+  placed.length = 0; readouts.length = 0;
   c.setTransform(1, 0, 0, 1, 0, 0);
   c.fillStyle = C.paper; c.fillRect(0, 0, w, h);
   c.strokeStyle = C.grid; c.lineWidth = 1; c.beginPath();
@@ -97,10 +97,19 @@ export function hatch(c) {
 }
 
 // On a narrow screen the whole figure shrinks, so small labels are drawn larger to stay
-// legible. Text of 12 units or less gets the full boost; text of 20 or more, none.
+// legible: text grows with the boost up to a floor of 13 × boost, so on a phone every
+// label lands near the same readable size. Text already above the floor is left alone.
 let boost = 1;
-export const setTextBoost = k => { boost = clamp(k || 1, 1, 1.6); };
-const boosted = size => (boost > 1 ? size * (1 + (boost - 1) * clamp((20 - size) / 8)) : size);
+export const TEXT_BOOST_MAX = 1.6; // phones need about 2.3; their layouts are not yet checked at that size
+export const setTextBoost = k => { boost = clamp(k || 1, 1, TEXT_BOOST_MAX); };
+const boosted = size => (boost > 1 ? Math.max(size, Math.min(size * boost, 13 * boost)) : size);
+
+// Compact figures are for phones: readout boxes are not drawn into the figure, where
+// their text would be tiny, but collected in `readouts` for the page to show as text.
+let compact = false;
+export const setCompact = v => { compact = !!v; };
+export const isCompact = () => compact;
+export const readouts = [];
 
 // Match a canvas's backing store to its displayed size and pixel density, keeping the
 // W × H proportions. Cheap to call every frame: it only resizes when something changed.
@@ -161,6 +170,28 @@ export function spread(labels, gap) {
   const sorted = [...labels].sort((p, q) => p.y - q.y);
   for (let i = 1; i < sorted.length; i++) sorted[i].y = Math.max(sorted[i].y, sorted[i - 1].y + gap);
   return labels;
+}
+
+// A dashed blueprint annotation block with key / value rows; a row's third item marks
+// its value as the one to watch. A value too long to share its row drops below it.
+export function note(c, x, y, w, title, rows) {
+  if (compact) {
+    const i = readouts.findIndex(r => r.title === title), entry = { title, rows: rows.map(([k, v, hot]) => ({ label: k, value: v, hot: !!hot })) };
+    if (i < 0) readouts.push(entry); else readouts[i] = entry;
+    return [x + w / 2, y + 40 + rows.length * 15];
+  }
+  const fits = rows.map(r => measure(c, r[0], 14) + measure(c, r[1], 17, 500, MONO) + 20 <= w - 32);
+  const h = 40 + fits.reduce((s, f) => s + (f ? 30 : 54), 0);
+  c.save(); c.setLineDash([5, 5]); rect(c, x, y, w, h, 6, alpha(C.paper, 0.85), C.ink2, 1); c.restore();
+  text(c, title, x + 16, y + 26, { size: 12, color: C.ink2, font: MONO, spacing: 1.2 });
+  let yy = y + 56;
+  rows.forEach((r, i) => {
+    text(c, r[0], x + 16, yy, { size: 14, color: C.ink2 });
+    if (!fits[i]) yy += 24;
+    text(c, r[1], x + w - 16, yy, { size: 17, color: r[2] ? C.accent : C.ink, font: MONO, weight: 500, align: 'right' });
+    yy += 30;
+  });
+  return [x + w / 2, y + h / 2];
 }
 
 export function path(c, pts) { c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo(p[0], p[1]) : c.moveTo(p[0], p[1]))); }

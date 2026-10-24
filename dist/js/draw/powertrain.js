@@ -1,7 +1,6 @@
 import { MODES } from '../sim/powertrain.js';
-import { C, MONO, part, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, clamp, figLabel } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, clamp, figLabel, note } from './kit.js';
 import { drawCylinder } from './engine.js';
-import { note } from './induction.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 

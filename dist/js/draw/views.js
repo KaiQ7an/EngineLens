@@ -1,4 +1,4 @@
-import { drawFourStroke, readout } from './fourstroke.js';
+import { drawFourStroke } from './fourstroke.js';
 import { drawNA, drawTurbo, drawSuper, inductionView } from './induction.js';
 import { throttleView } from './experiment.js';
 import { inline4View, inline6View, v6View, v12View, boxerView, w16View, drawV8 } from './layouts.js';
@@ -12,7 +12,7 @@ import { f1View } from './f1.js';
 
 // Each entry names a view: how to draw it, plus optional extra controls and state updates.
 export const VIEWS = {
-  fourStroke: { draw: drawFourStroke, readout },
+  fourStroke: { draw: drawFourStroke },
   na: inductionView(drawNA),
   turbo: inductionView(drawTurbo),
   super: inductionView(drawSuper),

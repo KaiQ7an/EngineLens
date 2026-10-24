@@ -1,6 +1,5 @@
 import { ROTOR, housing, apex, rotorCentre, rotorAngle, apexAlpha, faceStroke, faceProgress, flankPoint } from '../sim/rotary.js';
-import { C, part, text, rect, circle, stroke, path, pipe, flow, arrow, dot, hatch, fillPart, alpha, hash, lerp, figLabel, para } from './kit.js';
-import { note } from './induction.js';
+import { C, part, text, rect, circle, stroke, path, pipe, flow, arrow, dot, hatch, fillPart, alpha, hash, lerp, figLabel, para, note } from './kit.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
