@@ -12,8 +12,9 @@ const chosen = new WeakMap();
 
 function candidates({ dx, dy }) {
   const sx = dx || 70, list = [[dx, dy], [-dx, dy]];
-  for (const d of [40, 80]) list.push([dx, dy - d], [dx, dy + d], [-dx, dy - d], [-dx, dy + d]);
-  list.push([0, -Math.abs(dy) - 60], [0, Math.abs(dy) + 60], [sx * 1.6, dy], [-sx * 1.6, dy]);
+  for (const d of [40, 80, 130]) list.push([dx, dy - d], [dx, dy + d], [-dx, dy - d], [-dx, dy + d]);
+  list.push([0, -Math.abs(dy) - 60], [0, Math.abs(dy) + 60]);
+  for (const k of [1.6, 2.4]) list.push([sx * k, dy], [-sx * k, dy], [sx * k, dy - 60], [-sx * k, dy - 60], [sx * k, dy + 60], [-sx * k, dy + 60]);
   return list;
 }
 

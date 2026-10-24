@@ -298,8 +298,11 @@ export function entryPage(id) {
     // Readout boxes the view handed over instead of drawing (phones only).
     const figRead = $('.fig-read');
     let shownRead = '';
+    // Rows go two to a line unless a label is too long to share one (a Chinese character
+    // counts double). Labels never change on a page, so the layout does not jump.
+    const span = str => [...String(str)].reduce((n, ch) => n + (/[\u2e80-\u9fff\uff00-\uffef]/.test(ch) ? 2 : 1), 0);
     function showReadouts() {
-      const html = readouts.map(r => `<section><h3>${r.title}</h3><dl>${r.rows.map(row =>
+      const html = readouts.map(r => `<section${r.rows.some(row => span(row.label) > 12) ? ' class="one"' : ''}><h3>${r.title}</h3><dl>${r.rows.map(row =>
         `<div${row.hot ? ' class="hot"' : ''}><dt>${row.label}</dt><dd>${row.value}</dd></div>`).join('')}</dl></section>`).join('');
       if (html === shownRead) return;
       shownRead = html; figRead.innerHTML = html; figRead.hidden = !html;

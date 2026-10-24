@@ -1,4 +1,4 @@
-import { C, MONO, part, partAny, text, rect, circle, stroke, pipe, fillCut, alpha, pointAt, pathLength, lerp, hash, clamp, figLabel } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, pipe, fillCut, alpha, pointAt, pathLength, lerp, hash, clamp, figLabel, below } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -26,9 +26,9 @@ function cell(c) {
   for (const z of [AN, CA]) rect(c, z.x0, Y0, z.x1 - z.x0, Y1 - Y0, 6, alpha(C.ink, 0.04), C.ink, 1.6);
   c.beginPath(); c.rect(MEM.x0, Y0, MEM.x1 - MEM.x0, Y1 - Y0); fillCut(c);
   for (const x of [AN.x1 + 3, CA.x0 - 3]) stroke(c, [[x, Y0], [x, Y1]], C.accent, 3, [2, 5]); // catalyst layers
-  text(c, L('负极 · 氢气', 'Anode · hydrogen'), (AN.x0 + AN.x1) / 2, Y1 + 26, { size: 13, weight: 700, align: 'center' });
+  text(c, L('负极 · 氢气', 'Anode · hydrogen'), (AN.x0 + AN.x1) / 2, Y1 + 26, { size: 13, weight: 700, align: 'center', fit: 210 });
   text(c, L('质子交换膜', 'Membrane'), (MEM.x0 + MEM.x1) / 2, Y0 - 12, { size: 12.5, weight: 700, align: 'center' });
-  text(c, L('正极 · 空气', 'Cathode · air'), (CA.x0 + CA.x1) / 2, Y1 + 26, { size: 13, weight: 700, align: 'center' });
+  text(c, L('正极 · 空气', 'Cathode · air'), (CA.x0 + CA.x1) / 2, Y1 + 26, { size: 13, weight: 700, align: 'center', fit: 210 });
 }
 
 export function drawFuelCell(c, st) {
@@ -80,8 +80,8 @@ export function drawFuelCell(c, st) {
   // Key and the whole reaction.
   const key = [[h2, L('氢气 H₂', 'Hydrogen H₂')], [(cx, x, y) => circle(cx, x, y, 3.6, C.accent), L('质子 H⁺ / 电子 e⁻', 'Protons H⁺ / electrons e⁻')], [o2, L('氧气 O₂', 'Oxygen O₂')], [drop, L('水 H₂O', 'Water H₂O')]];
   key.forEach(([fn, name], i) => { fn(c, 620, 300 + i * 40); text(c, name, 650, 305 + i * 40, { size: 14, color: C.ink2 }); });
-  text(c, '2H₂ + O₂ → 2H₂O + ' + L('电', 'electricity'), 600, 500, { size: 22, weight: 800, font: MONO });
-  text(c, L('不燃烧，没有火焰', 'No burning, no flame'), 600, 530, { size: 14, color: C.ink2 });
+  text(c, '2H₂ + O₂ → 2H₂O + ' + L('电', 'electricity'), 600, 500, { size: 22, weight: 800, font: MONO, fit: 390 });
+  text(c, L('不燃烧，没有火焰', 'No burning, no flame'), 600, 500 + below(14, 30), { size: 14, color: C.ink2, fit: 390 });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
 }

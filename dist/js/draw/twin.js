@@ -1,6 +1,6 @@
 import { steadyBoost } from '../sim/induction.js';
 import { twinBoost, superchargerOn, spool, HANDOVER } from '../sim/twincharge.js';
-import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, fillCut, fillPart, clamp, figLabel, spread, boostedSize } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, fillCut, fillPart, clamp, figLabel, spread, boostedSize, note, isCompact } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -48,8 +48,16 @@ function boostChart(c, rpm) {
   stroke(c, curve(twinBoost), C.accent, 3.5);
   stroke(c, [[sx(HANDOVER), y1], [sx(HANDOVER), y0]], C.faint, 1, [4, 4]);
   text(c, L('交接', 'Handover'), sx(HANDOVER) + 6, y1 + 12, { size: 12, color: C.ink2 });
-  const legend = [[L('双增压', 'Twincharged'), C.accent, null], [L('只用涡轮', 'Turbo only'), C.ink2, [7, 5]], [L('只用机械增压', 'Supercharger only'), C.ink2, [2, 4]]];
-  legend.forEach(([name, color, dash], i) => { stroke(c, [[x0 + 20 + i * 160, y0 + 44], [x0 + 52 + i * 160, y0 + 44]], color, 3, dash); text(c, name, x0 + 60 + i * 160, y0 + 49, { size: 13, color }); });
+  // On a phone the legend becomes a readout under the figure, with each line's boost now.
+  if (isCompact()) note(c, 0, 0, 0, L('这个转速下的增压', 'BOOST AT THIS RPM'), [
+    [L('双增压（黄线）', 'Twincharged (yellow)'), twinBoost(rpm).toFixed(2) + ' bar', true],
+    [L('只用涡轮（虚线）', 'Turbo only (dashed)'), steadyBoost('turbo', rpm).toFixed(2) + ' bar'],
+    [L('只用机械增压（点线）', 'Supercharger only (dotted)'), steadyBoost('super', rpm).toFixed(2) + ' bar']
+  ]);
+  else {
+    const legend = [[L('双增压', 'Twincharged'), C.accent, null], [L('只用涡轮', 'Turbo only'), C.ink2, [7, 5]], [L('只用机械增压', 'Supercharger only'), C.ink2, [2, 4]]];
+    legend.forEach(([name, color, dash], i) => { stroke(c, [[x0 + 20 + i * 160, y0 + 44], [x0 + 52 + i * 160, y0 + 44]], color, 3, dash); text(c, name, x0 + 60 + i * 160, y0 + 49, { size: 13, color }); });
+  }
   stroke(c, [[sx(rpm), y1], [sx(rpm), y0]], C.ink, 1.5);
   circle(c, sx(rpm), sy(twinBoost(rpm)), 6, C.accent, C.ink, 1.4);
   return [(x0 + x1) / 2, (y0 + y1) / 2];
@@ -59,7 +67,7 @@ function spoolChart(c, t) {
   const { x0, x1, y0, y1, tMax } = SPOOL, sx = s => x0 + (x1 - x0) * s / tMax, sy = v => y0 - (y0 - y1) * v;
   stroke(c, [[x0, y1 - 10], [x0, y0], [x1, y0]], C.ink, 1.4);
   for (let s = 0; s <= tMax; s++) text(c, s + ' s', sx(s), y0 + 20, { size: 11.5, font: MONO, color: C.ink2, align: 'center' });
-  text(c, L('踩下油门后，增压多快到位', 'How fast boost arrives'), x0, y1 - 36, { size: 13, color: C.ink2 });
+  text(c, L('踩下油门后，增压多快到位', 'How fast boost arrives'), x0, y1 - Math.max(36, boostedSize(13) + 18), { size: 13, color: C.ink2, fit: x1 - x0 });
   const end = t < 0 ? tMax : Math.min(t, tMax), labels = [];
   for (const [kind, color, dash, name] of [['electric', C.accent, null, L('电动增压', 'Electric')], ['turbo', C.ink2, [7, 5], L('普通涡轮', 'Turbo')]]) {
     const pts = [];
@@ -110,7 +118,7 @@ export function drawTwin(c, st) {
   });
   anchors.turbo = [COMP[0], (COMP[1] + TURB[1]) / 2];
   c.beginPath(); c.roundRect(COOL[0] - 40, COOL[1] - 40, 80, 80, 6); fillCut(c);
-  text(c, L('中冷器', 'Intercooler'), COOL[0], COOL[1] + 62, { size: 13, color: C.ink2, align: 'center' });
+  text(c, L('中冷器', 'Intercooler'), COOL[0], COOL[1] + 62, { size: 13, color: C.ink2, align: 'center', fit: 80 });
   pipe(c, ENGINE_IN, 30); flow(c, ENGINE_IN, 'squeezed', time, { rate: speed, density, spread: 9, r: 3.2 });
   rect(c, 860, 160, 110, 220, 12, C.paper, C.ink, 1.6);
   text(c, L('发动机', 'Engine'), 915, 276, { size: 16, weight: 800, align: 'center' });

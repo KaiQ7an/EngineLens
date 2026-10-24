@@ -100,7 +100,7 @@ export function hatch(c) {
 // legible: text grows with the boost up to a floor of 13 × boost, so on a phone every
 // label lands near the same readable size. Text already above the floor is left alone.
 let boost = 1;
-export const TEXT_BOOST_MAX = 1.6; // phones need about 2.3; their layouts are not yet checked at that size
+export const TEXT_BOOST_MAX = 2.3;
 export const setTextBoost = k => { boost = clamp(k || 1, 1, TEXT_BOOST_MAX); };
 const boosted = size => (boost > 1 ? Math.max(size, Math.min(size * boost, 13 * boost)) : size);
 
@@ -121,15 +121,32 @@ export function fitCanvas(canvas, maxRatio = 2) {
 // ── Primitives ──────────────────────────────────────────────────────
 // Every label gets a thin halo of the background colour, so it stays readable where it
 // crosses linework. Pass `halo: false` for text sitting on a filled shape.
+// Options for enlarged text: `fit` is the widest it may be, and it shrinks to fit (not
+// below its unenlarged size); `keepIn` slides it sideways to stay on the figure;
+// `minor` marks a footnote that a compact figure leaves out (the caption covers it).
 export const textLog = { on: false, items: [] }; // layout checks collect label boxes here
 // Boxes of everything written on the current figure, in logical units, so callouts
 // can find a place that does not cover other text. stage() starts a new list.
 export const placed = [];
 export const measure = (c, str, size, weight = 500, font = SANS) => { c.font = `${weight} ${boosted(size)}px ${font}`; return c.measureText(str).width; };
 export const boostedSize = size => boosted(size);
-export function text(c, str, x, y, { size = 16, color = C.ink, align = 'left', weight = 500, font = SANS, spacing = 0, base = 'alphabetic', halo = true } = {}) {
+// Baseline-to-baseline distance for a line of `size` text under the one above: the
+// spacing a figure was drawn with, or more when its text has been enlarged.
+export const below = (size, spacing) => Math.max(spacing, boosted(size) * 1.22);
+export function text(c, str, x, y, { size = 16, color = C.ink, align = 'left', weight = 500, font = SANS, spacing = 0, base = 'alphabetic', halo = true, fit = 0, keepIn = false, minor = false } = {}) {
+  if (minor && compact) return 0;
+  const plain = size;
   size = boosted(size);
-  c.font = `${weight} ${size}px ${font}`; c.fillStyle = color; c.textAlign = align; c.textBaseline = base;
+  c.font = `${weight} ${size}px ${font}`;
+  if (fit || keepIn) {
+    const w0 = c.measureText(str).width;
+    if (fit && w0 > fit) { size = Math.max(plain, size * fit / w0); c.font = `${weight} ${size}px ${font}`; }
+    if (keepIn) {
+      const w1 = c.measureText(str).width, left = align === 'center' ? x - w1 / 2 : align === 'right' ? x - w1 : x;
+      x += Math.max(0, 6 - left) - Math.max(0, left + w1 - (W - 6));
+    }
+  }
+  c.fillStyle = color; c.textAlign = align; c.textBaseline = base;
   if ('letterSpacing' in c) c.letterSpacing = spacing + 'px';
   if (halo) {
     c.save(); c.strokeStyle = alpha(C.paper, 0.92); c.lineWidth = Math.max(3, size * 0.3); c.lineJoin = 'round';
@@ -152,6 +169,7 @@ export function text(c, str, x, y, { size = 16, color = C.ink, align = 'left', w
 // `y` is the first line's baseline, or with `anchor` the middle or the last line's.
 // Returns the height used, so the next line can follow it.
 export function para(c, str, x, y, maxW, opts = {}) {
+  if (opts.minor && compact) return 0;
   const size = boosted(opts.size ?? 16), lh = size * (opts.leading ?? 1.35);
   c.font = `${opts.weight ?? 500} ${size}px ${opts.font ?? SANS}`;
   const lines = [];
@@ -161,7 +179,7 @@ export function para(c, str, x, y, maxW, opts = {}) {
   }
   if (cur.trim()) lines.push(cur.trimEnd());
   const shift = opts.anchor === 'bottom' ? (lines.length - 1) * lh : opts.anchor === 'middle' ? (lines.length - 1) * lh / 2 : 0;
-  lines.forEach((l, i) => text(c, l, x, y - shift + i * lh, opts));
+  lines.forEach((l, i) => text(c, l, x, y - shift + i * lh, { ...opts, fit: maxW }));
   return lines.length * lh;
 }
 
@@ -289,7 +307,7 @@ export function marker(c, n, x, y, on) {
 
 // The figure number in the bottom-left corner, as in a printed plate. Thumbnails omit it.
 export function figLabel(c, n) {
-  if (n) text(c, 'FIG. ' + n, 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1 });
+  if (n) text(c, 'FIG. ' + n, 28, 748, { size: 12, color: C.ink2, font: MONO, spacing: 1, minor: true });
 }
 
 // The EngineLens: a thin accent ring that frames whatever is being explained.

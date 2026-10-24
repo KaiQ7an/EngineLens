@@ -108,6 +108,7 @@ main { outline: none; }
 .fig-read h3 { font: 500 11.5px var(--mono); letter-spacing: 1.2px; color: var(--bp-muted); margin-bottom: 6px; }
 .fig-read dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 16px; margin: 0; font-size: 13.5px; }
 .fig-read dl div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; border-bottom: 1px dashed var(--bp-line); padding-bottom: 4px; }
+.fig-read .one dl { grid-template-columns: 1fr; }
 .fig-read dt { color: var(--bp-muted); }
 .fig-read dd { margin: 0 0 0 auto; font-weight: 700; }
 .fig-read .hot dd { color: var(--accent); }

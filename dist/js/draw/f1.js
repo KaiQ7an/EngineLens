@@ -1,6 +1,6 @@
 import { ENGINES } from '../sim/firing.js';
 import { ERAS, electricShare, LAP, zoneAt, speedAt, FLOW } from '../sim/f1.js';
-import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel, para } from './kit.js';
+import { C, MONO, part, partAny, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, figLabel, para, below } from './kit.js';
 import { frontSection } from './layouts.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -18,7 +18,7 @@ const LAPBOX = { x0: 600, x1: 970, y0: 470, y1: 360 };
 const SPOTS = {
   ice: { dx: -150, dy: 64, r: 0 }, turbo: { dx: 66, dy: -60, r: 0 }, mguh: { dx: 0, dy: -60, r: 0 },
   mguk: { dx: -90, dy: 40, r: 0 }, ce: { dx: 0, dy: -60, r: 0 }, es: { dx: 0, dy: -60, r: 0 },
-  split: { dx: -36, dy: -20, r: 0 }, lap: { dx: -36, dy: -40, r: 0 }, fuel: { dx: 60, dy: -30, r: 0 }
+  split: { dx: -150, dy: 0, r: 0 }, lap: { dx: -36, dy: -40, r: 0 }, fuel: { dx: 60, dy: -30, r: 0 }
 };
 
 function wheel(c, [x, y], spin, label) {
@@ -49,14 +49,14 @@ function splitBars(c, era) {
   text(c, L('最大功率', 'Peak power') + ' · ' + e.label, x0, 70, { size: 15, weight: 800 });
   const rows = [[L('内燃机', 'Engine'), e.ice, era === '2026' ? L('约 400 kW', '≈ 400 kW') : L('约 550 kW（估计）', '≈ 550 kW (est.)'), C.burn], [L('MGU-K 电机', 'MGU-K motor'), e.k, e.k + ' kW', C.accent]];
   rows.forEach(([name, v, shown, color], i) => {
-    const y = 100 + i * 52;
+    const y = 70 + below(13, 30) + i * 52;
     text(c, name, x0, y, { size: 13, color: C.ink2 });
     rect(c, x0, y + 8, x1 - x0, 16, 8, alpha(C.ink, 0.08));
     rect(c, x0, y + 8, sx(v) - x0, 16, 8, color);
     text(c, shown, x1, y, { size: 14, font: MONO, weight: 600, align: 'right', color });
   });
   const share = Math.round(electricShare(era) * 100);
-  text(c, L(`电在总功率里占 ${share}%`, `Electric share of peak power: ${share}%`), x0, 226, { size: 14, weight: 700, color: era === '2026' ? C.accent : C.ink });
+  text(c, L(`电在总功率里占 ${share}%`, `Electric share of peak power: ${share}%`), x0, 226, { size: 14, weight: 700, color: era === '2026' ? C.accent : C.ink, fit: x1 - x0 });
   return [x0 + 120, 130];
 }
 
@@ -74,8 +74,8 @@ function lapTrace(c, lap) {
   circle(c, car[0], car[1], 7, C.accent, C.ink, 1.4);
   para(c, L('一圈的车速（示意）· 黄色区域是刹车区', 'Speed over a lap (model) · yellow: braking zones'), x0, y1 - 20, x1 - x0, { size: 13, color: C.ink2, anchor: 'bottom' });
   const names = { deploy: ['放电：电机帮着推', 'Deploying: the motor pushes'], top: ['接近极速：电机出力减小', 'Near top speed: the motor eases off'], brake: ['刹车：电机发电充电', 'Braking: the motor harvests'], corner: ['过弯', 'Cornering'] };
-  text(c, L(...names[z.zone]), x0, y0 + 38, { size: 16, weight: 800, color: z.zone === 'brake' ? C.accent : C.ink });
-  text(c, Math.round(speedAt(lap)) + ' km/h', x0, y0 + 66, { size: 16, font: MONO, weight: 600 });
+  text(c, L(...names[z.zone]), x0, y0 + 38, { size: 16, weight: 800, color: z.zone === 'brake' ? C.accent : C.ink, fit: x1 - x0 });
+  text(c, Math.round(speedAt(lap)) + ' km/h', x0, y0 + 38 + below(16, 28), { size: 16, font: MONO, weight: 600 });
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 }
 

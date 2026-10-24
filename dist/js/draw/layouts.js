@@ -1,12 +1,26 @@
 import { wrap, pistonDrop, sparkGlow } from '../sim/kinematics.js';
-import { ENGINES, localAngle, fireAngles, bankIntervals, throwAngle, inlineForces, cylinders, push, pushing, smoothness } from '../sim/firing.js';
-import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path, figLabel, measure, clamp, para, W } from './kit.js';
+import { ENGINES, localAngle, fireAngles, interval, bankIntervals, throwAngle, inlineForces, cylinders, push, pushing, smoothness } from '../sim/firing.js';
+import { C, MONO, part, text, rect, circle, stroke, dot, alpha, path, figLabel, measure, clamp, para, note, isCompact, below, W, STROKE_TONES } from './kit.js';
 import { drawCylinder, gasKind, R, L as ROD } from './engine.js';
 import { STROKE_NAMES } from './fourstroke.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
 const lit = local => sparkGlow(local) > 0 || (wrap(local) >= 360 && wrap(local) < 400);
+
+// On a phone, which cylinder fired last and how many are pushing, handed to the page as
+// text: the strip and graph that show it in the figure are too small to read there.
+function firingReadout(c, a, e, title = L('此刻', 'RIGHT NOW'), extra = []) {
+  if (!isCompact()) return;
+  const gap = interval(e), n = pushing(a, e);
+  const last = Object.entries(fireAngles(e)).find(([, d]) => wrap(a - d) < gap)[0];
+  const name = e.banks.length === 1 ? last.slice(1) : last;
+  note(c, 0, 0, 0, title, [
+    [L('刚点火', 'Just fired'), L(`${name} 缸`, `cylinder ${name}`), true],
+    [L('同时在推', 'Pushing now'), L(`${n} 个缸`, `${n} cylinder${n === 1 ? '' : 's'}`)],
+    [L('点火间隔', 'Firing every'), gap + '°'], ...extra
+  ]);
+}
 const bankName = b => (b === 'L' ? L('左排', 'Left bank') : L('右排', 'Right bank'));
 
 // The firing order on a 720° strip, with a playhead at the current crank angle.
@@ -14,13 +28,15 @@ function strip(c, theta, engine, bank, { x0, x1, y }, label) {
   const a = wrap(theta), fires = fireAngles(engine), sx = d => x0 + (x1 - x0) * d / 720;
   stroke(c, [[x0, y], [x1, y]], C.ink2, 1.2);
   for (let d = 0; d <= 720; d += 90) stroke(c, [[sx(d), y - 4], [sx(d), y + 4]], C.ink2, 1);
-  if (label) text(c, label, x0 - 14, y + 5, { size: 13, color: C.ink2, align: 'right' });
+  if (label) text(c, label, x0 - 14, y + 5, { size: 13, color: C.ink2, align: 'right', fit: x0 - 22 });
   const mine = Object.entries(fires).filter(([cyl]) => !bank || cyl[0] === bank).sort((p, q) => p[1] - q[1]);
-  const inline = engine.banks.length === 1;
+  const inline = engine.banks.length === 1, size = mine.length > 8 ? 11 : 13, name = cyl => (inline ? cyl.slice(1) : cyl);
+  // When enlarged text no longer fits between the marks, only the cylinder firing is named.
+  const room = (x1 - x0) * (mine[1][1] - mine[0][1]) / 720 > measure(c, name(mine[0][0]), size, 600, MONO) + 6;
   mine.forEach(([cyl, d], i) => {
     const on = wrap(a - d) < 60;
     rect(c, sx(d) - 3, y - 26, 6, 26, 2, on ? C.accent : C.ink);
-    text(c, inline ? cyl.slice(1) : cyl, sx(d), y - 34, { size: mine.length > 8 ? 11 : 13, color: on ? C.accent : C.ink, align: 'center', font: MONO, weight: 600 });
+    if (room || on) text(c, name(cyl), sx(d), y - 34, { size, color: on ? C.accent : C.ink, align: 'center', font: MONO, weight: 600 });
     if (bank) { // the gap to the next firing in this bank
       const next = mine[(i + 1) % mine.length][1] + (i === mine.length - 1 ? 720 : 0), gap = next - d;
       if ((d + next) / 2 <= 720) text(c, gap + '°', sx((d + next) / 2), y + 20, { size: 12.5, font: MONO, color: gap === 180 ? C.ink2 : C.accent, align: 'center', weight: 600 });
@@ -48,9 +64,9 @@ function pushGraph(c, theta, engine, { x0, x1, y0, y1 }) {
   const count = L(`同时在推：${n} 个缸`, `Pushing now: ${n} cylinder${n === 1 ? '' : 's'}`);
   // Title and count share a line when there is room for both, otherwise the title goes above.
   const wide = measure(c, title, 13) + measure(c, L('同时在推：2 个缸', 'Pushing now: 2 cylinders'), 14, 700) + 24 > x1 - x0;
-  text(c, title, x0, y1 - (wide ? 36 : 12), { size: 13, color: C.ink2 });
-  text(c, count, x1, y1 - 12, { size: 14, weight: 700, color: n ? C.accent : C.ink2, align: 'right' });
-  text(c, L('最弱时 ≈ 最强时的 ', 'Weakest ≈ ') + Math.round(smoothness(engine, 4) * 100) + L('%', '% of strongest'), x1, y0 + 20, { size: 12.5, color: C.ink2, align: 'right' });
+  text(c, title, x0, y1 - (wide && !isCompact() ? 36 : 12), { size: 13, color: C.ink2, fit: x1 - x0 });
+  text(c, count, x1, y1 - 12, { size: 14, weight: 700, color: n ? C.accent : C.ink2, align: 'right', minor: true });
+  text(c, L('最弱时 ≈ 最强时的 ', 'Weakest ≈ ') + Math.round(smoothness(engine, 4) * 100) + L('%', '% of strongest'), x1, y0 + 20, { size: 12.5, color: C.ink2, align: 'right', fit: x1 - x0 });
   return [(x0 + x1) / 2, (y0 + y1) / 2];
 }
 
@@ -61,8 +77,8 @@ function shakeMeter(c, theta, engine, balanced, [x, y]) {
   stroke(c, [[x, y - h / 2], [x, y + h / 2]], C.ink2, 1);
   for (const k of [-1, 0, 1]) stroke(c, [[x - 8, y + k * h / 2], [x + 8, y + k * h / 2]], C.ink2, 1);
   rect(c, x - 18, y - f * h / 2 - 6, 36, 12, 4, still ? C.ink2 : C.accent);
-  text(c, L('抖动', 'Shake'), x, y - h / 2 - 16, { size: 14, weight: 700, align: 'center' });
-  text(c, balanced ? L('已抵消', 'cancelled') : still ? L('天生平衡', 'balanced') : L('每转两次', '2× per turn'), x, y + h / 2 + 22, { size: 12, color: C.ink2, align: 'center' });
+  text(c, L('抖动', 'Shake'), x, y - h / 2 - 16, { size: 14, weight: 700, align: 'center', keepIn: true });
+  text(c, balanced ? L('已抵消', 'cancelled') : still ? L('天生平衡', 'balanced') : L('每转两次', '2× per turn'), x, y + h / 2 + 22, { size: 12, color: C.ink2, align: 'center', keepIn: true });
   return [x, y];
 }
 
@@ -91,13 +107,14 @@ function drawInline(c, st, key) {
       const on = lit(local);
       text(c, cyl.slice(1), x, top - 44, { size: 30, weight: 900, align: 'center', color: on ? C.accent : C.ink });
       dot(c, x - 22, top - 16, 5, gasKind(local));
-      text(c, L(...STROKE_NAMES[Math.floor(wrap(local) / 180)]), x - 10, top - 11, { size: 14, weight: 600, color: C.ink2 });
+      const k = Math.floor(wrap(local) / 180), sname = L(...STROKE_NAMES[k]);
+      if (measure(c, sname, 14, 600) < step - 40) text(c, sname, x - 10, top - 11, { size: 14, weight: 600, color: C[STROKE_TONES[k]] });
       if (on) text(c, L('点火！', 'FIRE!'), x + 22, top - 56, { size: 14, weight: 800, color: C.accent });
     });
     anchors[id] = [x, top + 60];
   });
   part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 150, x1: 790, y: 82 }, L('点火顺序', 'Firing order')); });
-  text(c, cfg.order, 810, 87, { size: 14, font: MONO, weight: 600 });
+  text(c, cfg.order, 810, 87, { size: 14, font: MONO, weight: 600, minor: true });
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 150, x1: 790, y0: 236, y1: 150 }); });
   part(c, 'shake', () => { anchors.shake = shakeMeter(c, a, e, st.balance && cfg.balance, [930, 190]); });
   if (cfg.balance) {
@@ -115,6 +132,7 @@ function drawInline(c, st, key) {
     anchors.balance = [495, 734];
   }
   if (!st.preview) callouts(c, anchors, inlineSpots(n), parts);
+  firingReadout(c, a, e, undefined, [[L('点火顺序', 'Firing order'), cfg.order]]);
   figLabel(c, st.figure);
 }
 const spotCache = {};
@@ -138,7 +156,9 @@ export const inline4View = {
 export const inline6View = { draw: (c, st) => drawInline(c, st, 'inline6') };
 
 // ── Bank grid: every cylinder as a small cell, one row per bank ─────
-const rowName = b => (b === 'L' ? L('左排', 'Left') : b === 'R' ? L('右排', 'Right') : L(b + ' 排', 'Row ' + b));
+// Bank names beside the grid; a phone figure has room only for a letter.
+const rowName = b => (isCompact() ? (b === 'L' ? L('左', 'L') : b === 'R' ? L('右', 'R') : b)
+  : b === 'L' ? L('左排', 'Left') : b === 'R' ? L('右排', 'Right') : L(b + ' 排', 'Row ' + b));
 function bankGrid(c, e, a, x0, y0, gap = 52, rowGap = 92, cellH = 76) {
   const per = e.firing.length / e.banks.length;
   e.banks.forEach((bank, row) => {
@@ -149,11 +169,12 @@ function bankGrid(c, e, a, x0, y0, gap = 52, rowGap = 92, cellH = 76) {
       const drop = pistonDrop(local, R, ROD) / (2 * R), kind = gasKind(local), on = lit(local);
       rect(c, x, y, w, cellH, 4, null, C.ink, 1.4);
       const crown = y + 6 + drop * (cellH - 42);
-      if (kind === 'burning') rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, alpha(C.burn, on ? 0.8 : 0.35));
-      else if (kind === 'exhaust') rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, alpha(C.ink2, 0.3));
+      // The gas above the piston in its stroke's colour, as in the single-cylinder figures.
+      const fill = { air: alpha(C.intake, 0.22), squeezed: alpha(C.squeeze, 0.3), burning: alpha(C.burn, on ? 0.8 : 0.4), exhaust: alpha(C.exhaust, 0.35) }[kind];
+      rect(c, x + 2, y + 2, w - 4, crown - y - 2, 2, fill);
       rect(c, x + 3, crown, w - 6, 18, 3, C.paper2, C.ink, 1.2);
       if (on) circle(c, x + w / 2, y - 8, 4, C.accent);
-      if (rowGap > 80) text(c, cyl, x + w / 2, y + cellH + 14, { size: 11, font: MONO, color: C.ink2, align: 'center' });
+      if (rowGap > 80) text(c, cyl, x + w / 2, y + cellH + 14, { size: 11, font: MONO, color: C.ink2, align: 'center', minor: true });
     }
   });
   return [x0 + (per * gap) / 2, y0 + (e.banks.length * rowGap) / 2];
@@ -204,7 +225,7 @@ function drawV(c, st, key) {
   text(c, L('从发动机正前方看', 'Seen from the front'), 40, 52, { size: 13, color: C.ink2 });
   part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 600, 64, cfg.gap); });
   part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 560, x1: 960, y: 362 }, ''); });
-  text(c, L('点火顺序：每 ', 'Fires every ') + 720 / e.firing.length + L('° 一次，左右两排轮流', '°, banks taking turns'), 560, 400, { size: 13, color: C.ink2 });
+  text(c, L('点火顺序：每 ', 'Fires every ') + 720 / e.firing.length + L('° 一次，左右两排轮流', '°, banks taking turns'), 560, 400, { size: 13, color: C.ink2, minor: true });
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 560, x1: 960, y0: 560, y1: 470 }); });
   part(c, 'rhythm', () => {
     const gaps = [...new Set(bankIntervals(e, 'L'))].join(' / ');
@@ -212,6 +233,7 @@ function drawV(c, st, key) {
   });
   anchors.rhythm = [600, 636];
   if (!st.preview) callouts(c, anchors, V_SPOTS, parts);
+  firingReadout(c, a, e);
   figLabel(c, st.figure);
 }
 export const v6View = { draw: (c, st) => drawV(c, st, 'v6') };
@@ -249,10 +271,11 @@ function drawBoxer(c, st) {
   text(c, L('从发动机正前方看：相对的两个活塞同时向外、同时向内', 'From the front: opposite pistons move out and in together'), 40, 52, { size: 13, color: C.ink2 });
   part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 640, 92, key === 'flat4' ? 72 : 60); });
   part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 600, x1: 960, y: 392 }, ''); });
-  text(c, (key === 'flat4' ? L('对置四缸 1-3-2-4（斯巴鲁）', 'Flat-four 1-3-2-4 (Subaru)') : L('对置六缸 1-6-2-4-3-5（保时捷）', 'Flat-six 1-6-2-4-3-5 (Porsche)')), 600, 430, { size: 13, color: C.ink2 });
+  text(c, (key === 'flat4' ? L('对置四缸 1-3-2-4（斯巴鲁）', 'Flat-four 1-3-2-4 (Subaru)') : L('对置六缸 1-6-2-4-3-5（保时捷）', 'Flat-six 1-6-2-4-3-5 (Porsche)')), 600, 430, { size: 13, color: C.ink2, minor: true });
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 600, x1: 960, y0: 620, y1: 520 }); });
   part(c, 'cog', () => { anchors.cog = cogCompare(c, 60, 520); });
   if (!st.preview) callouts(c, anchors, BOXER_SPOTS, parts);
+  firingReadout(c, a, e, undefined, [[L('点火顺序', 'Firing order'), key === 'flat4' ? '1-3-2-4' : '1-6-2-4-3-5']]);
   figLabel(c, st.figure);
 }
 export const boxerView = {
@@ -286,7 +309,7 @@ function wFront(c, e, a, time, { x, y, s }) {
     const q = sign * 45 * Math.PI / 180, far = 360 * s + 34;
     text(c, L(zh, en), x + Math.sin(q) * far, y - Math.cos(q) * far, { size: 14, weight: 700, align: 'center' });
   }
-  text(c, L('每个 VR8 里两排只差 15°', 'Two rows 15° apart in each VR8'), x, y + 78, { size: 13, color: C.ink2, align: 'center' });
+  text(c, L('每个 VR8 里两排只差 15°', 'Two rows 15° apart in each VR8'), x, y + 78, { size: 13, color: C.ink2, align: 'center', minor: true });
   return [x, y - 120];
 }
 
@@ -299,7 +322,7 @@ function turbos(c, time) {
     for (let k = 0; k < 8; k++) { c.rotate(Math.PI / 4); stroke(c, [[5, 0], [28, -5]], C.ink, 1.4); }
     c.restore();
   }
-  text(c, L('低转速先用两个，转速上来后四个一起', 'Two at low revs, all four as the revs rise'), 40, 196, { size: 13, color: C.ink2 });
+  text(c, L('低转速先用两个，转速上来后四个一起', 'Two at low revs, all four as the revs rise'), 40, 196, { size: 13, color: C.ink2, minor: true });
   return [208, 130];
 }
 
@@ -310,9 +333,10 @@ function drawW16(c, st) {
   part(c, 'turbos', () => { anchors.turbos = turbos(c, time); });
   part(c, 'banks', () => { anchors.banks = bankGrid(c, e, a, 640, 54, 56, 72, 56); });
   part(c, 'timeline', () => { anchors.timeline = strip(c, a, e, null, { x0: 560, x1: 970, y: 410 }, ''); });
-  para(c, L('16 个缸，每 45° 点一次火（示例顺序）', 'Sixteen cylinders, one firing every 45° (example order)'), 560, 448, 410, { size: 13, color: C.ink2 });
+  para(c, L('16 个缸，每 45° 点一次火（示例顺序）', 'Sixteen cylinders, one firing every 45° (example order)'), 560, 448, 410, { size: 13, color: C.ink2, minor: true });
   part(c, 'push', () => { anchors.push = pushGraph(c, a, e, { x0: 560, x1: 970, y0: 640, y1: 540 }); });
   if (!st.preview) callouts(c, anchors, W16_SPOTS, parts);
+  firingReadout(c, a, e);
   figLabel(c, st.figure);
 }
 export const w16View = { draw: drawW16 };
@@ -324,7 +348,8 @@ const PANELS = [
 ];
 const V8_SPOTS = {
   'crank-cross': { dx: 0, dy: 96, r: 0 }, 'crank-flat': { dx: 0, dy: 96, r: 0 },
-  'banks-cross': { dx: 0, dy: -96, r: 0 }, 'banks-flat': { dx: 0, dy: -96, r: 0 },
+  // The bank grids are named by the panel titles above them, so their callouts carry no name.
+  'banks-cross': { dx: 0, dy: -96, r: 0, quiet: true }, 'banks-flat': { dx: 0, dy: -96, r: 0, quiet: true },
   'timeline-cross': { dx: -160, dy: 0, r: 0 }, 'timeline-flat': { dx: -160, dy: 0, r: 0 }
 };
 
@@ -333,7 +358,8 @@ function endView(c, e, a, x, y) {
   for (const [side, ang] of [['L', -135], ['R', -45]]) {
     const q = ang * Math.PI / 180;
     stroke(c, [[x, y], [x + Math.cos(q) * 110, y + Math.sin(q) * 110]], C.ink2, 1, [4, 5]);
-    text(c, side === 'L' ? L('左排', 'Left') : L('右排', 'Right'), x + Math.cos(q) * 124, y + Math.sin(q) * 124, { size: 13, color: C.ink2, align: 'center' });
+    // A phone figure leaves these out: the bank grid beside it names the banks.
+    text(c, side === 'L' ? L('左排', 'Left') : L('右排', 'Right'), x + Math.cos(q) * 124, y + Math.sin(q) * 124, { size: 13, color: C.ink2, align: 'center', minor: true });
   }
   circle(c, x, y, r + 16, null, C.faint, 1);
   // Throws that point the same way (1 and 4, 2 and 3 on a flat-plane crank) share a label.
@@ -362,7 +388,7 @@ export function drawV8(c, st) {
   for (const pnl of PANELS) {
     const e = ENGINES[pnl.key], ox = pnl.ox;
     text(c, L(...pnl.title), ox + 36, 58, { size: 24, weight: 900 });
-    text(c, L(...pnl.sub), ox + 36, 84, { size: 14, color: C.ink2 });
+    text(c, L(...pnl.sub), ox + 36, 58 + below(14, 26), { size: 14, color: C.ink2, fit: 440 });
     part(c, 'crank-' + pnl.id, () => { anchors['crank-' + pnl.id] = endView(c, e, a, ox + 130, 240); });
     part(c, 'banks-' + pnl.id, () => { anchors['banks-' + pnl.id] = bankGrid(c, e, a, ox + 270, 140); });
     part(c, 'timeline-' + pnl.id, () => {
@@ -370,10 +396,12 @@ export function drawV8(c, st) {
       strip(c, a, e, 'R', { x0: ox + 90, x1: ox + 460, y: 560 }, L('右排', 'Right'));
       anchors['timeline-' + pnl.id] = [ox + 270, 515];
       const gaps = [...new Set(bankIntervals(e, 'L'))].join(' / ');
-      text(c, L('每排的点火间隔：', 'Gaps within a bank: ') + gaps + '°', ox + 36, 625, { size: 14, color: C.ink2 });
+      text(c, L('每排的点火间隔：', 'Gaps within a bank: ') + gaps + '°', ox + 36, 625, { size: 14, color: C.ink2, minor: true });
     });
-    text(c, L(...pnl.sound), ox + 36, 680, { size: 19, weight: 800, color: pnl.id === 'cross' ? C.ink : C.accent });
-    text(c, L(...pnl.car), ox + 36, 706, { size: 13, color: C.ink2 });
+    const soundY = isCompact() ? 666 : 680;
+    text(c, L(...pnl.sound), ox + 36, soundY, { size: 19, weight: 800, color: pnl.id === 'cross' ? C.ink : C.accent, fit: 440 });
+    text(c, L(...pnl.car), ox + 36, soundY + below(13, 26), { size: 13, color: C.ink2, fit: 440 });
+    firingReadout(c, a, e, L(...pnl.title), [[L('每排的间隔', 'Within a bank'), [...new Set(bankIntervals(e, 'L'))].join(' / ') + '°']]);
   }
   if (!st.preview) callouts(c, anchors, V8_SPOTS, parts);
   figLabel(c, st.figure);

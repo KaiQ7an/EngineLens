@@ -1,5 +1,5 @@
 import { manifold, gauge, parasitic, power, ALTITUDES, P_SEA } from '../sim/induction.js';
-import { C, MONO, part, text, circle, stroke, path, dot, hash, clamp, lerp, figLabel, spread, boostedSize } from './kit.js';
+import { C, MONO, part, text, circle, stroke, path, dot, hash, clamp, lerp, figLabel, spread, boostedSize, below } from './kit.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -26,7 +26,7 @@ function jar(c, m, t, ambient, time) {
   const p = t < 0 ? ambient * 0.35 : manifold(m.id, t, ambient);
   const air = p / (P_SEA * 0.97);
   const x = m.x, top = 96, h = 210, w = 132;
-  text(c, L(...m.name), x, 52, { size: 20, weight: 700, align: 'center' });
+  text(c, L(...m.name), x, 52, { size: 20, weight: 700, align: 'center', fit: 300 });
   path(c, [[x - w / 2, top], [x - w / 2, top + h], [x + w / 2, top + h], [x + w / 2, top]]);
   c.strokeStyle = C.ink; c.lineWidth = 2; c.stroke();
   stroke(c, [[x - w / 2 - 8, top], [x - w / 2 + 10, top]], C.ink, 2); stroke(c, [[x + w / 2 + 8, top], [x + w / 2 - 10, top]], C.ink, 2);
@@ -38,10 +38,11 @@ function jar(c, m, t, ambient, time) {
   }
   const g = t < 0 ? -ambient * 0.65 : gauge(m.id, t, ambient);
   text(c, (g > 0.005 ? '+' : '') + g.toFixed(2) + ' bar', x, top + h + 34, { size: 19, font: MONO, weight: 500, align: 'center', color: g > 0.005 ? C.accent : C.ink });
-  text(c, L('每次吸进 ', 'Air per breath ') + Math.round(air * 100) + '%', x, top + h + 60, { size: 14, color: C.ink2, align: 'center' });
+  const y2 = top + h + 34 + below(14, 26), y3 = y2 + below(14, 27);
+  text(c, L('每次吸进 ', 'Air per breath ') + Math.round(air * 100) + '%', x, y2, { size: 14, color: C.ink2, align: 'center', fit: 300 });
   if (m.id === 'super' && t >= 0) {
     const share = parasitic('super', t, ambient) / (air || 1);
-    text(c, L('被增压器吃掉 ≈ ', 'Taken by blower ≈ ') + Math.round(share * 100) + '%', x, top + h + 87, { size: 14, color: C.accent, align: 'center' });
+    text(c, L('被增压器吃掉 ≈ ', 'Taken by blower ≈ ') + Math.round(share * 100) + '%', x, y3, { size: 14, color: C.accent, align: 'center', fit: 300 });
   }
   if (m.id === 'turbo') {
     const spool = t < 0 ? 0 : clamp(gauge('turbo', t, ambient) / 0.8);
@@ -86,7 +87,8 @@ export function drawThrottle(c, st) {
   const anchors = {};
   for (const m of MODES) part(c, m.jar, () => { anchors[m.jar] = jar(c, m, st.t ?? -1, ambient, st.time); });
   part(c, 'chart', () => { anchors.chart = chart(c, st.t ?? -1, ambient); });
-  part(c, 'alt', () => text(c, st.alt === 'high' ? L('海拔 3650 米（约拉萨）· 空气稀薄', '3,650 m (about Lhasa) · thin air') : L('海平面', 'Sea level'), 976, 30, { size: 13, color: st.alt === 'high' ? C.accent : C.ink2, align: 'right' }));
+  // The altitude sits above the jars' titles, in the top margin.
+  part(c, 'alt', () => text(c, st.alt === 'high' ? L('海拔 3650 米（约拉萨）· 空气稀薄', '3,650 m (about Lhasa) · thin air') : L('海平面', 'Sea level'), 976, 24, { size: 12, color: st.alt === 'high' ? C.accent : C.ink2, align: 'right', base: 'middle', fit: 400, minor: true }));
   anchors.alt = [940, 26];
   if (!st.preview) callouts(c, anchors, SPOTS, st.parts);
   figLabel(c, st.figure);

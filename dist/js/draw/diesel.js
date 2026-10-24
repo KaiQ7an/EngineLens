@@ -1,8 +1,8 @@
 import { wrap, strokeIndex } from '../sim/kinematics.js';
 import { compressionTemp, injection, DIESEL_CR, PETROL_CR, AUTOIGNITION_C, IGNITE } from '../sim/diesel.js';
-import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, dot, alpha, clamp, figLabel } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, pipe, flow, arrow, dot, alpha, clamp, figLabel, note, isCompact, W, STROKE_TONES } from './kit.js';
 import { drawCylinder, gasKind } from './engine.js';
-import { STROKE_NAMES } from './fourstroke.js';
+import { STROKE_NAMES, deadCentres, readout } from './fourstroke.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
 
@@ -41,11 +41,13 @@ function thermometer(c, a) {
   }
   const mark = (v, zh, en, color) => {
     stroke(c, [[x + 11, y(v)], [x + 26, y(v)]], color, 1.5, [3, 3]);
-    text(c, L(zh, en), x + 32, y(v) + 4, { size: 12.5, color, weight: 600 });
+    text(c, L(zh, en), x + 32, y(v) + 4, { size: 12.5, color, weight: 600, fit: W - x - 40 });
   };
-  mark(compressionTemp(360, DIESEL_CR), '柴油机压缩到这里', 'Diesel gets here', C.accent);
-  mark(compressionTemp(360, PETROL_CR), '汽油机只到这里', 'Petrol stops here', C.ink2);
-  mark(AUTOIGNITION_C, '柴油自燃 ≈ 210°', 'Self-ignites ≈ 210°', C.ink2);
+  // A phone figure uses short names: its enlarged text has only the space right of the tube.
+  const short = isCompact();
+  mark(compressionTemp(360, DIESEL_CR), short ? '柴油机' : '柴油机压缩到这里', short ? 'Diesel' : 'Diesel gets here', C.accent);
+  mark(compressionTemp(360, PETROL_CR), short ? '汽油机' : '汽油机只到这里', short ? 'Petrol' : 'Petrol stops here', C.ink2);
+  mark(AUTOIGNITION_C, short ? '自燃点' : '柴油自燃 ≈ 210°', short ? 'Ignites' : 'Self-ignites ≈ 210°', C.ink2);
   const shown = hot ? L('燃烧中 >1500°', 'Burning >1500°') : Math.round(temp) + '°C';
   text(c, L('缸内空气温度', 'Air in the cylinder'), x, top - 26, { size: 13, color: C.ink2, align: 'center' });
   text(c, shown, x, bottom + 70, { size: 18, font: MONO, weight: 600, color: col === C.ink2 ? C.ink : col, align: 'center' });
@@ -68,11 +70,18 @@ export function drawDiesel(c, st) {
   arrow(c, 670, 66, -Math.PI / 2, C.ink, 8);
   text(c, L('废气', 'Exhaust'), 700, 52, { size: 14, color: C.ink2, weight: 500 });
   const anchors = drawCylinder(c, a, { x: CX, y: CY, s: S, air: 26, time, cams: true, diesel: true });
+  deadCentres(c, a, { cx: CX, cy: CY, s: S, diesel: true });
   part(c, 'thermo', () => { anchors.thermo = thermometer(c, a); });
   anchors['exhaust-port'] = [670, 160];
   const k = strokeIndex(a), fuel = injection(a) > 0;
-  dot(c, 640, 712, 6, gasKind(a, true));
-  text(c, L(...STROKE_NAMES[k]) + (fuel ? L(' · 正在喷油', ' · injecting') : ''), 656, 718, { size: 17, weight: 700, color: fuel ? C.accent : C.ink });
+  if (isCompact()) {
+    const temp = airTemp(a);
+    note(c, 0, 0, 0, L('此刻', 'RIGHT NOW'), [...readout(a, true).map(r => [r.label, r.value, r.hot]),
+      [L('缸内空气', 'Air inside'), temp === Infinity ? L('燃烧中', 'burning') : Math.round(temp) + '°C', temp > AUTOIGNITION_C]]);
+  } else {
+    dot(c, 640, 712, 6, gasKind(a, true));
+    text(c, L(...STROKE_NAMES[k]) + (fuel ? L(' · 正在喷油', ' · injecting') : ''), 656, 718, { size: 17, weight: 700, color: fuel ? C.accent : C[STROKE_TONES[k]] });
+  }
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
   return { anchors, speed };

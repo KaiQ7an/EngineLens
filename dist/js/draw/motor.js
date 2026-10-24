@@ -13,7 +13,7 @@ const WAVE = { x0: 640, x1: 970, y: 210, amp: 70 };
 const CHAIN = [['battery', 660, 560], ['inverter', 790, 560], ['motor', 920, 560]];
 const SPOTS = {
   stator: { dx: 50, dy: -96, r: 0 }, rotor: { dx: 90, dy: 120, r: 0 }, field: { dx: 40, dy: -40, r: 28 },
-  waves: { dx: -60, dy: -100, r: 0 }, inverter: { dx: 0, dy: -64, r: 0 }, battery: { dx: 0, dy: -64, r: 0 }
+  waves: { dx: -60, dy: -100, r: 0 }, inverter: { dx: -60, dy: -76, r: 0 }, battery: { dx: 0, dy: -64, r: 0 }
 };
 
 function arrowLine(c, from, to, color, width = 4) {
@@ -67,7 +67,7 @@ function waves(c, e) {
   });
   stroke(c, [[sx(ph), y - amp - 12], [sx(ph), y + amp + 12]], C.accent, 2);
   phaseCurrents(e).forEach((v, k) => circle(c, sx(ph), y - amp * v, 4.5, STYLE[k].color()));
-  text(c, L('三相电流（一圈）', 'Three-phase current (one turn)'), x0, y - amp - 24, { size: 13, color: C.ink2 });
+  text(c, L('三相电流（一圈）', 'Three-phase current (one turn)'), x0, y - amp - 24, { size: 13, color: C.ink2, fit: x1 - x0 });
   return [(x0 + x1) / 2, y];
 }
 
@@ -84,7 +84,7 @@ function chain(c, mode, time) {
     out[id] = [x, y - 30];
   }
   const label = mode === 'regen' ? L('回收：车轮带着电机发电 → 电池', 'Regen: wheels → motor → battery') : L('驱动：电池 → 电控 → 电机', 'Drive: battery → inverter → motor');
-  text(c, label, CHAIN[0][1] - 40, CHAIN[0][2] + 66, { size: 14, weight: 600, color: mode === 'regen' ? C.accent : C.ink });
+  text(c, label, CHAIN[0][1] - 40, CHAIN[0][2] + 66, { size: 14, weight: 600, color: mode === 'regen' ? C.accent : C.ink, fit: 370 });
   return out;
 }
 
@@ -97,14 +97,14 @@ export function drawMotor(c, st) {
     const tip = at(f.angle, R_IN - 8);
     arrowLine(c, at(f.angle + Math.PI, R_IN - 8), tip, C.accent, 5);
     const [lx, ly] = at(f.angle, R_IN - 44);
-    text(c, L('磁场', 'Field'), lx, ly - 10, { size: 14, weight: 800, color: C.accent, align: 'center' });
+    text(c, L('磁场', 'Field'), lx, ly - 10, { size: 14, weight: 800, color: C.accent, align: 'center', minor: true });
     anchors.field = tip;
   });
   part(c, 'waves', () => { anchors.waves = waves(c, e); });
   partAny(c, ['battery', 'inverter'], () => Object.assign(anchors, chain(c, mode, time)));
   anchors.battery ??= [CHAIN[0][1], CHAIN[0][2] - 30];
   anchors.inverter ??= [CHAIN[1][1], CHAIN[1][2] - 30];
-  para(c, L('看：线圈不动，磁场在转，转子跟着它跑', 'Watch: the coils stay put, the field turns, the rotor follows'), 640, 386, 330, { size: 14, color: C.ink2 });
+  para(c, L('看：线圈不动，磁场在转，转子跟着它跑', 'Watch: the coils stay put, the field turns, the rotor follows'), 640, 386, 330, { size: 14, color: C.ink2, minor: true });
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
   figLabel(c, st.figure);
 }

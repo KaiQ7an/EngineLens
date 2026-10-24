@@ -1,5 +1,5 @@
 import { MODES } from '../sim/powertrain.js';
-import { C, MONO, part, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, clamp, figLabel, note } from './kit.js';
+import { C, MONO, part, text, rect, circle, stroke, fillCut, alpha, pointAt, pathLength, clamp, figLabel, note, below } from './kit.js';
 import { drawCylinder } from './engine.js';
 import { callouts } from './callouts.js';
 import { L } from '../i18n.js';
@@ -64,7 +64,7 @@ function battery(c, soc, dir) {
     rect(c, x + 10 + i * cw, y + 10, cw - 4, h - 20, 3, lit ? alpha(C.accent, dir > 0 ? 0.85 : 0.6) : null, C.ink2, 1);
   }
   text(c, Math.round(soc * 100) + '%', x + w / 2, y + h + 26, { size: 16, font: MONO, weight: 600, align: 'center' });
-  text(c, dir > 0 ? L('充电中', 'charging') : dir < 0 ? L('放电中', 'discharging') : '', x + w / 2, y + h + 52, { size: 13, color: dir > 0 ? C.accent : C.ink2, align: 'center' });
+  text(c, dir > 0 ? L('充电中', 'charging') : dir < 0 ? L('放电中', 'discharging') : '', x + w / 2, y + h + 26 + below(13, 26), { size: 13, color: dir > 0 ? C.accent : C.ink2, align: 'center' });
 }
 
 function wheel(c, angle) {
@@ -115,7 +115,7 @@ export function drawPowertrain(c, st, entry, { clutch }) {
     part(c, 'no-link', () => {
       stroke(c, [[506, 250], [700, 250]], C.ink2, 2, [6, 6]);
       stroke(c, [[590, 236], [618, 264]], C.accent, 3); stroke(c, [[590, 264], [618, 236]], C.accent, 3);
-      text(c, L('发动机和车轮之间', 'Engine to wheels'), 604, 190, { size: 13.5, weight: 700, align: 'center', color: C.accent });
+      text(c, L('发动机和车轮之间', 'Engine to wheels'), 604, 214 - below(13.5, 24), { size: 13.5, weight: 700, align: 'center', color: C.accent, fit: 230 });
       text(c, L('没有连接', 'no link'), 604, 214, { size: 13.5, weight: 700, align: 'center', color: C.accent });
     });
     anchors['no-link'] = [604, 250];

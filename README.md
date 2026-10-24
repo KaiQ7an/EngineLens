@@ -33,7 +33,8 @@ count: a turbo visibly packs more into the same cylinder.
 | On track | F1 power unit | The 2026 rules: 90° V6 turbo, 350 kW MGU-K, no MGU-H; energy over a lap; 2014–2025 for comparison |
 
 The four-stroke page sets the pattern for the others. The narrated guide stops at each
-dead centre and explains what happens, then why. A crank-angle scrubber under the figure
+dead centre (the diesel page does the same, and the inline engines stop as each
+cylinder fires) and explains what happens, then why. A crank-angle scrubber under the figure
 (or a sideways drag on the drawing) turns the engine by hand; it stays where you leave it
 and plays on from there. Playback speed is set apart from the engine speed being
 described, which has its own readout of firings per second and how much the drawing is
@@ -41,11 +42,11 @@ slowed. Each stroke keeps one colour throughout: intake cyan, compression lilac,
 burning orange, exhaust grey.
 
 Labels are placed so they never cover each other: numbered callouts look for a free
-spot, and `dist/js/dev/layout.js` draws every figure at every step, in both languages
-and at desktop and phone text sizes, and lists any label that overlaps another or
-leaves the figure. On phones the figures enlarge their small labels, the four-stroke
-readout moves under the figure as text, and every figure redraws only while it is on
-screen. Each engine page has an identity card, parts you can tap (numbered callouts on the
+spot, and `dist/js/dev/layout.js` draws every figure at every step, in both languages,
+at desktop and tablet sizes and as a phone figure, and lists any label that overlaps
+another or leaves the figure. On phones the figure runs edge to edge and its labels
+are enlarged to a readable floor; readout boxes and footnotes leave the drawing, and
+the readouts appear as text under it. Every figure redraws only while it is on screen. Each engine page has an identity card, parts you can tap (numbered callouts on the
 drawing), strengths and trade-offs, cars you may know (tagged by layout and
 induction), one common myth explained, and links to related engines. Dashed-underlined
 terms open a glossary.

@@ -1,4 +1,5 @@
 import { wrap, strokeIndex, strokeProgress, valveLift, sparkGlow, valvesOverlap } from '../sim/kinematics.js';
+import { injection } from '../sim/diesel.js';
 import { C, text, para, MONO, rect, stroke, pipe, flow, arrow, dot, part, alpha, figLabel, note, isCompact, STROKE_TONES } from './kit.js';
 import { drawCylinder, crownY, GAS_KIND } from './engine.js';
 import { callouts } from './callouts.js';
@@ -34,9 +35,10 @@ export function pistonState(theta) {
 }
 
 // What each moving part is doing at crank angle θ. The panel in the figure shows it;
-// on a phone it goes to the page as a text readout instead.
-export function readout(theta) {
-  const a = wrap(theta), ps = pistonState(a), spark = sparkGlow(a) > 0;
+// on a phone it goes to the page as a text readout instead. A diesel has an injector
+// where a petrol engine has its spark plug.
+export function readout(theta, diesel = false) {
+  const a = wrap(theta), ps = pistonState(a), spark = sparkGlow(a) > 0, spray = injection(a) > 0;
   const valve = (kind, label) => {
     const lift = valveLift(a, kind);
     return { id: kind, label, lift, value: lift > 0.01 ? L('开', 'open') : L('关', 'shut') };
@@ -45,7 +47,8 @@ export function readout(theta) {
   return [
     { id: 'piston', label: L('活塞', 'Piston'), value: ps.text, hot: !!ps.at },
     valve('intake', L('进气门', 'Intake valve')), valve('exhaust', L('排气门', 'Exhaust valve')),
-    { id: 'spark', label: L('火花塞', 'Spark plug'), value: spark ? L('点火！', 'Spark!') : '—', hot: spark },
+    diesel ? { id: 'injector', label: L('喷油嘴', 'Injector'), value: spray ? L('喷油中', 'spraying') : '—', hot: spray }
+      : { id: 'spark', label: L('火花塞', 'Spark plug'), value: spark ? L('点火！', 'Spark!') : '—', hot: spark },
     { id: 'overlap', label: L('气门重叠', 'Valve overlap'), value: overlap ? L('两个气门都开着', 'both valves open') : '—', hot: overlap }
   ];
 }
@@ -81,8 +84,8 @@ function panel(c, a, x0, x1) {
 }
 
 // The two dead centres, marked on the bore like dimension lines on a drawing.
-function deadCentres(c, a, cx) {
-  const yT = CY + crownY(0) * S, yB = CY + crownY(180) * S, x = cx - 96 * S - 10, ps = pistonState(a);
+export function deadCentres(c, a, { cx = CX, cy = CY, s = S, diesel = false } = {}) {
+  const yT = cy + crownY(0, diesel) * s, yB = cy + crownY(180, diesel) * s, x = cx - 96 * s - 10, ps = pistonState(a);
   for (const [y, at, zh, en] of [[yT, 'tdc', '上止点', 'TDC'], [yB, 'bdc', '下止点', 'BDC']]) {
     const on = ps.at === at;
     stroke(c, [[x - 34, y], [x, y]], on ? C.accent : C.ink2, on ? 2 : 1, on ? null : [3, 3]);
@@ -109,7 +112,7 @@ export function drawFourStroke(c, st) {
   arrow(c, 690 + dx, 66, -Math.PI / 2, C.ink, 8);
   text(c, L('废气', 'Exhaust'), 722 + dx, 52, { size: 14, color: C.ink2, weight: 500 });
   const anchors = drawCylinder(c, a, { x: CX + dx, y: CY, s: S, air: 26, time, cams: true });
-  deadCentres(c, a, CX + dx);
+  deadCentres(c, a, { cx: CX + dx });
   if (compact) note(c, 0, 0, 0, L('此刻', 'RIGHT NOW'), readout(a).map(r => [r.label, r.value, r.hot]));
   else panel(c, a, 752, 978);
   if (!st.preview) callouts(c, anchors, SPOTS, parts);
