@@ -8,6 +8,8 @@ import { housing, apex, apexAlpha, rotorAngle, faceStroke, chamberArea } from '.
 import { phaseCurrents, field, rotorAngle as motorRotor } from '../dist/js/sim/motor.js';
 import { FLOWS, MODES, active } from '../dist/js/sim/powertrain.js';
 import { ERAS, electricShare, LAP, zoneAt, speedAt } from '../dist/js/sim/f1.js';
+import { twinBoost, superchargerOn, shares, spool, HANDOVER } from '../dist/js/sim/twincharge.js';
+import { reaction } from '../dist/js/sim/fuelcell.js';
 
 const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} ≉ ${b}`);
 const r = 27, l = 106;
@@ -245,4 +247,30 @@ test('the lap zones cover the lap; braking slows the car and deployment speeds i
     if (z.zone === 'deploy') assert.ok(speedAt(z.to - 0.005) > speedAt(from + 0.005), 'deploy ' + mid);
   }
   assert.equal(zoneAt(1.25).zone, zoneAt(0.25).zone);
+});
+
+test('W16: four rows, a firing every 45°, each row firing evenly', () => {
+  const e = ENGINES.w16;
+  for (const bank of e.banks) assert.deepEqual(bankIntervals(e, bank), [180, 180, 180, 180]);
+  assert.equal(pushing(400, e), 4);
+  assert.ok(smoothness(e, 2) > smoothness(ENGINES.v12, 2));
+});
+
+test('twincharging boosts from low revs and hands over to the turbo', () => {
+  assert.ok(twinBoost(1500) > steadyBoost('turbo', 1500) + 0.3);
+  assert.ok(superchargerOn(2000) && !superchargerOn(HANDOVER + 100));
+  near(twinBoost(5500), steadyBoost('turbo', 5500));
+  for (let rpm = 1000; rpm <= 6500; rpm += 250) {
+    const sh = shares(rpm);
+    near(sh.turbo + sh.super, sh.total, 1e-12);
+    assert.ok(sh.super >= 0 && sh.total >= steadyBoost('turbo', rpm) - 1e-12);
+  }
+});
+
+test('an electric compressor spools far faster than a turbo', () => {
+  assert.ok(spool('electric', 0.5) > 0.85 && spool('turbo', 0.5) < 0.4);
+});
+
+test('fuel cell: 2 H2 + O2 makes 2 H2O, with two electrons per hydrogen', () => {
+  assert.deepEqual(reaction(2), { o2: 1, water: 2, protons: 4, electrons: 4 });
 });

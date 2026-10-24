@@ -17,6 +17,13 @@ export const ENGINES = {
   v8flat: { banks: ['L', 'R'], vAngle: 90, firing: ['L1', 'R3', 'L3', 'R4', 'L4', 'R2', 'L2', 'R1'] },
   // Two inline-sixes (1-5-3-6-2-4 each) on six shared pins, firing alternately every 60°.
   v12: { banks: ['L', 'R'], vAngle: 60, firing: ['L1', 'R2', 'L5', 'R4', 'L3', 'R1', 'L6', 'R5', 'L2', 'R3', 'L4', 'R6'] },
+  // W16: two narrow-angle VR8 blocks set 90° apart, so four rows of four cylinders.
+  // `angles` gives each row's axis from vertical. The order here is an even-firing
+  // example that rotates through the rows, each row firing like an inline-four.
+  w16: {
+    banks: ['A', 'B', 'C', 'D'], angles: [-52.5, -37.5, 37.5, 52.5],
+    firing: ['A1', 'C1', 'B1', 'D1', 'A3', 'C3', 'B3', 'D3', 'A4', 'C4', 'B4', 'D4', 'A2', 'C2', 'B2', 'D2']
+  },
   // Boxers: opposite cylinders share a position and reach TDC together, so their
   // pistons move out and in at the same time. Subaru's flat-four fires 1-3-2-4 and
   // Porsche's flat-six 1-6-2-4-3-5 (cylinders 1-3 on one bank, 4-6 on the other).
