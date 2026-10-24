@@ -7,13 +7,14 @@ export const GROUPS = [
   { id: 'induction', name: ['进气方式', 'How it breathes'] },
   { id: 'layout', name: ['气缸布局', 'Cylinder layouts'] },
   { id: 'special', name: ['特殊结构', 'Different designs'] },
-  { id: 'electric', name: ['电动化', 'Going electric'] }
+  { id: 'electric', name: ['电动化', 'Going electric'] },
+  { id: 'racing', name: ['赛道', 'On track'] }
 ];
 
 // Engines not in the gallery yet.
 export const COMING = [
   ['W16 / V16', 'W16 / V16'], ['双增压与电动增压', 'Twincharging & e-boost'],
-  ['氢燃料电池', 'Fuel cell'], ['2026 F1 动力单元', '2026 F1 power unit']
+  ['氢燃料电池', 'Fuel cell']
 ];
 
 const tags = {
@@ -755,6 +756,57 @@ export const ENTRIES = [
     myth: {
       q: ['电动车为什么起步这么快？', 'Why do EVs launch so hard?'],
       a: ['因为电机从 0 转开始就能输出最大扭矩，不用像发动机那样先转起来，也不用等换挡。', 'Because a motor delivers full torque from zero rpm: no revving up as an engine must, and no gearchanges to wait for.']
+    }
+  },
+  {
+    id: 'f1-2026', group: 'racing', view: 'f1', kind: 'crank', speed: 30,
+    eyebrow: 'F1 POWER UNIT 2026',
+    name: ['F1 动力单元', 'F1 power unit'],
+    tagline: ['2026：油电差不多一半一半', '2026: roughly half fuel, half electric'],
+    facts: [[['发动机', 'Engine'], ['1.6 升 90° V6 + 一个涡轮', '1.6 L 90° V6, one turbo']], [['电机', 'Motor'], ['MGU-K 350 kW（之前 120 kW）', 'MGU-K 350 kW (was 120 kW)']], [['取消', 'Dropped'], ['MGU-H', 'MGU-H']], [['燃料', 'Fuel'], ['100% 可持续燃料', '100% sustainable fuel']]],
+    card: ['1.6 升 V6 涡轮 + 350 kW 电机。', '1.6-litre turbo V6 plus a 350 kW motor.'],
+    lead: ['F1 赛车用的不叫发动机，叫"动力单元"：一台 1.6 升 V6 涡轮，加上电机和电池。2026 年的新规则把电机功率提到 350 kW，内燃机降到约 400 kW，油和电差不多各占一半，同时取消了 MGU-H，并改用 100% 可持续燃料。', 'An F1 car runs a "power unit", not just an engine: a 1.6-litre turbo V6 plus a motor and a battery. The 2026 rules raise the motor to 350 kW and bring the engine down to about 400 kW, so fuel and electricity share the work roughly half and half. The MGU-H is dropped, and the fuel is 100% sustainable.'],
+    analogy: ['像一个短跑运动员背着一个能充电的助推器：刹车时把力气存进去，出弯和直道上再放出来。', 'Like a sprinter wearing a rechargeable booster: it stores energy under braking and gives it back out of corners and down the straights.'],
+    steps: [
+      { title: ['1.6 升 V6 涡轮', 'A 1.6-litre turbo V6'], text: ['发动机部分还是 1.6 升、90° 夹角的 V6，带一个涡轮，和 2014 年以来一样。', 'The engine is still a 1.6-litre 90° V6 with one turbo, as it has been since 2014.'], focus: ['ice', 'turbo'] },
+      { title: ['油电差不多一半一半', 'Roughly half and half'], text: ['2026 年起，MGU-K 从 120 kW 提到 350 kW，内燃机降到约 400 kW：最大功率里，电占了将近一半。', 'From 2026 the MGU-K jumps from 120 kW to 350 kW and the engine drops to about 400 kW: electricity supplies nearly half the peak power.'], focus: ['split', 'mguk'] },
+      { zone: 'brake', title: ['刹车时充电', 'Harvesting under braking'], text: ['进弯刹车时，MGU-K 反过来当发电机，把车的动能变成电，经过控制电子存进电池。', 'Braking into a corner, the MGU-K turns generator and sends the car\'s energy through the control electronics into the battery.'], focus: ['mguk', 'es', 'lap'] },
+      { zone: 'deploy', title: ['出弯和直道放电', 'Deploying out of corners'], text: ['出弯加速和直道上，电池把电送回 MGU-K，和发动机一起推车。电池能存的电有限，所以每一圈在哪里放电要算好。', 'Out of corners and down the straights the battery feeds the MGU-K, which pushes alongside the engine. The battery only holds so much, so where to deploy is planned lap by lap.'], focus: ['mguk', 'es', 'lap'] },
+      { title: ['取消 MGU-H', 'No more MGU-H'], text: ['2014–2025 年，涡轮轴上还有一个 MGU-H，能从废气里回收能量、消除涡轮迟滞。它又贵又复杂，2026 年被取消。点下面的"2014–2025"对比一下。', 'From 2014 to 2025 the turbo shaft carried an MGU-H that recovered energy from the exhaust and killed turbo lag. It was costly and complex, so 2026 drops it. Tap "2014–2025" below to compare.'], focus: ['turbo', 'mguh'] },
+      { title: ['100% 可持续燃料', '100% sustainable fuel'], text: ['燃料必须是 100% 可持续燃料，而且按能量限流：限制的是每小时烧进去多少能量，而不是多少公斤。', 'The fuel must be 100% sustainable, and its flow is capped by energy: the limit is how much energy goes in per hour, not how many kilograms.'], focus: ['fuel', 'ice'] }
+    ],
+    parts: {
+      ice: { name: ['内燃机（V6）', 'Combustion engine (V6)'], text: ['1.6 升、90° 夹角的 V6，按规则 2026 年最大功率降到约 400 kW。', 'A 1.6-litre 90° V6; under the 2026 rules it makes about 400 kW at most.'] },
+      turbo: { name: ['涡轮增压器', 'Turbocharger'], text: ['一个涡轮，废气吹动涡轮端，带动压气机。', 'One turbo: exhaust spins the turbine, which drives the compressor.'] },
+      mguh: { name: ['MGU-H', 'MGU-H'], text: ['"热能回收电机"，装在涡轮轴上。2014–2025 年使用，2026 年取消。', 'The heat motor-generator on the turbo shaft. Used 2014–2025, dropped for 2026.'] },
+      mguk: { name: ['MGU-K', 'MGU-K'], text: ['"动能回收电机"，和曲轴连在一起：刹车时发电，加速时出力。2026 年功率从 120 kW 提高到 350 kW。', 'The kinetic motor-generator, geared to the crankshaft: it harvests under braking and pushes under acceleration. Up from 120 kW to 350 kW in 2026.'] },
+      ce: { name: ['控制电子（CE）', 'Control electronics'], text: ['管理电在电机和电池之间怎么流。', 'Manages how electricity moves between the motor and the battery.'] },
+      es: { name: ['电池（ES）', 'Energy store'], text: ['储存回收来的电，在需要时放出来。', 'Stores harvested energy and releases it when needed.'] },
+      split: { name: ['功率分配', 'Power split'], text: ['点下面的年代按钮，比较 2014–2025 和 2026 的油电比例。', 'Tap the era buttons below to compare the split in 2014–2025 and 2026.'] },
+      lap: { name: ['一圈的充放电', 'Energy over a lap'], text: ['黄色是刹车区，在这里充电；其余地方放电。曲线只是示意，不对应某条赛道。', 'Yellow marks the braking zones, where it harvests; elsewhere it deploys. A stylised lap, not a real circuit.'] },
+      fuel: { name: ['可持续燃料', 'Sustainable fuel'], text: ['不来自石油的燃料，按能量限制流量。', 'Fuel not made from crude oil, with flow capped by energy.'] }
+    },
+    pros: [
+      ['电的比重大大提高，和量产车的电动化方向更接近。', 'Far more electric power, in step with how road cars are electrifying.'],
+      ['取消昂贵复杂的 MGU-H，让新厂商更容易加入：奥迪和福特（与红牛合作）都在 2026 年入局。', 'Dropping the costly, complex MGU-H opened the door to newcomers: Audi, and Ford with Red Bull, arrive in 2026.'],
+      ['100% 可持续燃料，让内燃机也能走向低碳。', '100% sustainable fuel puts the combustion engine on a low-carbon path.']
+    ],
+    cons: [
+      ['电池一圈能放的电有限，长直道末端可能不够用，所以 2026 赛车配了可调的主动空气动力学来减阻。', 'Energy per lap is limited and can run short at the end of long straights, so 2026 cars pair the power unit with active aerodynamics to cut drag.'],
+      ['没有了 MGU-H，涡轮迟滞的问题又回来了，要靠别的办法弥补。', 'Without the MGU-H, turbo lag is back and has to be handled other ways.'],
+      ['车手和车队要更精细地管理每一圈的充放电。', 'Drivers and teams have to manage harvesting and deployment more carefully every lap.']
+    ],
+    carsTitle: ['2026 年的动力单元供应商', '2026 power unit suppliers'],
+    cars: [
+      { name: ['梅赛德斯', 'Mercedes'], engine: ['供应：梅赛德斯、迈凯伦、威廉姆斯、Alpine', 'Supplies Mercedes, McLaren, Williams, Alpine'], tags: [tags.v6, tags.turboHybrid], why: ['混动时代（2014 年起）最成功的动力单元厂商。', 'The most successful manufacturer of the hybrid era (since 2014).'] },
+      { name: ['法拉利', 'Ferrari'], engine: ['供应：法拉利、哈斯、凯迪拉克', 'Supplies Ferrari, Haas, Cadillac'], tags: [tags.v6, tags.turboHybrid], why: ['唯一从 1950 年起每个赛季都参加 F1 的车队，自己造动力单元。', 'The only team in every season since 1950, and it builds its own power unit.'] },
+      { name: ['本田', 'Honda'], engine: ['供应：阿斯顿·马丁', 'Supplies Aston Martin'], tags: [tags.v6, tags.turboHybrid], why: ['2026 年起成为阿斯顿·马丁的厂商合作伙伴。', 'Aston Martin\'s works partner from 2026.'] },
+      { name: ['奥迪', 'Audi'], engine: ['供应：奥迪', 'Supplies Audi'], tags: [tags.v6, tags.turboHybrid], why: ['接手索伯车队，以厂商身份进入 F1。', 'Took over Sauber to enter as a works team.'] },
+      { name: ['红牛福特', 'Red Bull Ford'], engine: ['供应：红牛、Racing Bulls', 'Supplies Red Bull Racing, Racing Bulls'], tags: [tags.v6, tags.turboHybrid], why: ['红牛第一次自己造动力单元，福特支持电气化部分。', 'Red Bull\'s first in-house power unit, with Ford supporting the electrical side.'] }
+    ],
+    myth: {
+      q: ['"油电各一半"是什么意思？', 'What does "half and half" mean?'],
+      a: ['说的是最大功率：内燃机约 400 kW，MGU-K 350 kW。但电池能存的电有限，电机不能整圈都满功率，所以车队要算好每一圈在哪里充电、在哪里放电。', 'It refers to peak power: about 400 kW from the engine and 350 kW from the MGU-K. The battery holds only so much, so the motor cannot run flat out all lap; teams plan where to harvest and where to deploy.']
     }
   }
 ];

@@ -120,7 +120,7 @@ export function entryPage(id) {
       <div class="pc cons"><h2>${t('cons')}</h2><ul>${entry.cons.map(p => `<li>${rich(bi(p))}</li>`).join('')}</ul></div>
     </section>
     <section class="cars wrap">
-      <h2>${t('cars')}</h2>
+      <h2>${entry.carsTitle ? bi(entry.carsTitle) : t('cars')}</h2>
       <div class="car-grid">${entry.cars.map(car => `
         <div class="car">
           <h3>${bi(car.name)}</h3>

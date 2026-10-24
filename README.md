@@ -28,8 +28,9 @@ count: a turbo visibly packs more into the same cylinder.
 | Going electric | Hybrid | Energy flows through five drive modes: electric, generating, engine drive, regen, plug-in |
 | | Range extender | The same drivetrain with no link from engine to wheels |
 | | Electric motor | Three-phase coils, a rotating field, the rotor following it, and regeneration |
+| On track | F1 power unit | The 2026 rules: 90° V6 turbo, 350 kW MGU-K, no MGU-H; energy over a lap; 2014–2025 for comparison |
 
-W16, twincharging, fuel cells and the 2026 F1 power unit are listed as coming soon.
+W16, twincharging and fuel cells are listed as coming soon.
 
 Each engine page has an identity card, parts you can tap (numbered callouts on the
 drawing), strengths and trade-offs, cars you may know (tagged by layout and
@@ -57,7 +58,7 @@ dist/
   js/main.js            router, theme, language, animation loop
   js/sim/               pure, tested models: crank and valve timing, firing orders, boost,
                         diesel compression heating, Wankel rotary geometry, three-phase
-                        motor field, hybrid and range-extender drive modes
+                        motor field, hybrid and range-extender drive modes, the F1 power split
   js/draw/              canvas views, all drawn from a single crank angle
   js/data/              entry copy, cars and glossary as [中文, English] pairs
   js/ui/                gallery, engine page, glossary, term tooltips
@@ -90,6 +91,9 @@ diesel thermometer uses ideal adiabatic compression from 27°C (16:1 against 10:
 petrol); the rotary uses Mazda 13B-like proportions with a simplified rotor flank. The
 hybrid diagram is a generic series-parallel layout (like Honda e:HEV), not Toyota's
 planetary power split, and the motor is drawn as a two-pole permanent-magnet machine.
+For F1, the MGU-K figures (120 kW, 350 kW) come from the rules; engine power is not
+published, so about 400 kW (2026, as the FIA describes it) and about 550 kW
+(2014–2025, an estimate) are approximate, and the lap is stylised, not a real circuit.
 
 References:
 

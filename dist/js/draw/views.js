@@ -6,6 +6,7 @@ import { drawDiesel } from './diesel.js';
 import { drawRotary } from './rotary.js';
 import { drawMotor } from './motor.js';
 import { powertrainView } from './powertrain.js';
+import { f1View } from './f1.js';
 
 // Each entry names a view: how to draw it, plus optional extra controls and state updates.
 export const VIEWS = {
@@ -24,5 +25,6 @@ export const VIEWS = {
   rotary: { draw: drawRotary },
   hybrid: powertrainView({ clutch: true }),
   erev: powertrainView({ clutch: false }),
-  motor: { draw: drawMotor }
+  motor: { draw: drawMotor },
+  f1: f1View
 };

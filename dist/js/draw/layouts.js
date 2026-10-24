@@ -158,7 +158,7 @@ function bankGrid(c, e, a, x0, y0, gap = 52) {
 // Front cross-section of a V or boxer: the front cylinder of each bank on one crank.
 // The right bank is drawn on the left and the crank turns clockwise, which matches
 // the firing convention in sim/firing.js (see throwAngle).
-function frontSection(c, e, a, time, { x, y, s }) {
+export function frontSection(c, e, a, time, { x, y, s }) {
   const half = e.vAngle / 2;
   const out = {};
   for (const [bank, sign] of [['R', -1], ['L', 1]]) {
