@@ -6,13 +6,14 @@ export const GROUPS = [
   { id: 'basics', name: ['基本原理', 'The basics'] },
   { id: 'induction', name: ['进气方式', 'How it breathes'] },
   { id: 'layout', name: ['气缸布局', 'Cylinder layouts'] },
-  { id: 'special', name: ['特殊结构', 'Different designs'] }
+  { id: 'special', name: ['特殊结构', 'Different designs'] },
+  { id: 'electric', name: ['电动化', 'Going electric'] }
 ];
 
 // Engines not in the gallery yet.
 export const COMING = [
   ['W16 / V16', 'W16 / V16'], ['双增压与电动增压', 'Twincharging & e-boost'],
-  ['混合动力', 'Hybrid'], ['增程', 'Range extender'], ['纯电电机', 'Electric motor'], ['氢燃料电池', 'Fuel cell'], ['2026 F1 动力单元', '2026 F1 power unit']
+  ['氢燃料电池', 'Fuel cell'], ['2026 F1 动力单元', '2026 F1 power unit']
 ];
 
 const tags = {
@@ -20,7 +21,8 @@ const tags = {
   flat6: ['水平对置六缸', 'Flat-6'],
   na: ['自然吸气', 'Naturally aspirated'], turbo: ['涡轮', 'Turbo'], twin: ['双涡轮', 'Twin-turbo'], sc: ['机械增压', 'Supercharged'],
   turboHybrid: ['涡轮 + 电机', 'Turbo + motor'], twinHybrid: ['双涡轮 + 电机', 'Twin-turbo + motor'], naHybrid: ['自然吸气 + 电机', 'NA + motors'],
-  diesel: ['柴油', 'Diesel'], rotor1: ['单转子', 'Single rotor'], rotor2: ['双转子', 'Twin rotor'], rotor4: ['四转子', 'Four rotor'], rangeExt: ['只发电（增程）', 'Generator only']
+  diesel: ['柴油', 'Diesel'], rotor1: ['单转子', 'Single rotor'], rotor2: ['双转子', 'Twin rotor'], rotor4: ['四转子', 'Four rotor'], rangeExt: ['只发电（增程）', 'Generator only'],
+  hybrid: ['混动', 'Hybrid'], phev: ['插电混动', 'Plug-in hybrid'], erev: ['增程', 'Range extender'], ev: ['纯电', 'Battery electric']
 };
 
 export const ENTRIES = [
@@ -616,6 +618,143 @@ export const ENTRIES = [
     myth: {
       q: ['"转子烧机油"是故障吗？', 'Is a rotary burning oil a fault?'],
       a: ['不是。转子发动机会故意把少量机油喷进燃烧室，润滑三个角上的密封片，所以消耗机油是设计如此；需要的是定期检查和补充。', 'No. A rotary deliberately meters a little oil into the chambers to lubricate the apex seals, so using oil is by design; it just needs checking and topping up.']
+    }
+  },
+  {
+    id: 'hybrid', group: 'electric', view: 'hybrid', kind: 'scene', figure: '5.1',
+    eyebrow: 'HYBRID',
+    name: ['混合动力', 'Hybrid'],
+    tagline: ['发动机和电机分工合作', 'Engine and motor sharing the work'],
+    facts: [[['动力来源', 'Power from'], ['发动机 + 电机', 'Engine + motor']], [['电池', 'Battery'], ['小（HEV），或大、能插电（PHEV）', 'Small (HEV), or large and pluggable (PHEV)']], [['常见于', 'Found in'], ['丰田普锐斯、本田 e:HEV、比亚迪 DM-i', 'Toyota Prius, Honda e:HEV, BYD DM-i']]],
+    card: ['谁推车轮、谁在充电，看路况切换。', 'Who drives and who charges changes with the road.'],
+    lead: ['混动车既有发动机，也有电机和一块电池。它会按路况在几种工作方式之间切换：起步用电，加速时发动机发电，高速时发动机直接推车轮，刹车时把动能收回来。F1 赛车和勒芒冠军也都是混动。', 'A hybrid has an engine, a motor and a battery, and switches between ways of working as you drive: electric to pull away, the engine generating when you accelerate, the engine driving the wheels at speed, and energy recovered when you brake. F1 cars and Le Mans winners are hybrids too.'],
+    analogy: ['像一支接力队：起步交给短跑好的电机，长距离交给耐力好的发动机，下坡时还能把力气存起来。', 'Like a relay team: the motor, quick off the mark, takes the start; the engine, built for endurance, takes the long stretch; and downhill, the energy gets saved for later.'],
+    steps: [
+      { mode: 'ev', title: ['起步：纯电', 'Pulling away: electric'], text: ['低速起步时发动机不工作，电池给电机供电，电机推着车走，安静又省油。', 'At low speed the engine stays off; the battery powers the motor, which drives the car quietly.'], focus: ['battery', 'motor', 'wheels'] },
+      { mode: 'series', title: ['加速：发动机发电', 'Accelerating: the engine generates'], text: ['需要更多力气时，发动机启动、带动发电机，它发的电和电池的电一起送给电机。这时发动机还不直接推车轮。', 'For more push the engine starts and turns the generator; its electricity and the battery\'s both feed the motor. The engine is still not driving the wheels.'], focus: ['engine', 'generator', 'motor'] },
+      { mode: 'parallel', title: ['高速巡航：发动机直驱', 'Cruising: the engine drives'], text: ['上了高速，离合器结合，发动机直接通过齿轮推车轮，这是它效率最高的时候；电机需要时再帮一把。', 'At motorway speed a clutch engages and the engine drives the wheels through gears, where it is most efficient; the motor helps when needed.'], focus: ['engine', 'clutch', 'wheels'] },
+      { mode: 'regen', title: ['刹车：动能回收', 'Braking: recovering energy'], text: ['松油门或刹车时，车轮反过来带着电机转，电机变成发电机，把动能变回电存进电池。', 'Lift off or brake and the wheels turn the motor, which becomes a generator and puts the energy back into the battery.'], focus: ['wheels', 'motor', 'battery'] },
+      { mode: 'plug', title: ['插电混动：电池更大', 'Plug-in: a bigger battery'], text: ['插电混动（PHEV）把电池做得更大，还能插电充电，日常通勤几乎可以全用电跑；普通混动（HEV）没有充电口。', 'A plug-in hybrid (PHEV) has a bigger battery you can charge from the wall, so daily commutes can be almost all electric; a regular hybrid (HEV) has no charge port.'], focus: ['plug', 'battery'] }
+    ],
+    parts: {
+      engine: { name: ['发动机', 'Engine'], text: ['只在它效率高的时候才工作，其余时间熄火。', 'Runs only when it is efficient, and switches off otherwise.'] },
+      generator: { name: ['发电机', 'Generator'], text: ['被发动机带着转，把动力变成电。', 'Turned by the engine, it makes electricity.'] },
+      motor: { name: ['驱动电机', 'Drive motor'], text: ['大部分时候是它在推车轮；刹车时又变成发电机。', 'Drives the wheels most of the time, and turns generator when you brake.'] },
+      battery: { name: ['电池', 'Battery'], text: ['普通混动的电池很小，靠发动机和刹车回收来充电。', 'In a regular hybrid it is small and charged by the engine and braking.'] },
+      clutch: { name: ['离合器', 'Clutch'], text: ['高速时结合，让发动机直接推车轮。', 'Engages at speed so the engine can drive the wheels directly.'] },
+      wheels: { name: ['车轮', 'Wheels'], text: ['刹车时，车轮的动能可以被电机收回来。', 'When braking, their energy can be recovered by the motor.'] },
+      plug: { name: ['充电口', 'Charge port'], text: ['只有插电混动（PHEV）才有。', 'Only plug-in hybrids (PHEV) have one.'] },
+      tank: { name: ['油箱', 'Fuel tank'], text: ['发动机的燃料，混动车照样要加油。', 'Fuel for the engine: a hybrid still needs filling up.'] }
+    },
+    pros: [
+      ['城市里大量用电，油耗明显更低。', 'Much lower fuel use in town, where it runs on electricity a lot.'],
+      ['刹车的能量不再白白变成热量，而是存回电池。', 'Braking energy goes back into the battery instead of turning into heat.'],
+      ['不用担心续航，加油就能继续跑。', 'No range anxiety: just fill up and keep going.']
+    ],
+    cons: [
+      ['两套动力系统，结构复杂、成本更高。', 'Two power systems: more complex and more expensive.'],
+      ['电池和电机增加了重量。', 'The battery and motor add weight.'],
+      ['长途高速时，省油的优势变小。', 'On long motorway runs the fuel saving shrinks.']
+    ],
+    cars: [
+      { name: ['丰田普锐斯', 'Toyota Prius'], engine: ['THS 混动系统', 'Toyota Hybrid System'], tags: [tags.hybrid], why: ['用一组行星齿轮把发动机的力分给发电机和车轮，是量产混动车的开山之作。', 'A planetary gearset splits the engine\'s power between the generator and the wheels; the hybrid that started it all.'] },
+      { name: ['本田 CR-V / 雅阁 e:HEV', 'Honda CR-V / Accord e:HEV'], engine: ['e:HEV', 'e:HEV'], tags: [tags.hybrid], why: ['大多数时候电机驱动，高速时离合器让发动机直驱，和图里的方式一样。', 'Mostly motor-driven, with a clutch for direct engine drive at speed, as in the diagram.'] },
+      { name: ['比亚迪秦 PLUS DM-i', 'BYD Qin PLUS DM-i'], engine: ['DM-i', 'DM-i'], tags: [tags.phev], why: ['以电为主的插电混动。', 'A plug-in hybrid that leans on electricity.'] },
+      { name: ['丰田 GR010 HYBRID', 'Toyota GR010 HYBRID'], engine: ['V6 双涡轮 + 电机', 'Twin-turbo V6 + motor'], tags: [tags.v6, tags.twinHybrid], why: ['勒芒 24 小时冠军赛车，混动也能赢比赛。', 'A Le Mans winner: hybrids win races too.'] }
+    ],
+    myth: {
+      q: ['混动车要插电充电吗？', 'Do hybrids need plugging in?'],
+      a: ['普通混动（HEV）不用，它的电全靠发动机和刹车回收；只有插电混动（PHEV）才需要、也可以插电。', 'A regular hybrid (HEV) does not: its electricity comes from the engine and braking. Only a plug-in hybrid (PHEV) needs, or can use, a plug.']
+    }
+  },
+  {
+    id: 'erev', group: 'electric', view: 'erev', kind: 'scene', figure: '5.2',
+    eyebrow: 'RANGE EXTENDER',
+    name: ['增程式', 'Range extender'],
+    tagline: ['发动机只发电，从不推车轮', 'The engine only generates, never drives'],
+    facts: [[['推车轮的', 'Drives the wheels'], ['只有电机', 'Only the motor']], [['发动机的工作', 'Engine\'s job'], ['只负责发电', 'Generating electricity']], [['常见于', 'Found in'], ['理想、问界、马自达 MX-30 R-EV', 'Li Auto, AITO, Mazda MX-30 R-EV']]],
+    card: ['开起来是电车，发动机只当发电机。', 'Drives like an EV; the engine is just a generator.'],
+    lead: ['增程车开起来就是一台电动车：推车轮的永远是电机。车上那台发动机和车轮之间没有任何连接，它唯一的工作就是在电量低的时候发电。', 'A range extender drives like an electric car: the motor always turns the wheels. Its engine has no link to the wheels at all; its only job is to make electricity when the battery runs low.'],
+    analogy: ['像一台随车带着的充电宝加小发电机：电够的时候用电池，电不够了发电机就开工。', 'Like an EV that carries its own generator: it runs on the battery, and when that runs low, the generator gets to work.'],
+    steps: [
+      { mode: 'ev', title: ['电量足时：纯电', 'Charged: pure electric'], text: ['电池电量足的时候，它就是一台电动车，发动机一直不启动。', 'With a charged battery it is simply an electric car; the engine never starts.'], focus: ['battery', 'motor', 'wheels'] },
+      { mode: 'extend', title: ['电量低了：发动机发电', 'Low battery: the engine generates'], text: ['电量降到一定程度，发动机启动，但它只带动发电机，电送去电机，多的存进电池。', 'When charge runs low the engine starts, but only to turn the generator; the electricity feeds the motor and the surplus tops up the battery.'], focus: ['engine', 'generator', 'battery'] },
+      { mode: 'extend', title: ['发动机不接车轮', 'No link to the wheels'], text: ['发动机和车轮之间根本没有机械连接，所以它可以一直待在最省油的转速上，不用跟着车速变。', 'There is no mechanical link from engine to wheels, so it can sit at its most efficient speed whatever the car is doing.'], focus: ['engine', 'no-link'] },
+      { mode: 'regen', title: ['刹车回收', 'Braking recovery'], text: ['和纯电车一样，刹车时电机变成发电机，把能量送回电池。', 'As in an EV, the motor becomes a generator when braking and sends energy back to the battery.'], focus: ['wheels', 'motor', 'battery'] },
+      { mode: 'plug', title: ['回家插电', 'Plug in at home'], text: ['增程车的电池比普通混动大得多，回家插电充满，日常基本用不上发动机。', 'Its battery is much bigger than a regular hybrid\'s; charge it at home and daily driving rarely needs the engine.'], focus: ['plug', 'battery'] }
+    ],
+    parts: {
+      engine: { name: ['发动机（增程器）', 'Engine (range extender)'], text: ['只带动发电机，可以一直在最省油的转速工作。', 'It only turns the generator, so it can stay at its most efficient speed.'] },
+      generator: { name: ['发电机', 'Generator'], text: ['把发动机的转动变成电。', 'Turns the engine\'s rotation into electricity.'] },
+      motor: { name: ['驱动电机', 'Drive motor'], text: ['唯一推车轮的部件。', 'The only thing that drives the wheels.'] },
+      battery: { name: ['电池', 'Battery'], text: ['比混动大得多，可以插电充电。', 'Much bigger than a hybrid\'s, and pluggable.'] },
+      'no-link': { name: ['没有连接', 'No link'], text: ['这就是增程和混动最大的区别：发动机永远不直接推车轮。', 'The key difference from a hybrid: the engine never drives the wheels.'] },
+      wheels: { name: ['车轮', 'Wheels'], text: ['只由电机驱动。', 'Driven by the motor alone.'] },
+      plug: { name: ['充电口', 'Charge port'], text: ['回家插电，日常大多用电跑。', 'Plug in at home and most daily driving is electric.'] },
+      tank: { name: ['油箱', 'Fuel tank'], text: ['给增程器用，长途时才派上用场。', 'Fuel for the range extender, for long trips.'] }
+    },
+    pros: [
+      ['开起来就是电车：安静、平顺、起步快。', 'Drives like an EV: quiet, smooth and quick off the line.'],
+      ['长途不用找充电桩，加油就行。', 'Long trips need no charging stops: just refuel.'],
+      ['发动机只在最省油的转速工作。', 'The engine runs only at its most efficient speed.']
+    ],
+    cons: [
+      ['长途高速时要先发电再驱动，绕了一道，油耗未必低。', 'On long motorway runs it generates then drives, an extra step that is not always frugal.'],
+      ['同时带着发动机和大电池，车更重。', 'Carrying both an engine and a big battery makes it heavy.'],
+      ['发动机启动时，安静的电车会突然有了发动机声。', 'When the engine starts, the quiet EV suddenly has an engine note.']
+    ],
+    cars: [
+      { name: ['理想 L9 / L6', 'Li Auto L9 / L6'], engine: ['增程', 'Range extender'], tags: [tags.erev], why: ['把增程做成主流的大型 SUV。', 'Large SUVs that made range extenders mainstream.'] },
+      { name: ['问界 M9', 'AITO M9'], engine: ['增程（另有纯电版）', 'Range extender (EV version too)'], tags: [tags.erev], why: ['同一款车同时提供增程和纯电版本。', 'Offered as both a range extender and a pure EV.'] },
+      { name: ['马自达 MX-30 R-EV', 'Mazda MX-30 R-EV'], engine: ['8C 单转子', '8C single rotor'], tags: [tags.rotor1, tags.erev], why: ['用一台小小的转子发动机当增程器。', 'Uses a small rotary engine as its range extender.'] }
+    ],
+    myth: {
+      q: ['增程车是不是"油改电"的过渡产品？', 'Is a range extender just a stopgap?'],
+      a: ['在充电还不方便的地方，它确实很实用：开起来是电车，长途不用担心充电。但先发电再驱动电机，长途高速的油耗未必比混动低。', 'Where charging is patchy it is genuinely practical: it drives like an EV and long trips need no charging stops. But generating electricity to drive a motor is not always more frugal than a hybrid on long motorway runs.']
+    }
+  },
+  {
+    id: 'ev', group: 'electric', view: 'motor', kind: 'crank', speed: 20,
+    eyebrow: 'ELECTRIC MOTOR',
+    name: ['纯电电机', 'Electric motor'],
+    tagline: ['转动的磁场，拽着转子跑', 'A turning field pulling the rotor round'],
+    facts: [[['动力来源', 'Power from'], ['电池 → 电控 → 电机', 'Battery → inverter → motor']], [['会动的部件', 'Moving parts'], ['只有转子在转', 'Only the rotor turns']], [['扭矩', 'Torque'], ['从 0 转起就是最大', 'Full from zero rpm']], [['常见于', 'Found in'], ['特斯拉、小米 SU7、保时捷 Taycan', 'Tesla, Xiaomi SU7, Porsche Taycan']]],
+    card: ['三组线圈轮流通电，磁场带着转子转。', 'Three coils take turns; the field drags the rotor round.'],
+    lead: ['电动车没有发动机，只有电机。三组线圈轮流通电，在电机里造出一个会转的磁场，转子上的磁铁就被它一直拽着转。没有爆炸、没有气门，一踩就是最大扭矩。', 'An electric car has no engine, only a motor. Three sets of coils take turns carrying current and make a magnetic field that turns; the magnets on the rotor are pulled round after it. No explosions, no valves, and full torque the instant you press.'],
+    analogy: ['像一圈人轮流举起手里的磁铁：中间的指南针就会跟着一圈一圈地转。', 'Like a ring of people taking turns to raise a magnet: the compass needle in the middle follows them round and round.'],
+    steps: [
+      { mode: 'drive', title: ['三组线圈', 'Three sets of coils'], text: ['外圈的定子上有三组线圈（A、B、C），由电池经过电控（逆变器）供电。圆点表示电流朝外，叉表示朝里。', 'The stator round the outside carries three coil sets (A, B, C), fed from the battery through the inverter. A dot means current coming out of the page, a cross going in.'], focus: ['stator', 'inverter'] },
+      { mode: 'drive', title: ['轮流通电', 'Taking turns'], text: ['三组线圈的电流像三条错开 120° 的波浪：一组最强时，另外两组正在变弱或变强。看右边的波形。', 'The three currents are waves 120° apart: as one peaks, the others fade or build. See the waveforms on the right.'], focus: ['waves', 'stator'] },
+      { mode: 'drive', title: ['磁场在转', 'The field turns'], text: ['三组线圈合在一起，造出一个一直在转的磁场（黄色箭头），而线圈本身一动不动。', 'Together the coils make a magnetic field that keeps turning (the yellow arrow), while the coils themselves never move.'], focus: ['field'] },
+      { mode: 'drive', title: ['转子被拽着转', 'The rotor is pulled round'], text: ['转子上的永磁铁被转动的磁场吸着走，稍稍落后一点，于是转子跟着转、带动车轮。', 'The rotor\'s permanent magnets are drawn after the turning field, trailing it slightly, so the rotor turns and drives the wheels.'], focus: ['rotor', 'field'] },
+      { mode: 'regen', title: ['反过来就是发电机', 'Run backwards, it is a generator'], text: ['松开油门时，车轮带着转子转，转子跑到了磁场前面，电机变成发电机，把电送回电池：这就是动能回收，也是"单踏板"的原理。', 'Lift off and the wheels push the rotor ahead of the field; the motor becomes a generator and sends current back to the battery. That is regenerative braking, and the idea behind one-pedal driving.'], focus: ['rotor', 'inverter', 'battery'] }
+    ],
+    parts: {
+      stator: { name: ['定子（线圈）', 'Stator'], text: ['固定不动的外圈，上面绕着三组线圈。', 'The fixed outer ring, wound with three sets of coils.'] },
+      rotor: { name: ['转子（永磁铁）', 'Rotor'], text: ['中间转动的部分，上面装着永磁铁，带着车轮转。', 'The turning part in the middle, carrying permanent magnets and driving the wheels.'] },
+      field: { name: ['旋转磁场', 'Rotating field'], text: ['线圈不动，磁场却在转：这就是三相交流电的妙处。', 'The coils stay still, yet the field turns: that is the trick of three-phase current.'] },
+      waves: { name: ['三相电流', 'Three-phase current'], text: ['三条错开 120° 的正弦波，竖线是现在的位置。', 'Three sine waves 120° apart; the vertical line is now.'] },
+      inverter: { name: ['电控（逆变器）', 'Inverter'], text: ['把电池的直流电变成三相交流电，控制电机转多快、出多大力。', 'Turns the battery\'s direct current into three-phase current, controlling the motor\'s speed and torque.'] },
+      battery: { name: ['电池', 'Battery'], text: ['驱动时放电，回收时充电。', 'Discharges to drive, charges when regenerating.'] }
+    },
+    pros: [
+      ['一踩就是最大扭矩，起步极快。', 'Full torque from standstill: fierce launches.'],
+      ['会动的部件极少，安静，几乎不用保养。', 'Very few moving parts: quiet and nearly maintenance-free.'],
+      ['效率高，能把九成以上的电能变成动力，还能回收刹车的能量。', 'Highly efficient, turning over 90% of the electrical energy into motion, and it recovers braking energy.']
+    ],
+    cons: [
+      ['电池又重又贵，续航受电池限制。', 'Batteries are heavy and expensive, and they limit range.'],
+      ['长时间满功率会发热，需要好的冷却。', 'Sustained full power makes heat that needs good cooling.'],
+      ['充电比加油慢。', 'Charging takes longer than refuelling.']
+    ],
+    cars: [
+      { name: ['特斯拉 Model 3', 'Tesla Model 3'], engine: ['永磁同步磁阻电机', 'PM synchronous reluctance motor'], tags: [tags.ev], why: ['把电动车带进主流的车型之一。', 'One of the cars that took EVs mainstream.'] },
+      { name: ['小米 SU7', 'Xiaomi SU7'], engine: ['超级电机', 'HyperEngine'], tags: [tags.ev], why: ['自研的高转速电机，每分钟能转两万多转。', 'An in-house high-speed motor that spins past 20,000 rpm.'] },
+      { name: ['保时捷 Taycan', 'Porsche Taycan'], engine: ['前后双电机', 'Twin motors'], tags: [tags.ev], why: ['后轴带两挡变速箱，在电动车里很少见。', 'A two-speed gearbox on the rear axle, rare among EVs.'] }
+    ],
+    myth: {
+      q: ['电动车为什么起步这么快？', 'Why do EVs launch so hard?'],
+      a: ['因为电机从 0 转开始就能输出最大扭矩，不用像发动机那样先转起来，也不用等换挡。', 'Because a motor delivers full torque from zero rpm: no revving up as an engine must, and no gearchanges to wait for.']
     }
   }
 ];

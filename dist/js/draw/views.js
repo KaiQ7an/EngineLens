@@ -4,6 +4,8 @@ import { throttleView } from './experiment.js';
 import { inline4View, inline6View, v6View, v12View, boxerView, drawV8 } from './layouts.js';
 import { drawDiesel } from './diesel.js';
 import { drawRotary } from './rotary.js';
+import { drawMotor } from './motor.js';
+import { powertrainView } from './powertrain.js';
 
 // Each entry names a view: how to draw it, plus optional extra controls and state updates.
 export const VIEWS = {
@@ -19,5 +21,8 @@ export const VIEWS = {
   v12: v12View,
   boxer: boxerView,
   diesel: { draw: drawDiesel },
-  rotary: { draw: drawRotary }
+  rotary: { draw: drawRotary },
+  hybrid: powertrainView({ clutch: true }),
+  erev: powertrainView({ clutch: false }),
+  motor: { draw: drawMotor }
 };

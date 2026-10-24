@@ -39,6 +39,8 @@ function controlsFor(entry, st) {
       <input id="rpm" type="range" min="1000" max="6500" step="100" value="${st.rpm}">
     </div>
     <button class="btn btn-accent" id="tip-in" type="button">${t('tipIn')}</button>`;
+  // Drive-mode scenes are narrated only; they have no speed or throttle to set.
+  if (entry.kind === 'scene') return view.extraControls ? view.extraControls(st) : '';
   if (entry.kind === 'experiment') return `
     <div class="seg" role="group" aria-label="${t('altitude')}">
       <button type="button" data-alt="sea" aria-pressed="${st.alt === 'sea'}">${t('sea')}</button>

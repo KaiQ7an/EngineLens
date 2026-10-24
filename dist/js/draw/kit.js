@@ -47,6 +47,12 @@ export function part(c, id, draw) {
   inside++;
   try { draw(); } finally { inside--; }
 }
+// Like part(), for one drawing that stands for several focusable parts.
+export function partAny(c, ids, draw) {
+  if (!ids.some(isFocus)) { if (pass !== 'focus' || inside) draw(); return; }
+  inside++;
+  try { draw(); } finally { inside--; }
+}
 // Draw a view with focus handling: `draw` is called once, or twice around the wash.
 export function withFocus(c, draw) {
   pass = 'all';
