@@ -95,7 +95,7 @@ export function drawTwin(c, st) {
   });
   anchors.bypass = [230, 110];
   part(c, 'sc', () => {
-    pipe(c, MID, 30); if (on) flow(c, MID, 'squeezed', time, { rate: speed, spread: 9 });
+    pipe(c, MID, 30); if (on) flow(c, MID, 'boosted', time, { rate: speed, spread: 9 });
     blower(c, SC, time * 6, on);
     text(c, L('机械增压', 'Supercharger'), SC[0], SC[1] + 64, { size: 14, weight: 700, align: 'center' });
   });
@@ -109,7 +109,7 @@ export function drawTwin(c, st) {
   anchors.clutch = [SC[0], 300];
   part(c, 'turbo', () => {
     const spin = time * (2 + steadyBoost('turbo', rpm) * 30);
-    pipe(c, OUT, 30); flow(c, OUT, 'squeezed', time, { rate: speed, density, spread: 9, r: 3.2 });
+    pipe(c, OUT, 30); flow(c, OUT, 'boosted', time, { rate: speed, density, spread: 9, r: 3.2 });
     pipe(c, EXH, 30); flow(c, EXH, 'exhaust', time, { rate: speed, spread: 9 });
     pipe(c, EXH_OUT, 30);
     rect(c, COMP[0] - 4, COMP[1], 8, TURB[1] - COMP[1], 2, C.paper, C.ink, 1.2);
@@ -119,7 +119,7 @@ export function drawTwin(c, st) {
   anchors.turbo = [COMP[0], (COMP[1] + TURB[1]) / 2];
   c.beginPath(); c.roundRect(COOL[0] - 40, COOL[1] - 40, 80, 80, 6); fillCut(c);
   text(c, L('中冷器', 'Intercooler'), COOL[0], COOL[1] + 62, { size: 13, color: C.ink2, align: 'center', fit: 80 });
-  pipe(c, ENGINE_IN, 30); flow(c, ENGINE_IN, 'squeezed', time, { rate: speed, density, spread: 9, r: 3.2 });
+  pipe(c, ENGINE_IN, 30); flow(c, ENGINE_IN, 'boosted', time, { rate: speed, density, spread: 9, r: 3.2 });
   rect(c, 860, 160, 110, 220, 12, C.paper, C.ink, 1.6);
   text(c, L('发动机', 'Engine'), 915, 276, { size: 16, weight: 800, align: 'center' });
   arrow(c, 40, 210, 0, C.ink, 8);

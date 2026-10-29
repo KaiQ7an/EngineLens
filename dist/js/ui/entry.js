@@ -1,9 +1,10 @@
 import { ENTRIES, GROUPS, entryById } from '../data/entries.js';
 import { bi, t, ui } from '../i18n.js';
-import { W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, fitCanvas, setTextBoost, setCompact, readouts, STROKE_TONES } from '../draw/kit.js';
+import { C, W, H, stage, setFocus, withFocus, hits, clearHits, lerp, ease, fitCanvas, setTextBoost, setCompact, readouts, STROKE_TONES } from '../draw/kit.js';
 import { VIEWS } from '../draw/views.js';
 import { STROKE_NAMES } from '../draw/fourstroke.js';
 import { wrap, valveLift, strokeIndex } from '../sim/kinematics.js';
+import { advanceCrank, advanceClock, displayAngle, stepTarget } from '../sim/playback.js';
 import { rich } from './terms.js';
 import { cardHTML, mountCards } from './cards.js';
 
@@ -78,9 +79,9 @@ function scrubber(entry, st) {
   return `
   <div class="scrub">
     <div class="scrub-head"><label for="angle">${t('crankAngle')}</label><output id="angle-out"></output><span class="scrub-hint">${t('scrubHint')}</span></div>
-    ${strokes ? `<div class="scrub-strokes">${STROKE_NAMES.map((nm, k) => `<span data-tone="${STROKE_TONES[k]}">${bi(nm)}</span>`).join('')}</div>` : ''}
-    <input id="angle" type="range" min="0" max="719" step="1" value="${Math.round(wrap(st.theta))}" data-mode="${entry.scrub}">
-    <div class="scrub-marks">${[0, 180, 360, 540, 720].map(d => `<span style="left:${d / 7.2}%">${strokes ? t(d % 360 ? 'bdc' : 'tdc') : d + '°'}</span>`).join('')}</div>
+    ${strokes ? `<div class="scrub-strokes" role="group" aria-label="${t('chooseStroke')}">${STROKE_NAMES.map((nm, k) => `<button type="button" data-step="${k}" data-tone="${STROKE_TONES[k]}" aria-pressed="false"><small>0${k + 1}</small>${bi(nm)}</button>`).join('')}</div>` : ''}
+    <input id="angle" type="range" min="0" max="720" step="1" value="${displayAngle(st.theta, st.angleEnd)}" data-mode="${entry.scrub}">
+    <div class="scrub-marks" role="group" aria-label="${t('exactAngle')}">${[0, 180, 360, 540, 720].map(d => `<button type="button" data-angle="${d}" style="left:${d / 7.2}%" aria-label="${d}°${strokes ? ' · ' + t(d % 360 ? 'bdc' : 'tdc') : ''}">${d}°${strokes ? `<small>${t(d % 360 ? 'bdc' : 'tdc')}</small>` : ''}</button>`).join('')}</div>
   </div>`;
 }
 
@@ -89,7 +90,7 @@ function related(entry) {
   const same = ENTRIES.filter(e => e.group === entry.group && e !== entry);
   const i = ENTRIES.indexOf(entry);
   const near = [ENTRIES[i + 1], ENTRIES[i - 1], ...ENTRIES].filter(e => e && e !== entry && !same.includes(e));
-  return [...same, ...near].slice(0, 3);
+  return [...new Set([...same, ...near])].slice(0, 3);
 }
 
 export function entryPage(id) {
@@ -114,6 +115,7 @@ export function entryPage(id) {
           <canvas id="stage" width="${W * 1.5}" height="${H * 1.5}" role="img" aria-label="${bi(entry.name)}"></canvas>
           <div class="fig-read" hidden></div>
           ${entry.scrub ? scrubber(entry, st) : ''}
+          <div class="stage-legend" aria-label="${t('legend')}">${STROKE_NAMES.map((nm, k) => `<span data-tone="${STROKE_TONES[k]}"><i></i>${bi(nm)}</span>`).join('')}<span class="boost-key"><i></i>${t('boostedAir')}</span></div>
           <figcaption class="caption">
             <div class="cap-body" aria-live="polite"><span class="cap-step"></span><span class="cap-text"></span></div>
             <div class="cap-nav">
@@ -133,6 +135,7 @@ export function entryPage(id) {
           <div class="ctl-extra">${controlsFor(entry, st)}</div>
         </div>
         <p class="note">${t('model')}</p>
+        <p class="keyboard-note">${t(entry.scrub ? 'keys' : 'basicKeys')}</p>
       </div>
       <aside class="brief">
         <p class="eyebrow"><span>${bi(group.name)}</span> ${entry.eyebrow}</p>
@@ -177,20 +180,23 @@ export function entryPage(id) {
     const canvas = $('#stage'), c = canvas.getContext('2d');
     const cap = { step: $('.cap-step'), text: $('.cap-text'), clear: $('.cap-clear'), count: $('.cap-count') };
     const cards = mountCards(root);
-    let shown = '';
+    let shown = '', lastFrameKey = null;
 
-    const setPart = id => { st.part = st.part === id ? null : id; render(); };
+    const setPart = id => {
+      st.part = st.part === id ? null : id;
+      if (st.part) { st.playing = false; st.tween = null; st.hold = 0; }
+      render();
+    };
     const goStep = (i, manual = true) => {
       const n = entry.steps.length;
       i = (i + n) % n;
       st.step = i; st.stepClock = 0; st.part = null;
       const target = entry.steps[i].at;
       if (target !== undefined) {
-        const from = st.theta, cur = wrap(from);
-        let to = from - cur + target;
-        if (to < from - 0.01 && manual !== 'back') to += 720;
-        if (manual === 'back' && to > from) to -= 720;
-        st.tween = { from, to, t: 0 };
+        const from = st.theta, to = stepTarget(from, target, manual === 'back');
+        st.hold = 0; st.angleEnd = false;
+        if (reduced) { st.theta = to; st.tween = null; }
+        else st.tween = { from, to, t: 0 };
       }
       if (manual) st.playing = false;
       render();
@@ -204,6 +210,9 @@ export function entryPage(id) {
       root.querySelectorAll('[data-guided]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.guided === '1') === String(st.guided)));
       root.querySelectorAll('[data-part]').forEach(b => b.setAttribute('aria-pressed', b.dataset.part === st.part));
       shown = '';
+      lastFrameKey = null;
+      updateCaption();
+      updateScrub();
     }
 
     function updateCaption() {
@@ -224,8 +233,7 @@ export function entryPage(id) {
     }
 
     function advance(dt) {
-      st.time += dt;
-      if (view.update) view.update(st, dt, entry);
+      advanceClock(st, dt, view.update ? (state, delta) => view.update(state, delta, entry) : null);
       if (st.tween) {
         st.tween.t = Math.min(1, st.tween.t + dt / 0.7);
         st.theta = lerp(st.tween.from, st.tween.to, ease(st.tween.t));
@@ -238,14 +246,9 @@ export function entryPage(id) {
       }
       if (st.hold > 0) { st.hold -= dt; return; }
       const vis = entry.kind === 'flow' ? 20 + st.rpm / 6500 * 40 : playRpm(entry, st);
-      const before = st.theta, after = before + vis * 6 * dt;
-      if (st.guided && !timed(entry)) {
-        for (const s of entry.steps) {
-          const k = Math.ceil((before - s.at) / 720), mark = s.at + 720 * k;
-          if (mark > before && mark <= after) { st.theta = mark; st.hold = entry.hold ?? HOLD; return; }
-        }
-      }
-      st.theta = after;
+      const next = advanceCrank(st.theta, dt, vis, st.guided && !timed(entry) ? entry.steps.map(s => s.at) : []);
+      st.theta = next.theta;
+      if (next.stopped) st.hold = entry.hold ?? HOLD;
     }
 
     // Drawing pauses while the figure is scrolled out of view; the animation's state
@@ -281,18 +284,19 @@ export function entryPage(id) {
     }
 
     // Keep the scrubber on the crank angle while it plays.
-    const angle = $('#angle'), angleOut = $('#angle-out'), scrubStrokes = root.querySelectorAll('.scrub-strokes span');
+    const angle = $('#angle'), angleOut = $('#angle-out'), scrubStrokes = root.querySelectorAll('.scrub-strokes [data-step]');
     let shownAngle = -1;
     function updateScrub() {
       if (!angle) return;
-      const d = Math.round(wrap(st.theta)) % 720;
+      const d = displayAngle(st.theta, st.angleEnd);
       if (d === shownAngle) return;
       shownAngle = d;
       if (+angle.value !== d) angle.value = d;
       const k = strokeIndex(d), name = entry.scrub === 'strokes' ? ' · ' + bi(STROKE_NAMES[k]) : '';
       angleOut.textContent = d + '°' + name;
       angle.setAttribute('aria-valuetext', d + '°' + name);
-      scrubStrokes.forEach((el, i) => el.classList.toggle('on', i === k));
+      scrubStrokes.forEach((el, i) => { el.classList.toggle('on', i === k); el.setAttribute('aria-pressed', i === k); });
+      root.querySelectorAll('[data-angle]').forEach(el => el.setAttribute('aria-pressed', +el.dataset.angle === d));
     }
 
     // Readout boxes the view handed over instead of drawing (phones only).
@@ -308,8 +312,10 @@ export function entryPage(id) {
       shownRead = html; figRead.innerHTML = html; figRead.hidden = !html;
     }
     // Turning the crank by hand pauses the animation; it carries on from there when played.
-    const turnTo = theta => { st.theta = theta; st.playing = false; st.tween = null; st.hold = 0; render(); };
-    if (angle) angle.addEventListener('input', () => turnTo(st.theta - wrap(st.theta) + +angle.value));
+    const turnTo = (theta, end = false) => { st.theta = theta; st.angleEnd = end; st.part = null; st.playing = false; st.tween = null; st.hold = 0; render(); };
+    if (angle) angle.addEventListener('input', () => turnTo(st.theta - wrap(st.theta) + +angle.value, +angle.value === 720));
+    root.querySelectorAll('[data-angle]').forEach(b => b.addEventListener('click', () => turnTo(st.theta - wrap(st.theta) + +b.dataset.angle, +b.dataset.angle === 720)));
+    root.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => goStep(+b.dataset.step)));
 
     const rate = $('#rate');
     function updateRate() {
@@ -318,8 +324,9 @@ export function entryPage(id) {
     }
 
     // ── Events ──
-    $('#play').addEventListener('click', () => { st.playing = !st.playing; st.hold = 0; render(); });
-    root.querySelectorAll('[data-guided]').forEach(b => b.addEventListener('click', () => { st.guided = b.dataset.guided === '1'; st.hold = 0; st.playing = true; render(); }));
+    const togglePlaying = () => { st.playing = !st.playing; st.hold = 0; if (st.playing) { st.part = null; st.angleEnd = false; } render(); };
+    $('#play').addEventListener('click', togglePlaying);
+    root.querySelectorAll('[data-guided]').forEach(b => b.addEventListener('click', () => { st.guided = b.dataset.guided === '1'; st.hold = 0; st.part = null; st.angleEnd = false; st.playing = true; render(); }));
     // Back goes to the start of the current step first, like a video player's back button.
     const back = () => {
       const i = currentStep(), at = entry.steps[i].at;
@@ -337,10 +344,11 @@ export function entryPage(id) {
     const hitAt = ([x, y]) => hits.reduce((best, h) => { const d = Math.hypot(h.x - x, h.y - y); return d < h.rad && (!best || d < best.d) ? { id: h.id, d } : best; }, null);
     // A tap picks a part; a sideways drag on the drawing turns the crank instead.
     let drag = null, dragged = false;
-    canvas.addEventListener('pointerdown', e => { if (angle) drag = { x: e.clientX, theta: st.theta, id: e.pointerId, moving: false }; });
+    canvas.addEventListener('pointerdown', e => { if (angle && e.isPrimary && e.button === 0) drag = { x: e.clientX, y: e.clientY, theta: st.theta, id: e.pointerId, moving: false }; });
     canvas.addEventListener('pointermove', e => {
       if (!drag) { canvas.style.cursor = hitAt(toLogical(e)) ? 'pointer' : angle ? 'ew-resize' : 'default'; return; }
       const dx = e.clientX - drag.x;
+      if (!drag.moving && Math.abs(e.clientY - drag.y) > Math.max(6, Math.abs(dx))) { drag = null; return; }
       if (!drag.moving && Math.abs(dx) < 6) return;
       if (!drag.moving) { drag.moving = true; canvas.setPointerCapture(drag.id); }
       turnTo(drag.theta + dx / canvas.clientWidth * 720);
@@ -368,10 +376,22 @@ export function entryPage(id) {
 
     render();
     return {
-      frame(dt) { if (!document.hidden) { advance(dt); if (visible) draw(); cards.frame(dt); } },
+      frame(dt) {
+        if (document.hidden) return;
+        advance(dt);
+        // Text and keyboard state remain current when the canvas is off screen.
+        updateCaption();
+        updateScrub();
+        // Paused figures do not need 60 identical full canvas redraws per second.
+        // Include view state, size and palette so controls, resize and theme still repaint.
+        const key = st.playing || st.tween ? null : JSON.stringify([st, canvas.clientWidth, devicePixelRatio, C.paper]);
+        if (visible && (key === null || key !== lastFrameKey)) { draw(); lastFrameKey = key; }
+        cards.frame(dt);
+      },
+      invalidate() { lastFrameKey = null; },
       stop() { cards.stop(); if (io) io.disconnect(); },
       key(e) {
-        if (e.key === ' ') { st.playing = !st.playing; st.hold = 0; render(); return true; }
+        if (e.key === ' ') { togglePlaying(); return true; }
         if (e.key === 'ArrowRight') { goStep(currentStep() + 1); return true; }
         if (e.key === 'ArrowLeft') { back(); return true; }
         return false;

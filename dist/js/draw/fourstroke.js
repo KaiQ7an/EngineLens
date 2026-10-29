@@ -1,5 +1,6 @@
 import { wrap, strokeIndex, strokeProgress, valveLift, sparkGlow, valvesOverlap } from '../sim/kinematics.js';
 import { injection } from '../sim/diesel.js';
+import { crankTime } from '../sim/playback.js';
 import { C, text, para, MONO, rect, stroke, pipe, flow, arrow, dot, part, alpha, figLabel, note, isCompact, STROKE_TONES } from './kit.js';
 import { drawCylinder, crownY, GAS_KIND } from './engine.js';
 import { callouts } from './callouts.js';
@@ -29,8 +30,8 @@ export const STROKE_NAMES = [['进气', 'Intake'], ['压缩', 'Compression'], ['
 // What the piston is doing: resting at a dead centre, or which way it is going.
 export function pistonState(theta) {
   const a = wrap(theta, 360);
-  if (a < 6 || a > 354) return { at: 'tdc', text: L('在上止点（最高）', 'At TDC (top)') };
-  if (Math.abs(a - 180) < 6) return { at: 'bdc', text: L('在下止点（最低）', 'At BDC') };
+  if (a < 0.5 || a > 359.5) return { at: 'tdc', text: L('在上止点（最高）', 'At TDC (top)') };
+  if (Math.abs(a - 180) < 0.5) return { at: 'bdc', text: L('在下止点（最低）', 'At BDC') };
   return a < 180 ? { text: L('↓ 往下走', '↓ down') } : { text: L('↑ 往上走', '↑ up') };
 }
 
@@ -97,7 +98,8 @@ export function deadCentres(c, a, { cx = CX, cy = CY, s = S, diesel = false } = 
 }
 
 export function drawFourStroke(c, st) {
-  const { theta, time, parts, speed = 24 } = st;
+  const { theta, parts, speed = 24 } = st;
+  const time = crankTime(theta);
   const compact = isCompact(), a = wrap(theta), dx = compact ? COMPACT_SHIFT : 0, intake = shift(INTAKE, dx), exhaust = shift(EXHAUST, dx);
   part(c, 'intake-port', () => {
     pipe(c, intake, 38);

@@ -5,8 +5,8 @@ export const W = 1000, H = 760;
 // Blueprint drawing: white linework and section hatching on blueprint blue, with a
 // yellow accent. Figures stay blueprint in both page themes; only the depth changes.
 // Each stroke of the cycle keeps one colour everywhere it appears: intake cyan,
-// compression lilac, burning orange, exhaust grey (style.css repeats them as --tone-*).
-const TONES = { intake: '#7fdcff', squeeze: '#c9a8ff', burn: '#ff9f2e', exhaust: '#c4bcb2' };
+// compression yellow, burning orange, exhaust grey, boosted air blue.
+const TONES = { intake: '#7fdcff', squeeze: '#f3d765', burn: '#ff9f2e', exhaust: '#c4bcb2', boosted: '#69a3ff' };
 const PALETTES = {
   light: { paper: '#1f4f8c', paper2: '#2a5c9c', ink: '#f4f8ff', ink2: '#b3cbec', faint: '#4673ad', accent: '#ffd23f', grid: '#ffffff12', hatch: '#c9dbf5', ...TONES },
   dark: { paper: '#10294b', paper2: '#16325a', ink: '#eaf2ff', ink2: '#93b3de', faint: '#2d5487', accent: '#ffd23f', grid: '#ffffff0d', hatch: '#9fbde6', ...TONES }
@@ -254,6 +254,7 @@ export function pointAt(pts, d) {
 // fresh and squeezed air are rings, burning charge and exhaust are solid dots.
 export const GAS = {
   air: { fill: null, line: () => C.intake },
+  boosted: { fill: null, line: () => C.boosted },
   squeezed: { fill: null, line: () => C.squeeze },
   burning: { fill: () => C.burn, line: null },
   exhaust: { fill: () => C.exhaust, line: null }

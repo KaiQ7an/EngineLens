@@ -9,9 +9,11 @@ export const ALTITUDES = {
 
 // Steady boost (bar above ambient) at full throttle across engine speed.
 export function steadyBoost(mode, rpm) {
+  if (!Number.isFinite(rpm)) throw new RangeError('RPM must be finite');
+  if (rpm <= 0) return 0;
   if (mode === 'na') return -0.03;
   if (mode === 'turbo') return Math.min(0.85, Math.max(0, (rpm - 1500) / 2300) * 0.85);
-  return 0.38 + (rpm - 1000) / 5500 * 0.32; // positive-displacement blower: boost from low rpm
+  return Math.max(0, Math.min(0.7, 0.38 + (rpm - 1000) / 5500 * 0.32)) * Math.min(1, rpm / 800);
 }
 
 // The wastegate opens once the turbo reaches its boost limit.
@@ -19,8 +21,9 @@ export const wastegateOpen = rpm => steadyBoost('turbo', rpm) >= 0.85;
 
 // Fraction of steady boost reached t seconds after flooring the throttle.
 export function tipIn(mode, t) {
-  if (mode === 'turbo') return 1 - Math.exp(-t / 1.25);
-  if (mode === 'super') return 1 - Math.exp(-t / 0.15);
+  if (mode === 'turbo') return (1 - Math.exp(-Math.max(0, t) / 0.9)) ** 2;
+  // Direct mechanical drive has no turbine spool-up delay. Manifold filling is separate.
+  if (mode === 'super') return 1;
   return 1;
 }
 
@@ -47,7 +50,7 @@ export function manifold(mode, t, ambient = P_SEA) {
   // turbine up. Thin air at altitude means it must spin faster, so it takes longer.
   const target = Math.min(TURBO_TARGET, TURBO_MAX_RATIO * ambient * FULL);
   const spool = fill(t - 0.1, 0.9 * Math.sqrt(P_SEA / ambient));
-  return breathing + Math.max(0, target - ambient * FULL) * spool;
+  return breathing + Math.max(0, target - ambient * FULL) * spool ** 2;
 }
 
 export const gauge = (mode, t, ambient = P_SEA) => manifold(mode, t, ambient) - ambient;

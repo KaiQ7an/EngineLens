@@ -3,11 +3,18 @@
 export const CYCLE = 720;
 export const STROKES = ['intake', 'compression', 'power', 'exhaust'];
 
-export const wrap = (a, m = CYCLE) => ((a % m) + m) % m;
+export const wrap = (a, m = CYCLE) => {
+  const value = ((a % m) + m) % m;
+  // Subtracting an unwrapped cycle can leave 179.99999999999997 at a dead centre.
+  // Snap numerical noise so the drawing, phase and caption agree at boundaries.
+  const nearest = Math.round(value);
+  return Math.abs(value - nearest) < 1e-8 ? nearest % m : value;
+};
 const rad = d => d * Math.PI / 180;
 
 // Slider-crank geometry: distance from the crank centre to the piston pin.
 export function pinHeight(theta, r, l) {
+  if (!Number.isFinite(theta) || !Number.isFinite(r) || !Number.isFinite(l) || r <= 0 || l <= r) throw new RangeError('Finite angle and 0 < crank radius < rod length required');
   const s = Math.sin(rad(theta));
   return r * Math.cos(rad(theta)) + Math.sqrt(l * l - r * r * s * s);
 }

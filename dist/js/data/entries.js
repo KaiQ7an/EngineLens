@@ -46,7 +46,7 @@ export const ENTRIES = [
         why: ['活塞让出空间，缸里的压力比外面低，空气就自己涌进来，像拉开针筒一样。', 'As the piston makes room, the pressure inside drops below the air outside, so air rushes in, like pulling back a syringe.'],
         focus: ['intake-valve', 'piston', 'intake-port'] },
       { at: 180, until: 360, tone: 'squeeze', title: ['压缩', 'Compression'],
-        text: ['两个气门都关上，活塞从[[bdc|下止点]]往上顶，把混合气挤进大约十分之一的空间。快到顶时，火花塞点火。', 'Both valves close and the piston rises from [[bdc|bottom dead centre]], squeezing the charge into about a tenth of the space. Just before the top, the spark plug fires.'],
+        text: ['活塞从[[bdc|下止点]]往上走，进气门稍后关闭。随后两个气门保持关闭，混合气被压紧；快到顶时火花塞点火。', 'The piston rises from [[bdc|bottom dead centre]] and the intake valve closes shortly afterwards. Both valves then stay shut as the charge is compressed; the spark fires just before the top.'],
         why: ['挤得越紧（[[compression-ratio|压缩比]]越高），燃烧时压力升得越高，推活塞就越狠。提前一点点火，是因为火焰要一点时间才能烧旺。', 'The tighter the squeeze (the higher the [[compression-ratio|compression ratio]]), the higher the pressure when it burns. The spark comes a little early because the flame takes a moment to build.'],
         focus: ['chamber', 'piston', 'spark'] },
       { at: 360, until: 540, tone: 'burn', title: ['做功', 'Power'],
@@ -59,14 +59,14 @@ export const ENTRIES = [
         focus: ['exhaust-valve', 'exhaust-port', 'piston'] }
     ],
     parts: {
-      'intake-valve': { name: ['进气门', 'Intake valve'], text: ['空气的入口。只在吸气时打开，由上方的凸轮轴准时推开。', 'The way in for air. It opens only for intake, pushed open on time by the camshaft above.'] },
+      'intake-valve': { name: ['进气门', 'Intake valve'], text: ['空气的入口。主要在进气行程打开，并会提前开启、延迟关闭；由上方凸轮轴控制。', 'The way in for air. It opens around the intake stroke, with early opening and late closing controlled by the camshaft.'] },
       'exhaust-valve': { name: ['排气门', 'Exhaust valve'], text: ['废气的出口，排气时打开。它泡在几百摄氏度的废气里工作。', 'The way out for exhaust. It opens for the exhaust stroke and works in gas hundreds of degrees hot.'] },
       spark: { name: ['火花塞', 'Spark plug'], text: ['活塞快到顶时打出一个电火花，点燃混合气。点火早几度、晚几度，动力都会明显不同。', 'It fires a spark just before the piston reaches the top. A few degrees early or late makes a real difference to power.'] },
       cams: { name: ['凸轮轴', 'Camshafts'], text: ['两根带凸起的轴，转到凸起时就把气门推开。它们只有曲轴一半的转速，因为每个气门两圈才开一次。', 'Two shafts with lobes that push the valves open. They turn at half crank speed, because each valve opens once every two turns.'] },
       piston: { name: ['活塞', 'Piston'], text: ['在缸里上下跑的"拳头"。燃烧的力量就推在它的顶上。', 'The fist that runs up and down the cylinder. Combustion pushes on its crown.'] },
       rod: { name: ['连杆', 'Connecting rod'], text: ['连接活塞和曲轴，把"往下推"传给曲轴。', 'Links the piston to the crank and passes the push down to it.'] },
       crank: { name: ['曲轴', 'Crankshaft'], text: ['把上下运动变成旋转：就像踩自行车，腿上下用力，脚踏却在转圈。', 'Turns up-and-down into rotation, like pedalling a bike: your legs push down, the pedals go round.'] },
-      chamber: { name: ['燃烧室', 'Combustion chamber'], text: ['活塞顶和缸盖之间的空间。小点的颜色就是气体此刻的状态：青色圈是新鲜空气，紫色圈是被压缩，橙色是正在燃烧，灰色是废气。', 'The space above the piston. The dots show what the gas is doing: cyan rings are fresh air, lilac rings squeezed charge, orange burning, grey exhaust.'] }
+      chamber: { name: ['燃烧室', 'Combustion chamber'], text: ['活塞顶和缸盖之间的空间。小点的颜色就是气体此刻的状态：青色圈是新鲜空气，黄色圈是被压缩，橙色是正在燃烧，灰色是废气。', 'The space above the piston. The dots show what the gas is doing: cyan rings are fresh air, yellow rings squeezed charge, orange burning, grey exhaust.'] }
     },
     pros: [
       ['效率高、省油，每一步都有专门的时间去做好。', 'Efficient: each job gets its own stroke.'],
@@ -174,7 +174,7 @@ export const ENTRIES = [
     },
     pros: [
       ['小排量出大力气：1.5T 常常有 2.0 升自吸的劲。', 'Big power from a small engine: a 1.5T often matches a 2.0 NA.'],
-      ['更省油：平时温和地开，它就是一台小排量发动机。', 'Better economy: driven gently, it is just a small engine.'],
+      ['小排量增压在温和工况下可能更省油；实际油耗仍取决于车型、负荷和驾驶方式。', 'Downsized turbo engines can save fuel at light load; actual consumption depends on the vehicle, load and driving style.'],
       ['到了高原掉动力少，涡轮能把稀薄的空气补回来。', 'Loses less at altitude: the turbo makes up for thin air.']
     ],
     cons: [

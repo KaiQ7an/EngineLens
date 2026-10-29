@@ -1,5 +1,6 @@
 import { steadyBoost, tipIn, airCharge, wastegateOpen } from '../sim/induction.js';
 import { wrap } from '../sim/kinematics.js';
+import { crankTime } from '../sim/playback.js';
 import { C, MONO, part, text, rect, circle, stroke, path, pipe, flow, arrow, fillCut, fillPart, clamp, alpha, figLabel, note } from './kit.js';
 import { drawCylinder } from './engine.js';
 import { callouts } from './callouts.js';
@@ -110,7 +111,7 @@ export function drawTurbo(c, st) {
     for (let k = 0; k < 7; k++) stroke(c, [[112 + k * 12.5, 322], [112 + k * 12.5, 388]], C.ink2, 1);
     rect(c, 134, 318, 32, 74, 2, C.paper, C.ink, 1);
   });
-  flow(c, T_CHARGE, 'squeezed', time, { rate: speed * (0.4 + spool), density, spread: 10, r: 3.4 });
+  flow(c, T_CHARGE, 'boosted', time, { rate: speed * (0.4 + spool), density, spread: 10, r: 3.4 });
   part(c, 'bov', () => {
     rect(c, 238, 268, 24, 18, 3, C.paper, C.ink, 1.4);
     stroke(c, [[250, 268], [250, 252]], C.ink, 2);
@@ -136,7 +137,7 @@ export function drawTurbo(c, st) {
   part(c, 'turbine', () => wheel(c, ...TURB, WR, spin, 11));
   text(c, L('新鲜空气', 'Fresh air'), 24, 140, { size: 14, color: C.ink2 });
   text(c, L('废气排出', 'Exhaust out'), TURB[0] - 18, 40, { size: 14, color: C.ink2, align: 'right' });
-  const anchors = drawCylinder(c, a, { x: TB.x, y: TB.y, s: TB.s, air: Math.round(22 * airCharge(boost)), time, flowRate: speed, density, intakeKind: 'squeezed' });
+  const anchors = drawCylinder(c, a, { x: TB.x, y: TB.y, s: TB.s, air: Math.round(22 * airCharge(boost)), time, flowRate: speed, density, intakeKind: 'boosted' });
   Object.assign(anchors, { turbine: TURB, compressor: COMP, shaft: [525, 175], intercooler: [150, 355], wastegate: [875, 300], bov: [250, 270] });
   const state = st.tip >= 0 && spool < 0.9 ? L('涡轮还在加速（迟滞）', 'Spooling up (lag)') : gate ? L('增压够了，旁通阀打开', 'Full boost, wastegate open') : spool < 0.05 ? L('转速太低，废气推不动', 'Too few revs to spin it') : L('增压中', 'Boosting');
   note(c, 708, 520, 272, L('读数 · 示意', 'READOUT · MODEL'), [
@@ -192,23 +193,24 @@ function pulley(c, x, y, r, angle) {
 }
 
 export function drawSuper(c, st) {
-  const { theta, time, parts } = st;
+  const { theta, parts } = st;
+  const time = crankTime(theta);
   const a = wrap(theta), boost = boostNow('super', st);
   const speed = 0.6 + st.rpm / 4000, density = 1 + boost * 1.3;
   pipe(c, S_IN, 32);
   flow(c, S_IN, 'air', time, { rate: speed, spread: 10 });
   pipe(c, S_CHARGE, 32);
-  flow(c, S_CHARGE, 'squeezed', time, { rate: speed, density, spread: 10, r: 3.4 });
+  flow(c, S_CHARGE, 'boosted', time, { rate: speed, density, spread: 10, r: 3.4 });
   part(c, 'exhaust-pipe', () => { pipe(c, S_OUT, 32); flow(c, S_OUT, 'exhaust', time, { rate: st.flow.exhaust * speed, strength: clamp(st.flow.exhaust * 3), spread: 10 }); });
-  const rot = a * Math.PI / 180;
+  const rot = theta * Math.PI / 180, driveRatio = CRANK[2] / PULLEY[2];
   part(c, 'blower', () => {
     c.beginPath(); c.roundRect(BLOWER[0] - 132, BLOWER[1] - 72, 264, 144, 64); fillCut(c);
     c.beginPath(); c.roundRect(BLOWER[0] - 116, BLOWER[1] - 58, 232, 116, 56); c.fillStyle = C.paper; c.fill(); c.strokeStyle = C.ink; c.lineWidth = 1.4; c.stroke();
-    lobes(c, BLOWER[0] - 55, BLOWER[1], ROTOR, rot * 1.6);
-    lobes(c, BLOWER[0] + 55, BLOWER[1], ROTOR, -rot * 1.6 + Math.PI / 3);
+    lobes(c, BLOWER[0] - 55, BLOWER[1], ROTOR, rot * driveRatio);
+    lobes(c, BLOWER[0] + 55, BLOWER[1], ROTOR, -rot * driveRatio + Math.PI / 3);
     stroke(c, [[PULLEY[0], PULLEY[1]], [BLOWER[0] - 55, BLOWER[1] + 50]], C.ink2, 4);
   });
-  const anchors = drawCylinder(c, a, { x: SC.x, y: SC.y, s: SC.s, air: Math.round(22 * airCharge(boost)), time, flowRate: speed, density, intakeKind: 'squeezed' });
+  const anchors = drawCylinder(c, a, { x: SC.x, y: SC.y, s: SC.s, air: Math.round(22 * airCharge(boost)), time, flowRate: speed, density, intakeKind: 'boosted' });
   part(c, 'belt', () => belt(c, PULLEY, CRANK, time, speed));
   part(c, 'pulley', () => { pulley(c, ...CRANK, rot); pulley(c, ...PULLEY, rot * CRANK[2] / PULLEY[2]); });
   text(c, L('新鲜空气', 'Fresh air'), BLOWER[0] + 26, 46, { size: 14, color: C.ink2 });
@@ -229,5 +231,5 @@ export function drawSuper(c, st) {
 export const inductionView = draw => ({
   draw,
   update(st, dt) { if (st.tip >= 0) { st.tip += dt; if (st.tip > 5) st.tip = -1; } },
-  bind(root, st) { root.querySelector('#tip-in')?.addEventListener('click', () => { st.tip = 0; st.playing = true; }); }
+  bind(root, st, render) { root.querySelector('#tip-in')?.addEventListener('click', () => { st.tip = 0; st.playing = true; render(); }); }
 });

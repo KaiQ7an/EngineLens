@@ -1,5 +1,6 @@
 import { pistonDrop, pinHeight, valveLift, sparkGlow, burnGlow, camAngle, wrap, strokeIndex } from '../sim/kinematics.js';
 import { injection, IGNITE } from '../sim/diesel.js';
+import { crankTime } from '../sim/playback.js';
 import { C, part, alpha, hash, clamp, lerp, ease, circle, path, stroke, dot, flow, fillCut, fillPart } from './kit.js';
 
 // One cylinder in cross-section, drawn around its crank centre. Units are local and
@@ -26,8 +27,8 @@ export const crownY = (theta, diesel) => -pinHeight(theta, R, L) - crownHeight(d
 // Dots of air inside the cylinder: their number is the air charge, so a turbo
 // visibly packs in more. They stream in through the intake valve, crowd together as
 // the piston rises, burn, and leave through the exhaust valve.
-function gas(c, theta, n, time, diesel) {
-  const a = wrap(theta), crown = crownY(theta, diesel), kind = gasKind(a, diesel);
+function gas(c, theta, n, time, diesel, intakeKind) {
+  const a = wrap(theta), crown = crownY(theta, diesel), phase = gasKind(a, diesel), kind = phase === 'air' ? intakeKind : phase;
   const intakeFill = a < 180 ? pistonDrop(a, R, L) / (2 * R) : 1;
   const remaining = a >= 540 ? pistonDrop(a, R, L) / (2 * R) : 1;
   const jitter = kind === 'burning' ? 3 : 1.1;
@@ -160,7 +161,8 @@ function bottomEnd(c, theta, diesel = false) {
 
 // Draw a cylinder. Returns anchor points (stage coordinates) for labels and hit tests.
 export function drawCylinder(c, theta, o = {}) {
-  const { x = 500, y = 640, s = 1, air = 26, time = 0, cams = false, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true, diesel = false } = o;
+  const { x = 500, y = 640, s = 1, air = 26, cams = false, flowRate = 1, density = 1, intakeKind = 'air', crankcase = true, diesel = false } = o;
+  const time = crankTime(theta);
   c.save(); c.translate(x, y); c.scale(s, s);
   const a = wrap(theta), crown = crownY(theta, diesel);
   part(c, 'cylinder', () => {
@@ -178,7 +180,7 @@ export function drawCylinder(c, theta, o = {}) {
       f.addColorStop(0, alpha(col, burn * 0.45)); f.addColorStop(1, alpha(col, 0));
       c.fillStyle = f; c.fillRect(-BORE, DECK, 2 * BORE, crown - DECK);
     }
-    gas(c, a, air, time, diesel);
+    gas(c, a, air, time, diesel, intakeKind);
   });
   bottomEnd(c, theta, diesel);
   head(c, a, time, { cams, flowRate, density, intakeKind, diesel });

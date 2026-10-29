@@ -22,7 +22,7 @@ export function homePage() {
       <p class="lead">${bi(['看比赛时听到"V6 涡轮""自吸 V12"一头雾水？挑一台发动机点进去：蓝图会动，空气是一个个小圈，跟着它们走就看懂了。', 'Hear "turbo V6" or "naturally aspirated V12" and draw a blank? Pick an engine: the blueprint moves, air is drawn as rings, and you just follow them.'])}</p>
       <div class="hook">
         <p class="hook-q">${bi(['车尾写着 1.5T？', 'A "1.5T" badge on the boot?'])}</p>
-        <p>${rich(bi(['T 是 Turbo，涡轮增压；参数表上写 1.5L 的，多半是自然吸气。两者的区别，就在空气怎么进到缸里。', 'T is for turbo. A spec sheet that says 1.5L usually means naturally aspirated. The difference is how the air gets into the cylinder.']))}</p>
+        <p>${rich(bi(['1.5L 表示排量 1.5 升，L 本身不代表自然吸气；1.5T 通常表示 1.5 升涡轮增压。要看懂区别，先看空气怎么进到缸里。', '1.5L means 1.5 litres of displacement; L alone does not mean naturally aspirated. 1.5T usually indicates a 1.5-litre turbo. Start with how the air gets into the cylinder.']))}</p>
         <div class="hook-links"><a href="#/na"><b>1.5L</b>${bi(entryById('na').name)}</a><a href="#/turbo"><b>1.5T</b>${bi(entryById('turbo').name)}</a></div>
       </div>
     </div>

@@ -39,8 +39,12 @@ that way, and a test keeps it so. A crank-angle scrubber under the figure
 (or a sideways drag on the drawing) turns the engine by hand; it stays where you leave it
 and plays on from there. Playback speed is set apart from the engine speed being
 described, which has its own readout of firings per second and how much the drawing is
-slowed. Each stroke keeps one colour throughout: intake cyan, compression lilac,
-burning orange, exhaust grey.
+slowed. Each stroke keeps one colour throughout: intake cyan, compression yellow,
+burning orange, exhaust grey; boosted intake air has its own blue key. Each stage
+button pauses at that stroke; clickable angle marks land exactly at 0°, 180°, 360°,
+540° or the full-cycle endpoint of 720°. Part selection pauses the figure for inspection.
+Pausing also freezes particle positions and view-specific boost timers, and skips
+identical canvas redraws. Reduced-motion navigation jumps directly to the chosen step.
 
 Labels are placed so they never cover each other: numbered callouts look for a free
 spot, and `dist/js/dev/layout.js` draws every figure at every step, in both languages,
@@ -91,6 +95,8 @@ dist/
   js/dev/layout.js      label overlap check, run from the browser console
 tests/sim.test.js       node:test checks on the models
 tests/content.test.js   every entry has a view, both languages, and glossary links that resolve
+tests/playback.test.js  pause freezing, exact stops, full-cycle endpoint, numerical boundaries,
+                       frame-rate independence and bounded compressor response
 ```
 
 Every moving part is derived from one crank angle θ, so slowing down, pausing or

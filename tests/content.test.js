@@ -48,7 +48,8 @@ test('the four-stroke guide stops at each dead centre, in that stroke\'s colour'
 
 test('the piston is reported at a dead centre only when it is there', async () => {
   const { pistonState } = await import('../dist/js/draw/fourstroke.js');
-  for (const a of [0, 360, 720, 3, 717]) assert.equal(pistonState(a).at, 'tdc', `θ = ${a}`);
-  for (const a of [180, 540, 183]) assert.equal(pistonState(a).at, 'bdc', `θ = ${a}`);
-  for (const a of [30, 90, 270, 450, 630]) assert.equal(pistonState(a).at, undefined, `θ = ${a}`);
+  // Match the displayed whole-degree precision, not a six-degree dwell window.
+  for (const a of [0, 360, 720, 0.4, 719.6]) assert.equal(pistonState(a).at, 'tdc', `θ = ${a}`);
+  for (const a of [180, 540, 180.4]) assert.equal(pistonState(a).at, 'bdc', `θ = ${a}`);
+  for (const a of [1, 3, 183, 717, 30, 90, 270, 450, 630]) assert.equal(pistonState(a).at, undefined, `θ = ${a}`);
 });

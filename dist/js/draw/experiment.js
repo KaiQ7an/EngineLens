@@ -34,7 +34,7 @@ function jar(c, m, t, ambient, time) {
   const n = Math.round(22 * air);
   for (let i = 0; i < n; i++) {
     const u = hash(i * 3 + m.x), v = hash(i * 5 + 11);
-    dot(c, x - w / 2 + 12 + u * (w - 24) + Math.sin(time * 2 + i) * 1.2, top + 12 + v * (h - 24) + Math.cos(time * 2.3 + i) * 1.2, 4, air > 1.02 ? 'squeezed' : 'air');
+    dot(c, x - w / 2 + 12 + u * (w - 24) + Math.sin(time * 2 + i) * 1.2, top + 12 + v * (h - 24) + Math.cos(time * 2.3 + i) * 1.2, 4, air > 1.02 ? 'boosted' : 'air');
   }
   const g = t < 0 ? -ambient * 0.65 : gauge(m.id, t, ambient);
   text(c, (g > 0.005 ? '+' : '') + g.toFixed(2) + ' bar', x, top + h + 34, { size: 19, font: MONO, weight: 500, align: 'center', color: g > 0.005 ? C.accent : C.ink });

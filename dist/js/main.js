@@ -18,6 +18,7 @@ const currentTheme = () => theme ?? (systemDark.matches ? 'dark' : 'light');
 function applyTheme() {
   if (theme) root.dataset.theme = theme; else delete root.dataset.theme;
   setPalette(currentTheme());
+  page?.invalidate?.();
   document.querySelector('meta[name=theme-color]').content = currentTheme() === 'dark' ? '#081427' : '#eef2f8';
   document.getElementById('theme').setAttribute('aria-pressed', currentTheme() === 'dark');
 }
@@ -58,7 +59,7 @@ document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click'
 addEventListener('hashchange', route);
 addEventListener('keydown', e => {
   const el = e.target;
-  if (e.metaKey || e.ctrlKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+  if (e.metaKey || e.ctrlKey || e.altKey || e.isComposing || el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
   if (e.key === ' ' && el.closest('button, a')) return;
   if (page?.key?.(e)) e.preventDefault();
 });
@@ -75,4 +76,4 @@ installTerms();
 applyTheme();
 route();
 requestAnimationFrame(tick);
-document.fonts?.ready.then(() => page?.frame?.(0));
+document.fonts?.ready.then(() => { page?.invalidate?.(); page?.frame?.(0); });
